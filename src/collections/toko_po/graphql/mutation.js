@@ -47,7 +47,7 @@ const paymentProcess = {
     fields: () => ({
       status: { type: GraphQLInt },
       error: { type: GraphQLString },
-      detail_data: { type: Type[Manifest.entity + 'Type'] }
+      payment_page_url: { type: GraphQLString }
     })
   }),
   args: {
