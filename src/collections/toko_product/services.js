@@ -139,6 +139,20 @@ const getAllDataByCategoryId = async (args, context) => {
     return { status: 400, error: err }
   }
 }
+const getDetailDataByCode = async (args, context) => {
+  try {
+    const result = await EntityModel.findOne({ code: args.code })
+      .populate({ path: 'image_id' })
+      .populate({ path: 'category_id' })
+      .populate({ path: 'tag_id' })
+      .populate({ path: 'toko_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
+    return { status: 200, success: 'Successfully get Data', data_detail: result }
+  } catch (err) {
+    return { status: 400, error: err }
+  }
+}
 const fetchDetailData = async (args, context) => {
   try {
     const { accesstoken } = context.req.headers
@@ -321,5 +335,6 @@ module.exports = {
   ['doUpdate' + entity]: doUpdateData,
   ['doDelete' + entity]: doDeleteData,
   getAllDataByTokoId,
-  getAllDataByCategoryId
+  getAllDataByCategoryId,
+  getDetailDataByCode
 }

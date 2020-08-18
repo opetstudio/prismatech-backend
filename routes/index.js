@@ -6,6 +6,7 @@ const config = require('config')
 const formidable = require('formidable')
 const FileModel = require('../src/collections/file/Model')
 const pathmodule = require('path')
+const TokoProductService = require('../src/collections/toko_product/services')
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -62,8 +63,20 @@ router.post('/uploadfile', (req, res, next) => {
     // res.render('index', { title: req.body.name })
   })
 })
-router.get('/product-catalog', function (req, res, next) {
-  res.render('tokoonline/product-catalog', { title: 'Express' })
+router.get('/product-catalog', async function (req, res, next) {
+  const tokoId = '5f3373db203efa581d2354a2'
+  const pageSize = 10
+  const pageIndex = 0
+  const allMyTokoProducts = await TokoProductService.getAllDataByTokoId({ toko_id: tokoId, page_size: pageSize, page_index: pageIndex })
+  console.log('allMyTokoProducts===>', allMyTokoProducts)
+
+  res.render('tokoonline/product-catalog', { title: 'Express', allMyTokoProducts })
+})
+router.get('/product-detail/:code', async function (req, res, next) {
+  const productDetail = await TokoProductService.getDetailDataByCode({ code: req.params.code })
+  console.log('productDetail===>', productDetail)
+
+  res.render('tokoonline/product-detail', { title: 'Express', data: productDetail.data_detail })
 })
 
 module.exports = router

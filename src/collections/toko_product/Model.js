@@ -6,6 +6,9 @@ const schema = new mongoose.Schema({
   name: {
     type: String
   },
+  content1: {
+    type: String
+  },
   code: {
     type: String,
     unique: true
