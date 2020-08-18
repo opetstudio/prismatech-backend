@@ -231,27 +231,30 @@ const paymentProcess = async (args, context) => {
 
     var bodyHit = {
       transmission_date_time: '2019-10-09 08:24:57.100 +0700',
-      merchant_key_id: '872a02ad-b2a8-46eb-8f08-835169bc470c',
-      merchant_id: '000000070070071',
-      merchant_ref_no: 'INV12345673',
-      backend_callback_url: 'http://elevenia.com/backend',
-      frontend_callback_url: 'http://elevenia.com/frontend',
-      user_id: 'nofrets.poai11@gmail.com',
-      user_contact: '089634679074',
-      user_name: 'Nofrets P',
-      user_email: 'nofrets.poai1@gmail.com',
-      fds_user_device_id: 'samsungS9Plus',
+      merchant_key_id: '6d422ec3-87de-4234-b583-95f23a6a6cbf',
+      merchant_id: '000000070070070',
+      merchant_ref_no: 'ctrtesttrx001165',
+      backend_callback_url: '',
+      frontend_callback_url: '',
+
+      user_id: 'endahparamita@gmail.com',
+      user_contact: '0812345611',
+      user_name: 'endah paramita',
+      user_email: 'endahparamita@gmail.com',
+
+      fds_user_device_id: 351757111290115,
       fds_user_ip_address: '127.0.0.1',
-      fds_product_details: '[{"item_code":"kaos123","item_title":"kaos","quantity":2,"total":"50000", "currency": "IDR"},{"item_code":"kaos345","item_title":"sepatu adidas copa","quantity":4,"total":"400000", "currency": "IDR"}]',
+      fds_product_details: '[{"item_code":"kaosdnm","item_title":"kaos denim","quantity":2,"total":"2000", "currency": "IDR"},{"item_code":"sptadds","item_title":"sepatu adidas copa","quantity":4,"total":"10013", "currency": "IDR"}]',
       fds_shipping_details: '{"address":"jl.sanusi","telephoneNumber":"089634679074","handphoneNumber":"089634679074"}',
-      transaction_amount: 60000,
+
+      transaction_amount: 12025,
       transaction_date_time: '2019-10-09 08:24:57.100 +0700',
-      transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "pembayaran hunian, no unit 125"}]'
+      transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "belanja bulanan"}]'
     }
 
     // define the api
     const api = Apisauce.create({
-      baseURL: 'http://localhost:8283',
+      baseURL: config.get('debitinPaymentPageBackendBaseUrl'),
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -279,6 +282,7 @@ const paymentProcess = async (args, context) => {
     console.log('resp.ok====>', resp.ok)
     console.log('resp.data====>', resp.data)
     // console.log('resp====>', resp)
+    if (!resp.ok) throw new Error('' + resp.problem)
 
     // get all cart
     // const allOpenCart = await TokoCartModel.find({ session_id: args.session_id, toko_id: args.toko_id, status: 'open' })
@@ -326,7 +330,8 @@ const paymentProcess = async (args, context) => {
 
     // await session.commitTransaction()
     // session.endSession()
-    return { status: 200, success: 'Successfully save Data', detail_data: {} }
+    console.log('return response ', resp.data)
+    return { status: 200, success: 'Successfully save Data', payment_page_url: resp.data.url }
   } catch (err) {
     console.log('errorrr====>', err)
     // await session.abortTransaction()
