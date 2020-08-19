@@ -24,6 +24,7 @@ const fields = {
   _id: { type: GraphQLID },
   owner: { type: UserType },
   name: { type: GraphQLString },
+  slug: { type: GraphQLString },
   description: { type: GraphQLString },
   website: { type: GraphQLString },
   facebook: { type: GraphQLString },
@@ -37,6 +38,7 @@ module.exports = {
   updateArgs: {
     _id: { type: GraphQLID },
     name: { type: GraphQLString },
+    slug: { type: GraphQLString },
     description: { type: GraphQLString },
     website: { type: GraphQLString },
     facebook: { type: GraphQLString },
@@ -47,6 +49,7 @@ module.exports = {
   createArgs: {
     _id: { type: GraphQLID },
     name: { type: GraphQLString },
+    slug: { type: GraphQLString },
     description: { type: GraphQLString },
     website: { type: GraphQLString },
     facebook: { type: GraphQLString },

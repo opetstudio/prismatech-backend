@@ -47,7 +47,7 @@ const fetchAllDataBySessionId = async (args, context) => {
   try {
     const filter = {}
     const $and = []
-    const sessionId = args.session_id || context.req.cookies.JSESSIONID
+    const sessionId = args.session_id || context.req.cookies['connect.sid']
     $and.push({ session_id: sessionId })
     if (!_.isEmpty($and)) filter.$and = $and
     // const { accesstoken } = context.req.headers
@@ -106,7 +106,7 @@ const doCreateData = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = args.session_id || context.req.cookies.JSESSIONID
+    data.session_id = args.session_id || context.req.cookies['connect.sid']
     data.created_at = now
     data.updated_at = now
     console.log('dataCart====>', data)

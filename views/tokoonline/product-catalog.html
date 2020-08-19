@@ -14,7 +14,7 @@
         <div class="card-body pb-0">
           <div class="row d-flex align-items-stretch">
             <% allMyTokoProducts.list_data.forEach(function(data){ %>
-              <%- include('product-catalog-card.html', {data: data}) %>
+              <%- include('product-catalog-card.html', {data: data, tokoSlug: tokoSlug}) %>
             <% }); %>
 
           </div>

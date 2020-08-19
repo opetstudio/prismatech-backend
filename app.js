@@ -7,6 +7,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const corsAccess = require('./middlewares/corsAccess')
 const config = require('config')
+var session = require('express-session')
 
 var app = express()
 app.io = require('socket.io')()
@@ -32,6 +33,18 @@ server.listen(port, () => {
 const corsOptions = {
   exposedHeaders: 'Authorization'
 }
+
+var sess = {
+  secret: 'keyboard cat',
+  cookie: {}
+}
+
+if (app.get('env') === 'production') {
+  app.set('trust proxy', 1) // trust first proxy
+  sess.cookie.secure = true // serve secure cookies
+}
+
+app.use(session(sess))
 
 // view engine setup
 // view engine setup

@@ -105,6 +105,41 @@ const getAllDataByTokoId = async (args, context) => {
     return { status: 400, error: err }
   }
 }
+const getAllDataByTokoSlug = async (args, context) => {
+  try {
+    const tokoDetail = await TokoTokoOnlineModel.findOne({ slug: args.toko_slug })
+    const filter = { toko_id: '' + tokoDetail._id }
+    // const { accesstoken } = context.req.headers
+    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    // const { user_id: userId } = bodyAt
+    if (!_.isEmpty(args.string_to_search)) {
+      // filter.$and = []
+      // filter.$and.push({
+      //   $or: [
+      //     { title: { $regex: args.string_to_search, $options: 'i' } },
+      //     { code: { $regex: args.string_to_search, $options: 'i' } },
+      //     { description: { $regex: args.string_to_search, $options: 'i' } }
+      //   ]
+      // })
+    }
+    const result = await EntityModel.find(filter)
+      .sort({ updated_at: 'desc' })
+      .skip(args.page_index * args.page_size)
+      .limit(args.page_size)
+      .populate({ path: 'image_id' })
+      .populate({ path: 'category_id' })
+      .populate({ path: 'tag_id' })
+      .populate({ path: 'toko_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
+    const count = await EntityModel.countDocuments(filter)
+    const pageCount = await Math.ceil(count / args.page_size)
+    return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
+  } catch (err) {
+    console.log('err=> ', err)
+    return { status: 400, error: err }
+  }
+}
 const getAllDataByCategoryId = async (args, context) => {
   try {
     const filter = {}
@@ -336,5 +371,6 @@ module.exports = {
   ['doDelete' + entity]: doDeleteData,
   getAllDataByTokoId,
   getAllDataByCategoryId,
-  getDetailDataByCode
+  getDetailDataByCode,
+  getAllDataByTokoSlug
 }

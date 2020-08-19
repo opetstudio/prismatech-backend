@@ -4,6 +4,7 @@ const _ = require('lodash')
 const Manifest = require('./manifest')
 const User = require('../user/Model')
 const entity = Manifest.entity
+const { path } = require('ramda')
 const EntityModel = require('./Model')
 const TokoProductModel = require('../toko_product/Model')
 const fetchAllData = async (args, context) => {
@@ -36,11 +37,11 @@ const fetchAllData = async (args, context) => {
     return { status: 400, error: err }
   }
 }
-const fetchAllDataBySessionId = async (args, context) => {
+const fetchAllDataBySessionId = async (args, context = {}) => {
   try {
     const filter = {}
     const $and = []
-    const sessionId = args.session_id || context.req.cookies.JSESSIONID
+    const sessionId = args.session_id || path(['req', 'cookies', 'JSESSIONID'], context)
     $and.push({ session_id: sessionId })
     if (!_.isEmpty($and)) filter.$and = $and
     // const { accesstoken } = context.req.headers
@@ -54,10 +55,10 @@ const fetchAllDataBySessionId = async (args, context) => {
     //   })
     // }
     const result = await EntityModel.find(filter)
-      .sort({ updated_at: 'desc' })
+      .sort({ 'product_id.name': 'desc' })
       .skip(args.page_index * args.page_size)
       .limit(args.page_size)
-      .populate({ path: 'product_id' })
+      .populate({ path: 'product_id', populate: { path: 'image_id' } })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     const count = await EntityModel.countDocuments(filter)
@@ -99,7 +100,7 @@ const doCreateData = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = args.session_id || context.req.cookies.JSESSIONID
+    data.session_id = args.session_id || context.req.cookies['connect.sid']
     data.created_at = now
     data.updated_at = now
     console.log('dataCart====>', data)
@@ -148,7 +149,7 @@ const addToCart = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = args.session_id || context.req.cookies.JSESSIONID
+    data.session_id = context.req.cookies['connect.sid']
     data.created_at = now
     data.updated_at = now
     data.status = 'open'
@@ -159,6 +160,68 @@ const addToCart = async (args, context) => {
     else data.amount = productDetail.price * args.count
     set.$set = data
     if ($inc) set.$inc = $inc
+
+    const upsertResponse = await EntityModel.findOneAndUpdate(
+      { product_id: args.product_id, session_id: data.session_id },
+      set,
+      { upsert: true, new: true })
+      .populate({ path: 'product_id', populate: [{ path: 'image_id' }, { path: 'toko_id' }] })
+      .populate({ path: 'toko_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' }).session(opts.session)
+    console.log('upsertResponse====>', upsertResponse)
+
+    await session.commitTransaction()
+    session.endSession()
+    return { status: 200, success: 'Successfully save Data', detail_data: upsertResponse }
+  } catch (err) {
+    console.log('errorrr====>', err)
+    await session.abortTransaction()
+    session.endSession()
+    return { status: 400, error: err }
+  }
+}
+const removeFromCart = async (args, context) => {
+  const session = await EntityModel.db.startSession()
+  session.startTransaction()
+  try {
+    const opts = { session }
+    const now = Date.now()
+    // const { accesstoken } = context.req.headers
+    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    // const { user_id: userId } = bodyAt
+    // const userDetail = await User.findById(userId)
+
+    const productDetail = await TokoProductModel.findById(args.product_id).populate({ path: 'toko_id' })
+    if (!productDetail) throw new Error('Invalid Product')
+    // console.log('productDetail===>', productDetail)
+    // console.log('tokoId===>', args.toko_id)
+    if (_.isEmpty(_.find(productDetail.toko_id, (o) => args.toko_id === '' + o._id))) throw new Error('Product Toko Id and Field Toko Id is not match')
+
+    const data = args
+    // data.created_by = userDetail._id
+    // data.updated_by = userDetail._id
+    data.session_id = context.req.cookies['connect.sid']
+    data.created_at = now
+    data.updated_at = now
+    data.status = 'open'
+    // console.log('dataCart====>', data)
+    const set = {}
+    let $inc
+    if (!args.count) $inc = { count: -1, amount: -productDetail.price }
+    else data.amount = productDetail.price * args.count
+    set.$set = data
+    if ($inc) set.$inc = $inc
+
+    const cartDetail = await EntityModel.findOne({ product_id: args.product_id, session_id: data.session_id })
+    console.log('cartDetail===>', cartDetail)
+    if (cartDetail.count === 1) {
+      // delete
+      await EntityModel.deleteOne({ product_id: args.product_id, session_id: data.session_id }).session(session)
+      await session.commitTransaction()
+      session.endSession()
+      return { status: 200, success: 'Successfully save Data', detail_data: {} }
+    }
 
     const upsertResponse = await EntityModel.findOneAndUpdate(
       { product_id: args.product_id, session_id: data.session_id },
@@ -231,5 +294,6 @@ module.exports = {
   ['doCreate' + entity]: doCreateData,
   ['doUpdate' + entity]: doUpdateData,
   ['doDelete' + entity]: doDeleteData,
-  addToCart
+  addToCart,
+  removeFromCart
 }

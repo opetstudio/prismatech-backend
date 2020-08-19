@@ -7,6 +7,8 @@ const formidable = require('formidable')
 const FileModel = require('../src/collections/file/Model')
 const pathmodule = require('path')
 const TokoProductService = require('../src/collections/toko_product/services')
+const TokoCartService = require('../src/collections/toko_cart/services')
+
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -63,20 +65,34 @@ router.post('/uploadfile', (req, res, next) => {
     // res.render('index', { title: req.body.name })
   })
 })
-router.get('/product-catalog', async function (req, res, next) {
-  const tokoId = '5f3373db203efa581d2354a2'
-  const pageSize = 10
-  const pageIndex = 0
-  const allMyTokoProducts = await TokoProductService.getAllDataByTokoId({ toko_id: tokoId, page_size: pageSize, page_index: pageIndex })
-  console.log('allMyTokoProducts===>', allMyTokoProducts)
-
-  res.render('tokoonline/product-catalog', { title: 'Express', allMyTokoProducts })
+router.get('/product-catalog/:tokoSlug', async function (req, res, next) {
+  // const tokoId = '5f3373db203efa581d2354a2'
+  try {
+    const tokoSlug = req.params.tokoSlug
+    const pageSize = 10
+    const pageIndex = 0
+    const allMyTokoProducts = await TokoProductService.getAllDataByTokoSlug({ toko_slug: tokoSlug, page_size: pageSize, page_index: pageIndex })
+    console.log('allMyTokoProducts===>', allMyTokoProducts)
+    res.render('tokoonline/product-catalog', { title: 'Express', allMyTokoProducts, tokoSlug: req.params.tokoSlug })
+  } catch (err) {
+    console.log('err===>', err)
+    res.render('tokoonline/product-catalog', { title: 'Express', allMyTokoProducts: [], tokoSlug: req.params.tokoSlug })
+  }
 })
-router.get('/product-detail/:code', async function (req, res, next) {
+router.get('/product-detail/:tokoSlug/:code', async function (req, res, next) {
   const productDetail = await TokoProductService.getDetailDataByCode({ code: req.params.code })
   console.log('productDetail===>', productDetail)
 
-  res.render('tokoonline/product-detail', { title: 'Express', data: productDetail.data_detail })
+  res.render('tokoonline/product-detail', { title: 'Express', data: productDetail.data_detail, tokoSlug: req.params.tokoSlug })
+})
+router.get('/shopping-cart/:tokoSlug', async function (req, res, next) {
+  console.log('req.cookies===>', req.cookies)
+  const sessionId = req.cookies['connect.sid']
+  // const sessionId = args.session_id || req.cookies.JSESSIONID
+  const listAllTokoCarts = await TokoCartService.fetchAllTokoCartsBySessionId({ session_id: sessionId })
+  console.log('listAllTokoCarts===>', listAllTokoCarts)
+  console.log('sessionId===>', sessionId)
+  res.render('tokoonline/shopping-cart', { title: 'Express', listAllTokoCarts, tokoSlug: req.params.tokoSlug })
 })
 
 module.exports = router

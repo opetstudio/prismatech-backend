@@ -41,6 +41,20 @@ const addToCart = {
     return Services.addToCart(args, context)
   }
 }
+const removeFromCart = {
+  type: new GraphQLObjectType({
+    name: 'removeFromCartResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      detail_data: { type: Type[Manifest.entity + 'Type'] }
+    })
+  }),
+  args: Manifest.createArgs,
+  async resolve (parent, args, context) {
+    return Services.removeFromCart(args, context)
+  }
+}
 const updateData = {
   type: new GraphQLObjectType({
     name: 'update' + Manifest.entity + 'Response',
@@ -75,5 +89,6 @@ module.exports = {
   ['create' + Manifest.entity]: createData,
   ['update' + Manifest.entity]: updateData,
   ['delete' + Manifest.entity]: deleteData,
-  addToCart
+  addToCart,
+  removeFromCart
 }
