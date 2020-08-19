@@ -64,7 +64,7 @@ const fetchAllDataBySessionId = async (args, context) => {
       .sort({ updated_at: 'desc' })
       .skip(args.page_index * args.page_size)
       .limit(args.page_size)
-      .populate({ path: 'product_id' })
+      .populate({ path: 'cart_id', populate: { path: 'product_id' } })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     const count = await EntityModel.countDocuments(filter)
@@ -81,7 +81,8 @@ const fetchDetailData = async (args, context) => {
     // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     // const { user_id: userId } = bodyAt
     const result = await EntityModel.findOne({ _id: args.id })
-      .populate({ path: 'product_id' })
+      .populate({ path: 'cart_id', populate: { path: 'product_id' } })
+      .populate({ path: 'toko_id' })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
@@ -151,28 +152,36 @@ const checkoutProcess = async (args, context) => {
 
     }
 
+    const sessionId = context.req.cookies['connect.sid']
+
     // const userDetail = await User.findById(userId)
 
     // get all cart
-    const allOpenCart = await TokoCartModel.find({ session_id: args.session_id, toko_id: args.toko_id, status: 'open' })
+    const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: args.toko_id, status: 'open' })
     if (_.isEmpty(allOpenCart)) throw new Error('Checkout Failed. The cart is empty')
+    console.log('allOpenCart===>', allOpenCart)
 
     const totalProductAmount = allOpenCart.map(v => v.amount).reduce((a, b) => a + b, 0) // args.total_amount
+    console.log('totalProductAmount===>', totalProductAmount)
 
     const dataPo = {}
     dataPo.full_name = args.full_name
     dataPo.phone_number = args.phone_number
     dataPo.email = args.email
-    dataPo.session_id = args.session_id
+    dataPo.session_id = sessionId
     dataPo.device_id = args.device_id
     dataPo.shipping_address = args.shipping_address
     dataPo.total_product_amount = totalProductAmount
-    dataPo.total_amount = totalProductAmount + args.shipping_amount // args.total_amount
-    dataPo.shipping_amount = args.shipping_amount
+    dataPo.total_amount = totalProductAmount
+    if (!_.isEmpty(args.shipping_amount)) {
+      dataPo.total_amount = totalProductAmount + args.shipping_amount // args.total_amount
+      dataPo.shipping_amount = args.shipping_amount
+    }
     dataPo.cart_id = allOpenCart.map(v => '' + v._id)
     dataPo.toko_id = args.toko_id
     if (myUserId) dataPo.user_id = myUserId
     dataPo.action = 'checkoutProcess'
+    dataPo.invoice_code = '' + now
     dataPo.created_at = now
     dataPo.updated_at = now
     dataPo.created_by = myUserId || null
@@ -186,6 +195,7 @@ const checkoutProcess = async (args, context) => {
     const set = {}
     set.$set = dataPo
     // if (!args.count) set.$inc = { count: 1 }
+    console.log('set===>', set)
 
     // validate product & toko id
     const upsertResponse = await EntityModel.findOneAndUpdate(
