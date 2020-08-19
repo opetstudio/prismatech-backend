@@ -27,6 +27,9 @@ const schema = new mongoose.Schema({
   shipping_address: {
     type: String
   },
+  invoice_code: {
+    type: String
+  },
   total_product_amount: {
     type: Number
   },

@@ -50,7 +50,7 @@
         <div class="col-md-4"></div>
         <div class="col-md-4">
           <a href="/product-catalog/<%=tokoSlug%>" type="button" class="btn btn-block btn-info"> << Product Catalog</a>
-          <button type="button" class="btn btn-block btn-success">Check Out >></button>
+          <button onclick="buttonCheckOutOnClick()" type="button" class="btn btn-block btn-success">Check Out >></button>
         </div>
         <div class="col-md-4"></div>
       </div>
@@ -64,6 +64,46 @@
 <%- include('bottom.html', {}) %>
 
 <script>
+  function buttonCheckOutOnClick() {
+    // alert(productId)
+    // return
+    var data = `mutation{checkoutProcess( toko_id: "5f3373db203efa581d2354a2", device_id: "xxxx" ){status,error,detail_data{_id}}}`
+    $.ajax({
+        data: JSON.stringify({query: data}),
+        type: "POST",
+        url: "http://localhost:3000/graphql",
+        // cache: false,
+        // contentType: false,
+        // processData: false,
+        headers:{
+          // 'accesstoken': at,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        
+        success: function(resp) {
+          console.log('resp====>', resp)
+          // var tokoSlug = resp.data.addToCart.detail_data.toko_id.slug
+          window.location.href = '/shopping-invoice/<%=tokoSlug%>/' + resp.data.checkoutProcess.detail_data._id
+          // var url = window.location.href
+          // var arr = url.split("/");
+          // // var baseUrl = arr[0] + "//" + arr[2]
+          // var baseUrl = arr[0] + "//" + 'localhost:3000'
+          // console.log('baseUrl=', baseUrl)
+          // var filename = resp.detail_data.filename + '.' + resp.detail_data.file_type
+          // console.log('filename=', filename)
+          // var image = $('<img>').attr('src', baseUrl + '/renderfile/' + filename);
+
+          // $('.textarea').summernote("insertNode", image[0]);
+          // $('.textarea').summernote("insertImage", url);
+            // editor.insertImage(welEditable, url);
+        },
+        error: function(data) {
+          console.log(data);
+        }
+    });
+
+  }
   function buttonIncProductCount(productId) {
     // alert(productId)
     // return

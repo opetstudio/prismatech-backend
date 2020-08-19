@@ -8,6 +8,8 @@ const FileModel = require('../src/collections/file/Model')
 const pathmodule = require('path')
 const TokoProductService = require('../src/collections/toko_product/services')
 const TokoCartService = require('../src/collections/toko_cart/services')
+const TokoPoService = require('../src/collections/toko_po/services')
+const Moment = require('moment')
 
 
 /* GET home page. */
@@ -93,6 +95,15 @@ router.get('/shopping-cart/:tokoSlug', async function (req, res, next) {
   console.log('listAllTokoCarts===>', listAllTokoCarts)
   console.log('sessionId===>', sessionId)
   res.render('tokoonline/shopping-cart', { title: 'Express', listAllTokoCarts, tokoSlug: req.params.tokoSlug })
+})
+router.get('/shopping-invoice/:tokoSlug/:tokoPoId', async function (req, res, next) {
+  console.log('req.cookies===>', req.cookies)
+  const sessionId = req.cookies['connect.sid']
+  // const sessionId = args.session_id || req.cookies.JSESSIONID
+  const detalDataTokoPo = await TokoPoService.fetchDetailTokoPo({ id: req.params.tokoPoId })
+  console.log('detalDataTokoPo===>', detalDataTokoPo)
+  console.log('sessionId===>', sessionId)
+  res.render('tokoonline/shopping-invoice', { title: 'Express', detalDataTokoPo: detalDataTokoPo || {}, tokoSlug: req.params.tokoSlug, dateTime: Moment().format('MMMM Do YYYY, h:mm:ss a') })
 })
 
 module.exports = router
