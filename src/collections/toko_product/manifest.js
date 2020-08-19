@@ -25,6 +25,7 @@ const commonFields = {
 const fields = {
   _id: { type: GraphQLID },
   name: { type: GraphQLString },
+  content1: { type: GraphQLString },
   code: { type: GraphQLString },
   price: { type: GraphQLInt },
   description: { type: GraphQLString },
@@ -40,6 +41,7 @@ module.exports = {
   updateArgs: {
     _id: { type: GraphQLID },
     name: { type: GraphQLString },
+    content1: { type: GraphQLString },
     code: { type: GraphQLString },
     price: { type: GraphQLString },
     description: { type: GraphQLString },
@@ -51,6 +53,7 @@ module.exports = {
   },
   createArgs: {
     name: { type: GraphQLString },
+    content1: { type: GraphQLString },
     code: { type: GraphQLString },
     price: { type: GraphQLString },
     description: { type: GraphQLString },

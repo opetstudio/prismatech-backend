@@ -7,6 +7,10 @@ const schema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  slug: {
+    type: String,
+    unique: true
+  },
   website: {
     type: String
   },

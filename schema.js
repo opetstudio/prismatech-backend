@@ -47,7 +47,7 @@ const { createTokoTeam, deleteTokoTeam, updateTokoTeam } = require('./src/collec
 
 // toko cart
 const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = require('./src/collections/toko_cart/graphql/query')
-const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart } = require('./src/collections/toko_cart/graphql/mutation')
+const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart, removeFromCart } = require('./src/collections/toko_cart/graphql/mutation')
 
 // toko po
 // const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = require('./src/collections/toko_cart/graphql/query')
@@ -175,6 +175,7 @@ const Mutation = new GraphQLObjectType({
     deleteTokoCart,
     updateTokoCart,
     addToCart,
+    removeFromCart,
     // toko po
     checkoutProcess,
     paymentProcess

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('header.html', {}) %>
+<body class="hold-transition sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper" style="margin-left: 0;">
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="table-responsive-xl">
+          <table class="table table-striped table-bordered">
+              <thead>
+                  <tr>
+                      <th>
+                          Product
+                      </th>
+                      <th>
+                          Product Image
+                      </th>
+                      <th>
+                          Price
+                      </th>
+                      <th>
+                          Count
+                      </th>
+                      <th>
+                          Total Amount
+                      </th>
+                      <th>
+                      </th>
+                  </tr>
+              </thead>
+              <tbody>
+                <% var totalAmount=0 %>
+                <% listAllTokoCarts.list_data.forEach(function(data){ %>
+                  <% totalAmount += data.amount %>
+                  <%- include('shopping-cart-row.html', {data: data}) %>
+                <% }); %>
+              </tbody>
+          </table>
+      </div>
+      <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">Total: Rp.<%=totalAmount%></div>
+        <div class="col-md-4"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+          <a href="/product-catalog/<%=tokoSlug%>" type="button" class="btn btn-block btn-info"> << Product Catalog</a>
+          <button type="button" class="btn btn-block btn-success">Check Out >></button>
+        </div>
+        <div class="col-md-4"></div>
+      </div>
+
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+</div>
+<!-- ./wrapper -->
+<%- include('bottom.html', {}) %>
+
+<script>
+  function buttonIncProductCount(productId) {
+    // alert(productId)
+    // return
+    var data = `mutation{addToCart( toko_id: "5f3373db203efa581d2354a2", device_id: "xxxx", product_id: "${productId}", session_id: "session1"){status,error,detail_data{_id,product_id{_id,name,
+              code,
+              price,
+              description,
+              image_id{
+                _id,
+                filename,
+                file_type
+              }
+            }
+            count,
+            device_id,
+            session_id,
+            toko_id{
+              slug
+            }
+          }
+        }
+      }`
+    $.ajax({
+        data: JSON.stringify({query: data}),
+        type: "POST",
+        url: "http://localhost:3000/graphql",
+        // cache: false,
+        // contentType: false,
+        // processData: false,
+        headers:{
+          // 'accesstoken': at,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        
+        success: function(resp) {
+          console.log('resp====>', resp)
+          // var tokoSlug = resp.data.addToCart.detail_data.toko_id.slug
+          window.location.href = '/shopping-cart/<%=tokoSlug%>'
+          // var url = window.location.href
+          // var arr = url.split("/");
+          // // var baseUrl = arr[0] + "//" + arr[2]
+          // var baseUrl = arr[0] + "//" + 'localhost:3000'
+          // console.log('baseUrl=', baseUrl)
+          // var filename = resp.detail_data.filename + '.' + resp.detail_data.file_type
+          // console.log('filename=', filename)
+          // var image = $('<img>').attr('src', baseUrl + '/renderfile/' + filename);
+
+          // $('.textarea').summernote("insertNode", image[0]);
+          // $('.textarea').summernote("insertImage", url);
+            // editor.insertImage(welEditable, url);
+        },
+        error: function(data) {
+          console.log(data);
+        }
+    });
+  }
+  function buttonDecProductCount(productId) {
+    // alert(productId)
+    // return
+    var data = `mutation{removeFromCart( toko_id: "5f3373db203efa581d2354a2", device_id: "xxxx", product_id: "${productId}", session_id: "session1"){status,error,detail_data{_id,product_id{_id,name,
+              code,
+              price,
+              description,
+              image_id{
+                _id,
+                filename,
+                file_type
+              }
+            }
+            count,
+            device_id,
+            session_id,
+            toko_id{
+              slug
+            }
+          }
+        }
+      }`
+    $.ajax({
+        data: JSON.stringify({query: data}),
+        type: "POST",
+        url: "http://localhost:3000/graphql",
+        // cache: false,
+        // contentType: false,
+        // processData: false,
+        headers:{
+          // 'accesstoken': at,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        
+        success: function(resp) {
+          // console.log('resp====>', resp)
+          // var tokoSlug = resp.data.addToCart.detail_data.toko_id.slug
+          window.location.href = '/shopping-cart/<%=tokoSlug%>'
+          // var url = window.location.href
+          // var arr = url.split("/");
+          // // var baseUrl = arr[0] + "//" + arr[2]
+          // var baseUrl = arr[0] + "//" + 'localhost:3000'
+          // console.log('baseUrl=', baseUrl)
+          // var filename = resp.detail_data.filename + '.' + resp.detail_data.file_type
+          // console.log('filename=', filename)
+          // var image = $('<img>').attr('src', baseUrl + '/renderfile/' + filename);
+
+          // $('.textarea').summernote("insertNode", image[0]);
+          // $('.textarea').summernote("insertImage", url);
+            // editor.insertImage(welEditable, url);
+        },
+        error: function(data) {
+          console.log(data);
+        }
+    });
+  }
+</script>
+</body>
+</html>
