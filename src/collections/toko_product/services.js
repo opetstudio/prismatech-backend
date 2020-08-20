@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
+const ObjectId = mongoose.Types.ObjectId
 const config = require('config')
 const _ = require('lodash')
 const { flatten } = require('../../../src/utils/services')
@@ -10,7 +11,6 @@ const EntityModel = require('./Model')
 const TagModel = require('../tag/Model')
 const TokoTeamModel = require('../toko_team/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
-const { forEach } = require('lodash')
 const fetchAllData = async (args, context) => {
   try {
     const filter = {}
@@ -244,19 +244,30 @@ const doCreateData = async (args, context) => {
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
+    const tagIdList = []
     if (!_.isEmpty(args.tag_id)) {
-      const existedTag = await TagModel.find({ _id: { $in: args.tag_id } })
-      const listNewTag = (args.tag_id).filter(n => !(existedTag.map(v => '' + v._id)).includes(n))
-      if (!_.isEmpty(listNewTag)) {
-        const dataListNewTag = listNewTag.map(v => ({
+      const needToCreateTag = []
+      args.tag_id.forEach(v => {
+        if (!ObjectId.isValid(v)) needToCreateTag.push(v)
+        else tagIdList.push(v)
+      })
+
+      // const existedTag = await TagModel.find({ _id: { $in: args.tag_id } })
+      // const listNewTag = (args.tag_id).filter(n => !(existedTag.map(v => '' + v._id)).includes(n))
+      if (!_.isEmpty(needToCreateTag)) {
+        const dataListNewTag = needToCreateTag.map(v => ({
           name: v,
           created_by: userDetail._id,
           updated_by: userDetail._id,
           created_at: now,
           updated_at: now
         }))
-        const createNewTagResponse = await TagModel.create([dataListNewTag], opts)
-        console.log('createNewTagResponse => ', createNewTagResponse)
+        // console.log('dataListNewTag====>', dataListNewTag)
+        const createNewTagResponse = await TagModel.create(dataListNewTag, opts)
+        // console.log('createNewTagResponse => ', createNewTagResponse)
+        createNewTagResponse.forEach(v => {
+          tagIdList.push('' + v._id)
+        })
       }
     }
     const data = args
@@ -264,6 +275,7 @@ const doCreateData = async (args, context) => {
     data.updated_by = userDetail._id
     data.created_at = now
     data.updated_at = now
+    data.tag_id = tagIdList
     const createResponse = (await EntityModel.create([data], opts))[0]
     console.log('createResponse====>', createResponse)
     await session.commitTransaction()
