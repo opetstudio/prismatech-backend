@@ -113,7 +113,7 @@ const doCreateData = async (args, context) => {
     teamMemberData.updated_by = userDetail._id
     teamMemberData.created_at = now
     teamMemberData.updated_at = now
-    const createTeamResponse = (await TokoTeamModel.create([data], opts))[0]
+    const createTeamResponse = (await TokoTeamModel.create([teamMemberData], opts))[0]
     console.log('createTeamResponse====>', createTeamResponse)
 
     await session.commitTransaction()
