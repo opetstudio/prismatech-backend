@@ -45,6 +45,7 @@ const fetchAllData = async (args, context) => {
         $or: $or
       })
     }
+    if (_.isEmpty(filter.$and)) isEligible = false
     if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
 
     const result = await EntityModel.find(filter)
