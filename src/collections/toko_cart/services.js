@@ -7,6 +7,7 @@ const entity = Manifest.entity
 const { path } = require('ramda')
 const EntityModel = require('./Model')
 const TokoProductModel = require('../toko_product/Model')
+const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const fetchAllData = async (args, context) => {
   try {
     const filter = {}
@@ -139,12 +140,23 @@ const addToCart = async (args, context) => {
     // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     // const { user_id: userId } = bodyAt
     // const userDetail = await User.findById(userId)
-
+    console.log('args.product_id=>', args.product_id)
+    console.log('args.toko_id=>', args.toko_id)
     const productDetail = await TokoProductModel.findById(args.product_id).populate({ path: 'toko_id' })
     if (!productDetail) throw new Error('Invalid Product')
-    // console.log('productDetail===>', productDetail)
-    // console.log('tokoId===>', args.toko_id)
-    if (_.isEmpty(_.find(productDetail.toko_id, (o) => args.toko_id === '' + o._id))) throw new Error('Product Toko Id and Field Toko Id is not match')
+    console.log('productDetail===>', productDetail)
+    console.log('tokoId===>', args.toko_id)
+
+    const tokoSlug = args.toko_slug
+    let tokoId = args.toko_id
+    let tokoDetail = {}
+    if (_.isEmpty(tokoId)) {
+      // get toko detail by toko slug
+      tokoDetail = await TokoTokoOnlineModel.findOne({ slug: tokoSlug })
+      tokoId = '' + tokoDetail._id
+    }
+
+    if (_.isEmpty(_.find(productDetail.toko_id, (o) => tokoId === '' + o._id))) throw new Error('Product Toko Id and Field Toko Id is not match')
 
     const data = args
     // data.created_by = userDetail._id
@@ -192,11 +204,20 @@ const removeFromCart = async (args, context) => {
     // const { user_id: userId } = bodyAt
     // const userDetail = await User.findById(userId)
 
+    const tokoSlug = args.toko_slug
+    let tokoId = args.toko_id
+    let tokoDetail = {}
+    if (_.isEmpty(tokoId)) {
+      // get toko detail by toko slug
+      tokoDetail = await TokoTokoOnlineModel.findOne({ slug: tokoSlug })
+      tokoId = '' + tokoDetail._id
+    }
+
     const productDetail = await TokoProductModel.findById(args.product_id).populate({ path: 'toko_id' })
     if (!productDetail) throw new Error('Invalid Product')
     // console.log('productDetail===>', productDetail)
     // console.log('tokoId===>', args.toko_id)
-    if (_.isEmpty(_.find(productDetail.toko_id, (o) => args.toko_id === '' + o._id))) throw new Error('Product Toko Id and Field Toko Id is not match')
+    if (_.isEmpty(_.find(productDetail.toko_id, (o) => tokoId === '' + o._id))) throw new Error('Product Toko Id and Field Toko Id is not match')
 
     const data = args
     // data.created_by = userDetail._id

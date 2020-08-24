@@ -313,7 +313,7 @@
 <%- include('bottom.html', {}) %>
 <script>
   $("#buttonAddToCart").on("click", function(e) {
-    var data = `mutation{addToCart( toko_id: "5f3373db203efa581d2354a2", device_id: "xxxx", product_id: "<%=data._id%>", session_id: "session1"){status,error,detail_data{_id,product_id{_id,name,
+    var data = `mutation{addToCart( toko_slug: "<%=tokoSlug%>", device_id: "xxxx", product_id: "<%=data._id%>", session_id: "session1"){status,error,detail_data{_id,product_id{_id,name,
               code,
               price,
               description,

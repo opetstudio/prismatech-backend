@@ -68,7 +68,6 @@ router.post('/uploadfile', (req, res, next) => {
   })
 })
 router.get('/product-catalog/:tokoSlug', async function (req, res, next) {
-  // const tokoId = '5f3373db203efa581d2354a2'
   try {
     const tokoSlug = req.params.tokoSlug
     const pageSize = 10

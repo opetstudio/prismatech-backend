@@ -39,6 +39,7 @@ module.exports = {
     session_id: { type: GraphQLString },
     product_id: { type: GraphQLString },
     toko_id: { type: GraphQLString },
+    toko_slug: { type: GraphQLString },
     count: { type: GraphQLInt }
   },
   createArgs: {
@@ -46,6 +47,7 @@ module.exports = {
     product_id: { type: GraphQLString },
     session_id: { type: GraphQLString },
     toko_id: { type: GraphQLString },
+    toko_slug: { type: GraphQLString },
     count: { type: GraphQLInt }
   },
   fields: {

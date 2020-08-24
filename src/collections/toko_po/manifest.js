@@ -51,6 +51,7 @@ module.exports = {
     email: { type: GraphQLString },
     cart_id: { type: GraphQLList(GraphQLString) },
     toko_id: { type: GraphQLString },
+    toko_slug: { type: GraphQLString },
     shipping_address: { type: GraphQLString },
     shipping_amount: { type: GraphQLInt }
   },
@@ -63,6 +64,7 @@ module.exports = {
     email: { type: GraphQLString },
     cart_id: { type: GraphQLList(GraphQLString) },
     toko_id: { type: GraphQLString },
+    toko_slug: { type: GraphQLString },
     shipping_address: { type: GraphQLString },
     shipping_amount: { type: GraphQLInt }
   },

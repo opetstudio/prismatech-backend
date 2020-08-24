@@ -10,6 +10,7 @@ const entity = Manifest.entity
 const EntityModel = require('./Model')
 const TokoProductModel = require('../toko_product/Model')
 const TokoCartModel = require('../toko_cart/Model')
+const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const { PostCode } = require('../../utils/services')
 // import { create } from 'apisauce'
 const Apisauce = require('apisauce')
@@ -155,9 +156,17 @@ const checkoutProcess = async (args, context) => {
     const sessionId = context.req.cookies['connect.sid']
 
     // const userDetail = await User.findById(userId)
+    const tokoSlug = args.toko_slug
+    let tokoId = args.toko_id
+    let tokoDetail = {}
+    if (_.isEmpty(tokoId)) {
+      // get toko detail by toko slug
+      tokoDetail = await TokoTokoOnlineModel.findOne({ slug: tokoSlug })
+      tokoId = '' + tokoDetail._id
+    }
 
     // get all cart
-    const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: args.toko_id, status: 'open' })
+    const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: tokoId, status: 'open' })
     if (_.isEmpty(allOpenCart)) throw new Error('Checkout Failed. The cart is empty')
     console.log('allOpenCart===>', allOpenCart)
 
@@ -178,7 +187,7 @@ const checkoutProcess = async (args, context) => {
       dataPo.shipping_amount = args.shipping_amount
     }
     dataPo.cart_id = allOpenCart.map(v => '' + v._id)
-    dataPo.toko_id = args.toko_id
+    dataPo.toko_id = tokoId
     if (myUserId) dataPo.user_id = myUserId
     dataPo.action = 'checkoutProcess'
     dataPo.invoice_code = '' + now
