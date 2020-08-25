@@ -73,7 +73,7 @@ function App() {
 
     //     // fetch product
     // Simple POST request with a JSON body using fetch
-    var graphqlData = 'query{\n      getAllTokoProductsByTokoId(toko_id: "' + _TOKOID_ + '" ,page_size: 10, page_index: 0, string_to_search: ""){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+    var graphqlData = 'query{\n      getAllTokoProductsByTokoId(toko_id: "' + TOKOONLINE_TOKOID + '" ,page_size: 10, page_index: 0, string_to_search: ""){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -146,7 +146,7 @@ function App() {
                 React.createElement(
                   Button,
                   { size: 'small', color: 'primary', onClick: function onClick() {
-                      window.location.href = _PAGE_PRODUCT_DETAIL_ + '#' + v.code;
+                      window.location.href = TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code;
                     } },
                   'View'
                 )
