@@ -146,7 +146,8 @@ function App() {
                 React.createElement(
                   Button,
                   { size: 'small', color: 'primary', onClick: function onClick() {
-                      window.location.href = TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code;
+                      // window.location.href = TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code 
+                      window.open(TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code);
                     } },
                   'View'
                 )
