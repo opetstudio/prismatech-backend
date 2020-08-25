@@ -107,7 +107,7 @@ var LikeButton = function (_React$Component) {
         React.createElement(
           'div',
           { style: { width: width, backgroundColor: 'green' } },
-          React.createElement('img', { src: 'http://localhost:3000/renderfile/' + productImage, style: { width: '100%' } })
+          React.createElement('img', { src: 'http://dev.plink.co.id:3000/renderfile/' + productImage, style: { width: '100%' } })
         ),
         React.createElement(
           'div',
