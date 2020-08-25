@@ -51,6 +51,22 @@ const getDetailData = {
     return Services['fetchDetail' + Manifest.entity](args, context)
   }
 }
+const getDetailDataByCode = {
+  type: new GraphQLObjectType({
+    name: 'getDetail' + Manifest.entity + 'ByCodeResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      data_detail: { type: Type[Manifest.entity + 'Type'] }
+    })
+  }),
+  args: {
+    code: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.getDetailDataByCode(args, context)
+  }
+}
 
 // no need login
 const getAllDataByTokoId = {
@@ -99,6 +115,7 @@ const getAllDataByCategoryId = {
 module.exports = {
   ['getAll' + Manifest.entity + 's']: getAllData,
   ['getDetail' + Manifest.entity]: getDetailData,
+  ['getDetail' + Manifest.entity + 'ByCode']: getDetailDataByCode,
   ['getAll' + Manifest.entity + 's' + 'ByTokoId']: getAllDataByTokoId,
   ['getAll' + Manifest.entity + 's' + 'ByCategoryId']: getAllDataByCategoryId
 }

@@ -20,6 +20,10 @@ router.get('/renderfile/:filename', (req, res, next) => {
   res.sendFile(pathmodule.join(__dirname + '/../uploadfile/' + req.params.filename))
   // res.sendFile(__dirname + './uploadfile/1595349658069.png')
 })
+router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
+  res.sendFile(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
+  // res.sendFile(__dirname + './uploadfile/1595349658069.png')
+})
 router.post('/uploadfile', (req, res, next) => {
   const form = formidable({ multiples: true })
   form.parse(req, async (err, fields, files) => {
