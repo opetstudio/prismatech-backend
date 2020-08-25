@@ -65,7 +65,7 @@ var LikeButton = function (_React$Component) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: graphqlData })
       };
-      fetch('http://localhost:3000/graphql', requestOptions).then(function (response) {
+      fetch('http://dev.plink.co.id:3000/graphql', requestOptions).then(function (response) {
         return response.json();
       }).then(function (response) {
         console.log('response===>', response);
