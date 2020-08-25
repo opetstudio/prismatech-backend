@@ -137,7 +137,7 @@ var LikeButton = function (_React$Component) {
               React.createElement(
                 'button',
                 { type: 'button', onClick: function onClick() {
-                    window.location.href = _PAGE_PRODUCT_CATALOG_;
+                    window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG;
                   }, style: { height: 50, width: 150, margin: 5 } },
                 '<< Product Catalog'
               ),
