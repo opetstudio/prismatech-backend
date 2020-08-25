@@ -116,7 +116,7 @@ var LikeButton = function (_React$Component) {
             { style: { width: '100%', height: 80, fontSize: '80%' } },
             item.name
           ),
-          React.createElement('img', { src: 'http://localhost:3000/renderfile/' + item.image_id.filename + '.' + item.image_id.file_type, style: { width: width, height: width } }),
+          React.createElement('img', { src: 'http://dev.plink.co.id:3000/renderfile/' + item.image_id.filename + '.' + item.image_id.file_type, style: { width: width, height: width } }),
           React.createElement(
             'div',
             { style: { width: '100%', height: 40, fontSize: '80%' } },
