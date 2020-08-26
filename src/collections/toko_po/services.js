@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const config = require('config')
 const request = require('request')
+const { path } = require('ramda')
 // var http = require('http')
 // var querystring = require('querystring')
 const _ = require('lodash')
@@ -48,7 +49,7 @@ const fetchAllDataBySessionId = async (args, context) => {
   try {
     const filter = {}
     const $and = []
-    const sessionId = args.session_id || context.req.cookies['connect.sid']
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
     $and.push({ session_id: sessionId })
     if (!_.isEmpty($and)) filter.$and = $and
     // const { accesstoken } = context.req.headers
@@ -91,6 +92,22 @@ const fetchDetailData = async (args, context) => {
     return { status: 400, error: err }
   }
 }
+const getDetailDataBySessionId = async (args, context) => {
+  try {
+    // const { accesstoken } = context.req.headers
+    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    // const { user_id: userId } = bodyAt
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
+    const result = await EntityModel.findOne({ session_id: sessionId })
+      .populate({ path: 'cart_id', populate: { path: 'product_id' } })
+      .populate({ path: 'toko_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
+    return { status: 200, success: 'Successfully get Data', data_detail: result }
+  } catch (err) {
+    return { status: 400, error: err }
+  }
+}
 const doCreateData = async (args, context) => {
   const session = await EntityModel.db.startSession()
   session.startTransaction()
@@ -108,7 +125,7 @@ const doCreateData = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = args.session_id || context.req.cookies['connect.sid']
+    data.session_id = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
     data.created_at = now
     data.updated_at = now
     console.log('dataCart====>', data)
@@ -152,8 +169,7 @@ const checkoutProcess = async (args, context) => {
     } catch (e) {
 
     }
-
-    const sessionId = context.req.cookies['connect.sid']
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
 
     // const userDetail = await User.findById(userId)
     const tokoSlug = args.toko_slug
@@ -180,6 +196,7 @@ const checkoutProcess = async (args, context) => {
     dataPo.session_id = sessionId
     dataPo.device_id = args.device_id
     dataPo.shipping_address = args.shipping_address
+    dataPo.shipping_amount = args.shipping_amount
     dataPo.total_product_amount = totalProductAmount
     dataPo.total_amount = totalProductAmount
     if (!_.isEmpty(args.shipping_amount)) {
@@ -410,5 +427,6 @@ module.exports = {
   ['doUpdate' + entity]: doUpdateData,
   ['doDelete' + entity]: doDeleteData,
   checkoutProcess,
-  paymentProcess
+  paymentProcess,
+  getDetailDataBySessionId
 }

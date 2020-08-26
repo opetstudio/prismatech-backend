@@ -42,7 +42,9 @@ const fetchAllDataBySessionId = async (args, context = {}) => {
   try {
     const filter = {}
     const $and = []
-    const sessionId = args.session_id || path(['req', 'cookies', 'JSESSIONID'], context)
+    console.log('context.req.sessionID=====>', context.req.sessionID)
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
+
     $and.push({ session_id: sessionId })
     if (!_.isEmpty($and)) filter.$and = $and
     // const { accesstoken } = context.req.headers
@@ -55,6 +57,8 @@ const fetchAllDataBySessionId = async (args, context = {}) => {
     //     ]
     //   })
     // }
+    console.log('context.req.cookies========>', path(['req', 'cookies', 'connect.sid'], context))
+    console.log('filter========>', filter)
     const result = await EntityModel.find(filter)
       .sort({ 'product_id.name': 'desc' })
       .skip(args.page_index * args.page_size)
@@ -161,7 +165,8 @@ const addToCart = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = context.req.cookies['connect.sid']
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
+    data.session_id = sessionId
     data.created_at = now
     data.updated_at = now
     data.status = 'open'
@@ -222,7 +227,8 @@ const removeFromCart = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = context.req.cookies['connect.sid']
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
+    data.session_id = sessionId
     data.created_at = now
     data.updated_at = now
     data.status = 'open'
@@ -275,7 +281,8 @@ const doUpdateData = async (args, context) => {
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
     // data.created_at = now
-    data.session_id = context.req.sessionID
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
+    data.session_id = sessionId
     data.updated_at = now
     console.log('update=> ', data)
     return { status: 200, success: 'Successfully save Data', detail_data: await EntityModel.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }

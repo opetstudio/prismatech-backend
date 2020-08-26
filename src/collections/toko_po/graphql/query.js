@@ -72,9 +72,26 @@ const getDetailData = {
     return Services['fetchDetail' + Manifest.entity](args, context)
   }
 }
+const getDetailDataBySessionId = {
+  type: new GraphQLObjectType({
+    name: 'getDetail' + Manifest.entity + 'BySessionIdResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      data_detail: { type: Type[Manifest.entity + 'Type'] }
+    })
+  }),
+  args: {
+    session_id: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.getDetailDataBySessionId(args, context)
+  }
+}
 
 module.exports = {
   ['getAll' + Manifest.entity + 's']: getAllData,
   ['getAll' + Manifest.entity + 's' + 'BySessionId']: getAllDataBySessionId,
+  ['getDetail' + Manifest.entity + 'BySessionId']: getDetailDataBySessionId,
   ['getDetail' + Manifest.entity]: getDetailData
 }
