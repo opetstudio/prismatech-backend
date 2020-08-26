@@ -50,7 +50,7 @@ const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = requi
 const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart, removeFromCart } = require('./src/collections/toko_cart/graphql/mutation')
 
 // toko po
-// const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = require('./src/collections/toko_cart/graphql/query')
+const { getDetailTokoPoBySessionId } = require('./src/collections/toko_po/graphql/query')
 const { checkoutProcess, paymentProcess } = require('./src/collections/toko_po/graphql/mutation')
 
 const {
@@ -110,7 +110,9 @@ const RootQuery = new GraphQLObjectType({
     // toko cart
     getAllTokoCarts,
     getDetailTokoCart,
-    getAllTokoCartsBySessionId
+    getAllTokoCartsBySessionId,
+    // toko po
+    getDetailTokoPoBySessionId
   }
 })
 

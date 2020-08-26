@@ -301,6 +301,35 @@ function App() {
   React.useEffect(function () {
     doFetchDetailDataPo();
   }, [doFetchDetailDataPo]);
+  var paymentProcess = React.useCallback(function () {
+    var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
+    var requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: graphqlData })
+    };
+    fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
+      return response.json();
+    }).then(function (response) {
+      console.log('getDetailTokoPoBySessionId response===>', response);
+      // response.json()
+      return response.data.getDetailTokoPoBySessionId;
+    }).then(function (data) {
+      setPurchaseOrderDetailRequest({ detailData: data.data_detail, isRequest: false, error: null });
+      setCheckoutProcessRequest({
+        payload: {
+          full_name: (data.data_detail || {}).full_name,
+          email: (data.data_detail || {}).email,
+          phone_number: (data.data_detail || {}).phone_number,
+          shipping_address: (data.data_detail || {}).shipping_address,
+          shipping_amount: (data.data_detail || {}).shipping_amount
+        }
+      });
+    });
+  }, []);
+  React.useEffect(function () {
+    doFetchDetailDataPo();
+  }, [doFetchDetailDataPo]);
 
   var ThumbsView = function ThumbsView(_ref5) {
     var productImage = _ref5.productImage,
@@ -395,24 +424,6 @@ function App() {
               'Total Amount: ',
               amount
             )
-          ),
-          React.createElement(
-            'div',
-            { className: classes.controls },
-            React.createElement(
-              Button,
-              { size: 'small', color: 'primary', onClick: function onClick() {
-                  return buttonDecProductCount({ productId: productId });
-                } },
-              '-'
-            ),
-            React.createElement(
-              Button,
-              { size: 'small', color: 'primary', onClick: function onClick() {
-                  return doAddToCart({ productId: productId });
-                } },
-              '+'
-            )
           )
         )
       )
@@ -462,9 +473,7 @@ function App() {
               label: 'full_name',
               defaultValue: '-',
               value: (checkoutProcessRequest.payload || {}).full_name,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { full_name: e.target.value }) });
-              }
+              disabled: true
             })
           ),
           React.createElement(
@@ -476,11 +485,9 @@ function App() {
               name: 'phone_number',
               label: 'phone_number',
               fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { phone_number: e.target.value }) });
-              },
               defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).phone_number
+              value: (checkoutProcessRequest.payload || {}).phone_number,
+              disabled: true
             })
           ),
           React.createElement(
@@ -492,9 +499,7 @@ function App() {
               name: 'email',
               label: 'email',
               fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { email: e.target.value }) });
-              },
+              disabled: true,
               defaultValue: 'Default Value',
               value: (checkoutProcessRequest.payload || {}).email
             })
@@ -508,9 +513,7 @@ function App() {
               name: 'shipping_address',
               label: 'shipping_address',
               fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { shipping_address: e.target.value }) });
-              },
+              disabled: true,
               defaultValue: 'Default Value',
               value: (checkoutProcessRequest.payload || {}).shipping_address
             })
@@ -524,9 +527,7 @@ function App() {
               name: 'shipping_amount',
               label: 'shipping_amount',
               fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { shipping_amount: e.target.value }) });
-              },
+              disabled: true,
               defaultValue: '0',
               value: (checkoutProcessRequest.payload || {}).shipping_amount
             })
@@ -538,9 +539,9 @@ function App() {
           React.createElement(
             Button,
             { onClick: function onClick() {
-                window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG;
+                window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
               }, className: classes.button },
-            'Product Catalog'
+            'Shopping Cart'
           ),
           React.createElement(
             Button,
@@ -548,11 +549,11 @@ function App() {
               variant: 'contained',
               color: 'primary',
               onClick: function onClick() {
-                return checkoutProcess({ payload: checkoutProcessRequest.payload });
+                return paymentProcess({ payload: checkoutProcessRequest.payload });
               },
               className: classes.button
             },
-            'Check Out'
+            'Payment'
           )
         )
       )

@@ -1,161 +1,411 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var _MaterialUI = MaterialUI,
+    makeStyles = _MaterialUI.makeStyles,
+    Paper = _MaterialUI.Paper,
+    Grid = _MaterialUI.Grid,
+    Card = _MaterialUI.Card,
+    CardMedia = _MaterialUI.CardMedia,
+    Button = _MaterialUI.Button,
+    Skeleton = _MaterialUI.Skeleton,
+    Container = _MaterialUI.Container,
+    Carousel = _MaterialUI.Carousel,
+    ButtonGroup = _MaterialUI.ButtonGroup,
+    InputBase = _MaterialUI.InputBase,
+    CardContent = _MaterialUI.CardContent,
+    Box = _MaterialUI.Box,
+    Typography = _MaterialUI.Typography,
+    Chip = _MaterialUI.Chip,
+    CloseIcon = _MaterialUI.CloseIcon,
+    ShopingCartIcon = _MaterialUI.ShopingCartIcon,
+    AddIcon = _MaterialUI.AddIcon,
+    RemoveIcon = _MaterialUI.RemoveIcon,
+    TextField = _MaterialUI.TextField;
 
 var e = React.createElement;
 
-var style = {
-  container: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    backgroundColor: 'DodgerBlue'
-  },
-  cardWrapper: {
-    backgroundColor: '#f1f1f1',
-    width: '100%',
-    height: '100%',
-    padding: 10,
-    textAlign: 'center',
-    // lineHeight: 75,
-    fontSize: 30
-  },
-  card: {
-    backgroundColor: 'yellow',
-    width: '100%',
-    height: '100%',
-    textAlign: 'center',
-    // lineHeight: 75,
-    fontSize: 30,
-    cursor: 'pointer'
-  }
-};
+var backendBaseUrl = TOKOONLINE_BASEURL;
 
-var LikeButton = function (_React$Component) {
-  _inherits(LikeButton, _React$Component);
+var useStyles = makeStyles(function (theme) {
+    return {
+        heroContent: {
+            marginTop: 100,
+            marginBottom: 30,
+            padding: 20,
+            background: '#fff'
+        },
+        sectionDesktop: _defineProperty({
+            display: 'none'
+        }, theme.breakpoints.up('md'), {
+            display: 'flex'
+        }),
+        sectionMobile: _defineProperty({
+            display: 'flex'
+        }, theme.breakpoints.up('md'), {
+            display: 'none'
+        }),
+        product_img_md: {
+            width: 400,
+            height: 400
+        },
+        product_empty_md: {
+            width: 400,
+            height: 400,
+            background: '#A6ACAF'
+        },
+        product_img_xs: {
+            width: 300,
+            height: 300
+        },
+        product_empty_xs: {
+            width: 300,
+            height: 300,
+            background: '#A6ACAF'
+        },
+        product_name: {
+            marginTop: 10,
+            marginBottom: 0,
+            fontSize: 24,
+            fontWeight: 700
+        },
+        product_detail: {
+            margin: '2rem 1rem',
+            textAlign: 'justify'
+        },
+        statusLabel_01: {
+            background: '#109607',
+            color: 'white',
+            fontWeight: '700'
+        },
+        statusLabel_02: {
+            background: '#F6D20B',
+            color: 'white',
+            fontWeight: '700'
+        },
+        addToCartContainer: {
+            background: '#F7F9F9',
+            // margin: '1rem 0',
+            padding: '1rem'
+        },
+        priceContainer: {
+            marginTop: 10,
+            marginBottom: 0,
+            color: '#AF1200',
+            fontWeight: 'bold',
+            fontSize: '1.5rem'
+        },
+        inputRoot: {
+            height: '2rem',
+            color: 'inherit',
+            background: '#fff'
+        },
+        inputInput: _defineProperty({
+            fontSize: '12px',
+            padding: '1rem',
+            // vertical padding + font size from searchIcon
+            transition: theme.transitions.create('width'),
+            width: '100%'
+        }, theme.breakpoints.up('md'), {
+            width: '1.5rem'
+        }),
+        btnActionRed: {
+            margin: '1rem 1rem 2rem 0',
+            fontSize: '0.7rem'
+        },
+        spesifikasiContainer: {
+            margin: '0 0 1.5rem',
+            padding: '3rem 2rem',
+            background: '#fff'
+        },
+        spesifikasiTitleContainer: {
+            background: '#D0D3D4',
+            borderRadius: '1rem',
+            padding: '1rem',
+            margin: '1rem 0'
+        },
+        spesifikasiTitle: {
+            fontWeight: 'bold',
+            fontSize: '1.2rem'
+        },
+        spesifikasi_table: {
+            margin: '2rem 1rem'
+        },
+        bc_link: {
+            color: '#D35400'
+        },
+        success_color: {
+            background: '#357a38',
+            color: "#fff"
+        }
+    };
+});
 
-  function LikeButton(props) {
-    _classCallCheck(this, LikeButton);
+function App() {
+    var tokoonlinesessionid = localStorage.getItem('tokoonlinesessionid');
+    if (!tokoonlinesessionid) localStorage.setItem('tokoonlinesessionid', '' + new Date().getTime());
+    var classes = useStyles();
 
-    var _this = _possibleConstructorReturn(this, (LikeButton.__proto__ || Object.getPrototypeOf(LikeButton)).call(this, props));
+    var _React$useState = React.useState({
+        error: null,
+        detailData: null,
+        isRequest: false
+    }),
+        _React$useState2 = _slicedToArray(_React$useState, 2),
+        productDetailRequest = _React$useState2[0],
+        setProductDetailRequest = _React$useState2[1];
 
-    _this.state = { liked: false, dataDetail: {}, error: null, width: 0, height: 0 };
-    _this.updateWindowDimensions = _this.updateWindowDimensions.bind(_this);
-    return _this;
-  }
+    var _React$useState3 = React.useState({
+        error: null,
+        isRequest: false
+    }),
+        _React$useState4 = _slicedToArray(_React$useState3, 2),
+        addToCartRequest = _React$useState4[0],
+        setAddToCartRequest = _React$useState4[1];
 
-  _createClass(LikeButton, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var _this2 = this;
+    var doAddToCart = function doAddToCart(_ref) {
+        var productId = _ref.productId;
 
-      // alert(window.location.hash)
-      this.updateWindowDimensions();
-      window.addEventListener('resize', this.updateWindowDimensions);
-      // fetch product
-      // Simple POST request with a JSON body using fetch
-      var graphqlData = 'query{\n      getDetailTokoProductByCode(code: "' + window.location.hash.substring(1) + '"){\n        error,\n        status,\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
-      var requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: graphqlData })
-      };
-      fetch('http://dev.plink.co.id:3000/graphql', requestOptions).then(function (response) {
-        return response.json();
-      }).then(function (response) {
-        console.log('response===>', response);
-        // response.json()
-        return response.data.getDetailTokoProductByCode;
-      }).then(function (data) {
-        return _this2.setState({ dataDetail: data.data_detail });
-      });
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      window.removeEventListener('resize', this.updateWindowDimensions);
-    }
-  }, {
-    key: 'updateWindowDimensions',
-    value: function updateWindowDimensions() {
-      this.setState({ width: window.innerWidth, height: window.innerHeight });
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      // const { dataDetail: { image_id: { filename, file_type: fileType } } } = this.state
-      var dataDetail = this.state.dataDetail;
-      var productName = dataDetail.name,
-          productPrice = dataDetail.price,
-          image = dataDetail.image_id,
-          description = dataDetail.description;
+        if (qty < 1) return;
+        var graphqlData = 'mutation{addToCart(count:' + qty + ', toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){status,error,detail_data{_id,product_id{_id,name,\n                            code,\n                            price,\n                            description,\n                            image_id{\n                              _id,\n                              filename,\n                              file_type\n                            }\n                          }\n                          count,\n                          amount,\n                          device_id,\n                          session_id,\n                          toko_id{\n                            slug\n                          }\n                        }\n                      }\n                      }';
+        var requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: graphqlData })
+        };
+        fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
+            return response.json();
+        }).then(function (response) {
+            console.log('response===>', response);
+            // response.json()
+            return response.data.addToCart;
+        }).then(function (data) {
+            setAddToCartRequest({ error: data.error, isRequest: false });
+            // if (data.error) alert(data.error)
+            // else setProductCatalogRequest({ reload: reload + 1 })
+            if (!data.error) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;else alert(data.error);
+        });
+    };
 
-      var productImage = ((image || {}).filename || '') + '.' + (image || {}).file_type;
+    var _React$useState5 = React.useState(0),
+        _React$useState6 = _slicedToArray(_React$useState5, 2),
+        qty = _React$useState6[0],
+        setQty = _React$useState6[1];
 
-      var width = void 0;
-      if (window.innerWidth >= 1024) width = '50%';else if (window.innerWidth >= 600) width = '100%';else if (window.innerWidth < 600) width = '100%';
+    var doFetchData = React.useCallback(function () {
+        var graphqlData = 'query{\n      getDetailTokoProductByCode(code: "' + window.location.hash.substring(1) + '"){\n        error,\n        status,\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+        var requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: graphqlData })
+        };
+        fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
+            return response.json();
+        }).then(function (response) {
+            // console.log('response===>', response)
+            // response.json()
+            return response.data.getDetailTokoProductByCode;
+        }).then(function (data) {
+            return setProductDetailRequest({ detailData: data.data_detail, isRequest: false, error: null });
+        });
+    }, []);
+    var error = productDetailRequest.error,
+        isRequest = productDetailRequest.isRequest;
 
-      // return null
-      return React.createElement(
-        'div',
-        { style: style.container },
+    var detailData = productDetailRequest.detailData || {};
+
+    React.useEffect(function () {
+        doFetchData();
+    }, [doFetchData]);
+
+    var handleDecreaseItem = function handleDecreaseItem(event, index) {
+        if (qty > 0) {
+            setQty(qty - 1);
+        }
+    };
+
+    var handleIncreaseItem = function handleIncreaseItem(event, index) {
+        setQty(qty + 1);
+    };
+
+    return (
+        // newest
         React.createElement(
-          'div',
-          { style: { width: width, backgroundColor: 'green' } },
-          React.createElement('img', { src: 'http://dev.plink.co.id:3000/renderfile/' + productImage, style: { width: '100%' } })
-        ),
-        React.createElement(
-          'div',
-          { style: { width: width, display: 'flex', flexDirection: 'column' } },
-          React.createElement(
             'div',
-            { style: { padding: 10 } },
+            null,
             React.createElement(
-              'div',
-              { style: { width: '100%', fontSize: 30, backgroundColor: 'yellow' } },
-              productName
-            ),
-            React.createElement(
-              'div',
-              { style: { width: '100%', fontSize: 30, backgroundColor: 'white' } },
-              description
-            ),
-            React.createElement(
-              'div',
-              { style: { width: '100%', fontSize: 30, backgroundColor: 'purple' } },
-              'Rp. ',
-              productPrice
-            ),
-            React.createElement(
-              'div',
-              { style: { width: '100%', fontSize: 30, backgroundColor: 'burlywood' } },
-              React.createElement(
-                'button',
-                { type: 'button', onClick: function onClick() {
-                    window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG;
-                  }, style: { height: 50, width: 150, margin: 5 } },
-                '<< Product Catalog'
-              ),
-              React.createElement(
-                'button',
-                { type: 'button', style: { height: 50, width: 150, margin: 5 } },
-                ' ',
-                'Add To Cart >>'
-              )
+                Container,
+                null,
+                React.createElement(
+                    'div',
+                    { className: classes.heroContent },
+                    React.createElement(
+                        Grid,
+                        { container: true, spacing: 5, justify: 'center' },
+                        React.createElement(
+                            Grid,
+                            { item: true },
+                            React.createElement(
+                                'div',
+                                { className: classes.sectionDesktop },
+                                isRequest ? React.createElement(Skeleton, { variant: 'rect', animation: 'wave', width: 400, height: 400 }) : React.createElement(CardMedia, {
+                                    className: classes.product_img_md,
+                                    image: backendBaseUrl + '/renderfile/' + (detailData.image_id || {}).filename + '.' + (detailData.image_id || {}).file_type,
+                                    title: 'Image title'
+                                })
+                            ),
+                            React.createElement(
+                                'div',
+                                { className: classes.sectionMobile },
+                                isRequest ? React.createElement(Skeleton, { variant: 'rect', animation: 'wave', width: 300, height: 300 }) : React.createElement(CardMedia, {
+                                    className: classes.product_img_md,
+                                    image: backendBaseUrl + '/renderfile/' + (detailData.image_id || {}).filename + '.' + (detailData.image_id || {}).file_type,
+                                    title: 'Image title'
+                                })
+                            )
+                        ),
+                        React.createElement(
+                            Grid,
+                            { item: true, xs: 12, sm: 6, md: 4 },
+                            React.createElement(
+                                Grid,
+                                { container: true, spacing: 2, direction: 'row' },
+                                React.createElement(
+                                    Grid,
+                                    { item: true },
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 60, width: '5rem' }) :
+                                    // check if stock exist next
+                                    React.createElement(Chip, { label: 'Ada Stok' })
+                                ),
+                                React.createElement(
+                                    Grid,
+                                    { item: true },
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 60, width: '5rem' }) :
+                                    // need to return category from backend
+                                    React.createElement(Chip, { label: 'ButuhKategori', className: classes.success_color })
+                                )
+                            ),
+                            React.createElement(
+                                Grid,
+                                { container: true, spacing: 2, direction: 'column' },
+                                React.createElement(
+                                    Typography,
+                                    { className: classes.product_name, component: 'p' },
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50 }) : detailData.name
+                                ),
+                                React.createElement(
+                                    Typography,
+                                    { className: classes.priceContainer },
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: '30%' }) : "Rp. " + detailData.price
+                                ),
+                                React.createElement(
+                                    Grid,
+                                    { item: true, style: { padding: 0, marginTop: 10 } },
+                                    React.createElement(
+                                        Typography,
+                                        { className: classes.spesifikasiTitle },
+                                        'Detail Produk'
+                                    ),
+                                    React.createElement(
+                                        Typography,
+                                        null,
+                                        detailData.description
+                                    )
+                                ),
+                                React.createElement(
+                                    Box,
+                                    null,
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 100 }) : React.createElement(
+                                        Grid,
+                                        { container: true, className: classes.addToCartContainer },
+                                        React.createElement(
+                                            Grid,
+                                            { item: true, xs: 6, sm: 6, md: 6 },
+                                            React.createElement(
+                                                Typography,
+                                                { color: 'textSecondary' },
+                                                'Qty'
+                                            )
+                                        ),
+                                        React.createElement(
+                                            Grid,
+                                            { item: true, xs: 6, sm: 6, md: 6 },
+                                            React.createElement(
+                                                ButtonGroup,
+                                                { disableElevation: true, variant: 'contained' },
+                                                React.createElement(
+                                                    Button,
+                                                    { size: 'small', onClick: handleDecreaseItem },
+                                                    'Min'
+                                                ),
+                                                React.createElement(TextField, {
+                                                    id: 'outlined-size-small',
+                                                    defaultValue: '0',
+                                                    value: qty,
+                                                    variant: 'outlined',
+                                                    onChange: function onChange(e) {
+                                                        return setQty(e.target.value);
+                                                    },
+                                                    type: 'number',
+                                                    size: 'small'
+                                                }),
+                                                React.createElement(
+                                                    Button,
+                                                    { size: 'small', onClick: handleIncreaseItem },
+                                                    'Plus'
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                React.createElement(
+                                    'div',
+                                    { className: classes.sectionDesktop },
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 200,
+                                        style: { marginRight: '1rem' } }) : React.createElement(
+                                        Button,
+                                        { variant: 'outlined', color: 'secondary',
+                                            className: classes.btnActionRed,
+                                            onClick: function onClick() {
+                                                return doAddToCart({ productId: detailData._id });
+                                            }
+                                        },
+                                        'Tambah ke keranjang'
+                                    ),
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
+                                        Button,
+                                        { variant: 'contained', color: 'secondary',
+                                            className: classes.btnActionRed },
+                                        'Beli Sekarang'
+                                    )
+                                ),
+                                React.createElement(
+                                    'div',
+                                    { className: classes.sectionMobile },
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 200,
+                                        style: { marginRight: '1rem' } }) : React.createElement(
+                                        Button,
+                                        { variant: 'outlined', color: 'secondary',
+                                            className: classes.btnActionRed },
+                                        'Tambah ke keranjang'
+                                    ),
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
+                                        Button,
+                                        { variant: 'contained', color: 'secondary',
+                                            className: classes.btnActionRed },
+                                        'Beli Sekarang'
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
             )
-          )
         )
-      );
-    }
-  }]);
+    );
+}
 
-  return LikeButton;
-}(React.Component);
-
-var domContainer = document.querySelector('#tokoonline_content');
-ReactDOM.render(e(LikeButton), domContainer);
+ReactDOM.render(React.createElement(App, null), document.querySelector('#tokoonline_content'));
