@@ -30,6 +30,8 @@ const fields = {
   facebook: { type: GraphQLString },
   instagram: { type: GraphQLString },
   youtube: { type: GraphQLString },
+  plink_merchant_id: { type: GraphQLString },
+  plink_merchant_key_id: { type: GraphQLString },
   status: { type: GraphQLString }
 }
 module.exports = {
@@ -44,6 +46,8 @@ module.exports = {
     facebook: { type: GraphQLString },
     instagram: { type: GraphQLString },
     youtube: { type: GraphQLString },
+    plink_merchant_id: { type: GraphQLString },
+    plink_merchant_key_id: { type: GraphQLString },
     status: { type: GraphQLString }
   },
   createArgs: {
@@ -55,6 +59,8 @@ module.exports = {
     facebook: { type: GraphQLString },
     instagram: { type: GraphQLString },
     youtube: { type: GraphQLString },
+    plink_merchant_id: { type: GraphQLString },
+    plink_merchant_key_id: { type: GraphQLString },
     status: { type: GraphQLString }
   },
   fields: {

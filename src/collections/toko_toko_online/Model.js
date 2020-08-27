@@ -23,6 +23,12 @@ const schema = new mongoose.Schema({
   youtube: {
     type: String
   },
+  plink_merchant_id: {
+    type: String
+  },
+  plink_merchant_key_id: {
+    type: String
+  },
   description: {
     type: String
   },
