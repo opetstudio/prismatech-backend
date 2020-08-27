@@ -305,6 +305,12 @@ const paymentProcess = async (args, context) => {
     const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Purchase Failed.')
 
+    // toko online detail
+    const tokoDetail = await TokoTokoOnlineModel.findById(tokoPoDetail.toko_id)
+    if (_.isEmpty(tokoDetail)) throw new Error('Gagal Purchase. Data toko tidak ditemukan')
+    if (_.isEmpty(tokoDetail.plink_merchant_key_id)) throw new Error('Gagal Purchase. Plink Merchant Key Id masih kosong. Hubungi pemilik toko.')
+    if (_.isEmpty(tokoDetail.plink_merchant_id)) throw new Error('Gagal Purchase. Plink Merchant Id masih kosong. Hubungi pemilik toko.')
+
     const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
 
     const nowDateTime = new Date()
@@ -313,9 +319,9 @@ const paymentProcess = async (args, context) => {
 
     var bodyHit = {
       transmission_date_time: formatedDateTime,
-      merchant_key_id: '6d422ec3-87de-4234-b583-95f23a6a6cbf',
-      merchant_id: '000000070070070',
-      merchant_ref_no: 'ctrtesttrx001165',
+      merchant_key_id: tokoDetail.plink_merchant_key_id,
+      merchant_id: tokoDetail.plink_merchant_id,
+      merchant_ref_no: tokoPoDetail.session_id,
       backend_callback_url: '',
       frontend_callback_url: '',
 
