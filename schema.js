@@ -26,7 +26,7 @@ const { getAllUserRoles, getDetailUserRole, getDetailUserRoleByMyUserId } = requ
 const { createUserRole, deleteUserRole, updateUserRole } = require('./src/collections/user_role/graphql/mutation')
 
 // toko product
-const { getAllTokoProducts, getDetailTokoProduct, getDetailTokoProductByCode, getAllTokoProductsByTokoId, getAllTokoProductsByCategoryId } = require('./src/collections/toko_product/graphql/query')
+const { getAllTokoProducts, getDetailTokoProduct, getDetailTokoProductByCode, getDetailTokoProductJoinCartByCode, getAllTokoProductsByTokoId, getAllTokoProductsByCategoryId } = require('./src/collections/toko_product/graphql/query')
 const { createTokoProduct, deleteTokoProduct, updateTokoProduct } = require('./src/collections/toko_product/graphql/mutation')
 
 // tag
@@ -90,7 +90,7 @@ const RootQuery = new GraphQLObjectType({
     getAllTokoProducts,
     getDetailTokoProduct,
     getDetailTokoProductByCode,
-
+    getDetailTokoProductJoinCartByCode,
     // tag
     getAllTags,
     getDetailTag,

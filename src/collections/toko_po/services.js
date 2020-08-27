@@ -302,30 +302,36 @@ const paymentProcess = async (args, context) => {
     }
 
     // toko po detail
-    const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id })
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Purchase Failed.')
 
+    const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
+
+    const nowDateTime = new Date()
+    const tz = new Date().toString().match(/([-\+][0-9]+)\s/)[1]
+    const formatedDateTime = `${nowDateTime.getFullYear()}-${('' + nowDateTime.getMonth()).padStart(2, '0')}-${('' + nowDateTime.getDate()).padStart(2, '0')} ${('' + nowDateTime.getHours()).padStart(2, '0')}:${('' + nowDateTime.getMinutes()).padStart(2, '0')}:${('' + nowDateTime.getSeconds()).padStart(2, '0')} ${tz}`
+
     var bodyHit = {
-      transmission_date_time: '2019-10-09 08:24:57.100 +0700',
+      transmission_date_time: formatedDateTime,
       merchant_key_id: '6d422ec3-87de-4234-b583-95f23a6a6cbf',
       merchant_id: '000000070070070',
       merchant_ref_no: 'ctrtesttrx001165',
       backend_callback_url: '',
       frontend_callback_url: '',
 
-      user_id: 'endahparamita@gmail.com',
-      user_contact: '0812345611',
-      user_name: 'endah paramita',
-      user_email: 'endahparamita@gmail.com',
+      user_id: tokoPoDetail.email,
+      user_contact: tokoPoDetail.phone_number,
+      user_name: tokoPoDetail.full_name,
+      user_email: tokoPoDetail.email,
 
-      fds_user_device_id: 351757111290115,
+      fds_user_device_id: tokoPoDetail.device_id,
       fds_user_ip_address: '127.0.0.1',
-      fds_product_details: '[{"item_code":"kaosdnm","item_title":"kaos denim","quantity":2,"total":"2000", "currency": "IDR"},{"item_code":"sptadds","item_title":"sepatu adidas copa","quantity":4,"total":"10013", "currency": "IDR"}]',
-      fds_shipping_details: '{"address":"jl.sanusi","telephoneNumber":"089634679074","handphoneNumber":"089634679074"}',
+      fds_product_details: JSON.stringify(productsInCart),
+      fds_shipping_details: '{"address":"' + tokoPoDetail.shipping_address + '","telephoneNumber":"' + tokoPoDetail.phone_number + '","handphoneNumber":"' + tokoPoDetail.phone_number + '"}',
 
-      transaction_amount: 12025,
-      transaction_date_time: '2019-10-09 08:24:57.100 +0700',
-      transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "belanja bulanan"}]'
+      transaction_amount: tokoPoDetail.total_amount,
+      transaction_date_time: formatedDateTime
+      // transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "belanja bulanan"}]'
     }
     // define the api
     const api = Apisauce.create({
@@ -355,6 +361,7 @@ const paymentProcess = async (args, context) => {
     console.log('resp.status====>', resp.status)
     console.log('resp.ok====>', resp.ok)
     console.log('resp.data====>', resp.data)
+    console.log('bodyHit====>', bodyHit)
     // console.log('resp====>', resp)
     if (!resp.ok) throw new Error('' + resp.problem)
 

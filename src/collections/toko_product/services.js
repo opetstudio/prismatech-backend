@@ -10,6 +10,7 @@ const entity = Manifest.entity
 const EntityModel = require('./Model')
 const TagModel = require('../tag/Model')
 const TokoTeamModel = require('../toko_team/Model')
+const TokoCartModel = require('../toko_cart/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const fetchAllData = async (args, context) => {
   try {
@@ -185,6 +186,26 @@ const getDetailDataByCode = async (args, context) => {
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
+  } catch (err) {
+    return { status: 400, error: err.message }
+  }
+}
+const getDetailDataJoinCartByCode = async (args, context) => {
+  try {
+    const result = await EntityModel.findOne({ code: args.code })
+      .populate({ path: 'image_id' })
+      .populate({ path: 'category_id' })
+      .populate({ path: 'tag_id' })
+      .populate({ path: 'toko_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
+    let productDetailInCart = {}
+    if (!_.isEmpty(result)) {
+      // select product from cart by session_id
+      const sessionId = args.session_id
+      productDetailInCart = await TokoCartModel.findOne({ session_id: sessionId, product_id: '' + result._id }).populate({ path: 'product_id' }).populate({ path: 'toko_id' })
+    }
+    return { status: 200, success: 'Successfully get Data', data_detail: result, data_detail_in_cart: productDetailInCart }
   } catch (err) {
     return { status: 400, error: err.message }
   }
@@ -385,5 +406,6 @@ module.exports = {
   getAllDataByTokoId,
   getAllDataByCategoryId,
   getDetailDataByCode,
+  getDetailDataJoinCartByCode,
   getAllDataByTokoSlug
 }
