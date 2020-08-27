@@ -152,6 +152,7 @@ function App() {
     var _React$useState = React.useState({
         error: null,
         detailData: null,
+        cartDetail: {},
         isRequest: false
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -167,7 +168,8 @@ function App() {
         setAddToCartRequest = _React$useState4[1];
 
     var doAddToCart = function doAddToCart(_ref) {
-        var productId = _ref.productId;
+        var productId = _ref.productId,
+            isStay = _ref.isStay;
 
         if (qty < 1) return;
         var graphqlData = 'mutation{addToCart(count:' + qty + ', toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                            code,\n                            price,\n                            description,\n                            image_id{\n                              _id,\n                              filename,\n                              file_type\n                            }\n                          }\n                          count,\n                          amount,\n                          device_id,\n                          session_id,\n                          toko_id{\n                            slug\n                          }\n                        }\n                      }\n                      }';
@@ -187,7 +189,8 @@ function App() {
             setAddToCartRequest({ error: data.error, isRequest: false });
             // if (data.error) alert(data.error)
             // else setProductCatalogRequest({ reload: reload + 1 })
-            if (!data.error) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;else alert(data.error);
+            if (data.error) return alert(data.error);
+            if (!isStay) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
         });
     };
 
@@ -197,7 +200,7 @@ function App() {
         setQty = _React$useState6[1];
 
     var doFetchData = React.useCallback(function () {
-        var graphqlData = 'query{\n      getDetailTokoProductByCode(code: "' + window.location.hash.substring(1) + '"){\n        error,\n        status,\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -208,9 +211,10 @@ function App() {
         }).then(function (response) {
             // console.log('response===>', response)
             // response.json()
-            return response.data.getDetailTokoProductByCode;
+            return response.data.getDetailTokoProductJoinCartByCode;
         }).then(function (data) {
-            return setProductDetailRequest({ detailData: data.data_detail, isRequest: false, error: null });
+            setProductDetailRequest({ cartDetail: data.data_detail_in_cart, detailData: data.data_detail, isRequest: false, error: null });
+            setQty((data.data_detail_in_cart || {}).count || 0);
         });
     }, []);
     var error = productDetailRequest.error,
@@ -371,7 +375,7 @@ function App() {
                                         { variant: 'outlined', color: 'secondary',
                                             className: classes.btnActionRed,
                                             onClick: function onClick() {
-                                                return doAddToCart({ productId: detailData._id });
+                                                return doAddToCart({ productId: detailData._id, isStay: true });
                                             }
                                         },
                                         'Tambah ke keranjang'
@@ -379,7 +383,11 @@ function App() {
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
                                         Button,
                                         { variant: 'contained', color: 'secondary',
-                                            className: classes.btnActionRed },
+                                            className: classes.btnActionRed,
+                                            onClick: function onClick() {
+                                                return doAddToCart({ productId: detailData._id });
+                                            }
+                                        },
                                         'Beli Sekarang'
                                     )
                                 ),
@@ -390,13 +398,21 @@ function App() {
                                         style: { marginRight: '1rem' } }) : React.createElement(
                                         Button,
                                         { variant: 'outlined', color: 'secondary',
-                                            className: classes.btnActionRed },
+                                            className: classes.btnActionRed,
+                                            onClick: function onClick() {
+                                                return doAddToCart({ productId: detailData._id, isStay: true });
+                                            }
+                                        },
                                         'Tambah ke keranjang'
                                     ),
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
                                         Button,
                                         { variant: 'contained', color: 'secondary',
-                                            className: classes.btnActionRed },
+                                            className: classes.btnActionRed,
+                                            onClick: function onClick() {
+                                                return doAddToCart({ productId: detailData._id });
+                                            }
+                                        },
                                         'Beli Sekarang'
                                     )
                                 )
