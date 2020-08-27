@@ -10,6 +10,7 @@ const User = require('../user/Model')
 const entity = Manifest.entity
 const EntityModel = require('./Model')
 const TokoProductModel = require('../toko_product/Model')
+const TokoTeamModel = require('../toko_team/Model')
 const TokoCartModel = require('../toko_cart/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const { PostCode } = require('../../utils/services')
@@ -18,18 +19,48 @@ const Apisauce = require('apisauce')
 const fetchAllData = async (args, context) => {
   try {
     const filter = {}
-    const $and = []
-    if (!_.isEmpty($and)) filter.$and = $and
-    // const { accesstoken } = context.req.headers
-    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
-    // const { user_id: userId } = bodyAt
-    // if (!_.isEmpty(args.string_to_search)) {
-    //   filter.$and.push({
-    //     $or: [
-    //       { name: { $regex: args.string_to_search, $options: 'i' } }
-    //     ]
-    //   })
-    // }
+    filter.$and = []
+    const { accesstoken } = context.req.headers
+    const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    const { user_id: userId } = bodyAt
+    if (!_.isEmpty(args.string_to_search)) {
+      filter.$and.push({
+        $or: [
+          { full_name: { $regex: args.string_to_search, $options: 'i' } },
+          { email: { $regex: args.string_to_search, $options: 'i' } },
+          { action: { $regex: args.string_to_search, $options: 'i' } },
+          { session_id: { $regex: args.string_to_search, $options: 'i' } },
+          { phone_number: { $regex: args.string_to_search, $options: 'i' } }
+        ]
+      })
+    }
+
+    // check authorization
+    let isEligible = false
+    const $or = []
+    const myListToko = await TokoTeamModel.find({ user_id: userId })
+    if (myListToko) {
+      console.log('myListToko=>', myListToko)
+      myListToko.forEach(v => {
+        $or.push({ toko_id: '' + v.toko_id })
+      })
+      isEligible = true
+    }
+    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    if (myOwnListToko) {
+      myOwnListToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+      isEligible = true
+    }
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    if (_.isEmpty(filter.$and)) isEligible = false
+    if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
+
     const result = await EntityModel.find(filter)
       .sort({ updated_at: 'desc' })
       .skip(args.page_index * args.page_size)
@@ -42,7 +73,7 @@ const fetchAllData = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchAllDataBySessionId = async (args, context) => {
@@ -74,7 +105,7 @@ const fetchAllDataBySessionId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailData = async (args, context) => {
@@ -89,7 +120,7 @@ const fetchDetailData = async (args, context) => {
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const getDetailDataBySessionId = async (args, context) => {
@@ -105,7 +136,7 @@ const getDetailDataBySessionId = async (args, context) => {
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doCreateData = async (args, context) => {
@@ -151,7 +182,7 @@ const doCreateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const checkoutProcess = async (args, context) => {
@@ -160,6 +191,15 @@ const checkoutProcess = async (args, context) => {
   try {
     const opts = { session }
     const now = Date.now()
+
+    // validasi
+    if (!args.full_name || args.full_name === '-' || args.full_name === 'undefined') throw new Error('Data Nama Customer masih kosong')
+    if (!args.phone_number || args.phone_number === '-' || args.phone_number === 'undefined') throw new Error('Data Nomor Telepon masih kosong')
+    if (!args.email || args.email === '-' || args.email === 'undefined') throw new Error('Data Email masih kosong')
+    if (!args.shipping_address || args.shipping_address === '-' || args.shipping_address === 'undefined') throw new Error('Data Alamat Pengiriman masih kosong')
+    if (!args.shipping_amount || args.shipping_amount === '0' || args.shipping_amount === 'undefined') throw new Error('Data Biaya Pengiriman masih kosong')
+    if (_.isEmpty(args.cart_id) || args.cart_id === 'undefined') throw new Error('Keranjang belanja masih kosong')
+
     const { accesstoken } = context.req.headers
     let myUserId
     try {
@@ -242,14 +282,14 @@ const checkoutProcess = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const paymentProcess = async (args, context) => {
-  // const session = await EntityModel.db.startSession()
-  // session.startTransaction()
+  const session = await EntityModel.db.startSession()
+  session.startTransaction()
   try {
-    // const opts = { session }
+    const opts = { session }
     const now = Date.now()
     // const { accesstoken } = context.req.headers
     let myUserId
@@ -262,7 +302,7 @@ const paymentProcess = async (args, context) => {
     }
 
     // toko po detail
-    const tokoPoDetail = await EntityModel.findOne({ _id: args._id, session_id: args.session_id })
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Purchase Failed.')
 
     var bodyHit = {
@@ -287,7 +327,6 @@ const paymentProcess = async (args, context) => {
       transaction_date_time: '2019-10-09 08:24:57.100 +0700',
       transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "belanja bulanan"}]'
     }
-
     // define the api
     const api = Apisauce.create({
       baseURL: config.get('debitinPaymentPageBackendBaseUrl'),
@@ -300,7 +339,6 @@ const paymentProcess = async (args, context) => {
         channelid: 'WEB'
       }
     })
-
     // start making calls
     // api
     //   .get('/repos/skellock/apisauce/commits')
@@ -319,6 +357,30 @@ const paymentProcess = async (args, context) => {
     console.log('resp.data====>', resp.data)
     // console.log('resp====>', resp)
     if (!resp.ok) throw new Error('' + resp.problem)
+
+    if (_.isEmpty(resp.data.url)) throw new Error('Gagal request payment page')
+
+    // update po
+    // update cart
+
+    const data = {}
+    // data.created_by = userDetail._id
+    // data.updated_by = userDetail._id
+    data.session_id = args.session_id
+    data.created_at = now
+    data.updated_at = now
+
+    const set = {}
+    set.$set = data
+    // if (!args.count) set.$inc = { count: 1 }
+    tokoPoDetail.action = 'paymentProcess'
+    tokoPoDetail.updated_at = now
+    tokoPoDetail.payment_page_url = resp.data.url
+    tokoPoDetail.debitin_paymentpage_backend_baseurl = config.get('debitinPaymentPageBackendBaseUrl')
+    await tokoPoDetail.save(opts)
+
+    await TokoCartModel.updateMany({ session_id: args.session_id }, { $set: { status: 'close' } }).session(session)
+    // User.updateMany({"created": false}, {"$set":{"created": true}});
 
     // get all cart
     // const allOpenCart = await TokoCartModel.find({ session_id: args.session_id, toko_id: args.toko_id, status: 'open' })
@@ -364,15 +426,15 @@ const paymentProcess = async (args, context) => {
     // console.log('upsertResponse====>', upsertResponse)
     // if (!upsertResponse) throw new Error('Checkout Failed.')
 
-    // await session.commitTransaction()
-    // session.endSession()
+    await session.commitTransaction()
+    session.endSession()
     console.log('return response ', resp.data)
-    return { status: 200, success: 'Successfully save Data', payment_page_url: resp.data.url }
+    return { status: 200, success: 'Successfully save Data', payment_page_url: resp.data.url, debitin_paymentpage_backend_baseurl: config.get('debitinPaymentPageBackendBaseUrl') }
   } catch (err) {
     console.log('errorrr====>', err)
-    // await session.abortTransaction()
-    // session.endSession()
-    return { status: 400, error: err }
+    await session.abortTransaction()
+    session.endSession()
+    return { status: 400, error: err.message }
   }
 }
 const doUpdateData = async (args, context) => {
@@ -392,7 +454,7 @@ const doUpdateData = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await EntityModel.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteData = async (args, context) => {
@@ -415,7 +477,7 @@ const doDeleteData = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 

@@ -2,6 +2,8 @@
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var _MaterialUI = MaterialUI,
     Button = _MaterialUI.Button,
     Card = _MaterialUI.Card,
@@ -91,32 +93,9 @@ var useStyles = makeStyles(function (theme) {
 });
 // class App extends React.Component {
 
-function getCookie(cname) {
-  console.log('document.cookie', document.cookie);
-  var name = cname + '=';
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for (var i = 0; i < ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return '';
-}
-function setCookie(cname, cvalue, exdays) {
-  console.log('setCookie===>', cname);
-  var d = new Date();
-  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-  var expires = 'expires=' + d.toUTCString();
-  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/*';
-}
 function App() {
-  var tokoonlinesessionid = localStorage.getItem('tokoonlinesessionid');
-  if (!tokoonlinesessionid) localStorage.setItem('tokoonlinesessionid', '' + new Date().getTime());
+  var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
+  if (!tokoonlinesessionid) localStorage.setItem(TOKOONLINE_TOKOID, '' + new Date().getTime());
   var classes = useStyles();
   var theme = useTheme();
 
@@ -182,7 +161,7 @@ function App() {
 
     //     // fetch product
     // Simple POST request with a JSON body using fetch
-    var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem('tokoonlinesessionid') + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
+    var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -201,7 +180,7 @@ function App() {
   var doAddToCart = function doAddToCart(_ref2) {
     var productId = _ref2.productId;
 
-    var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        amount,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
+    var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        amount,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -211,9 +190,10 @@ function App() {
       return response.json();
     }).then(function (response) {
       console.log('response===>', response);
-      // response.json()
+      if (response.errors) return alert(JSON.stringify(response.errors));
       return response.data.addToCart;
     }).then(function (data) {
+      if (!data) return;
       setAddToCartRequest({ error: data.error, isRequest: false });
       if (data.error) alert(data.error);else setProductCatalogRequest({ reload: reload + 1 });
       // if (!data.error) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART
@@ -225,7 +205,7 @@ function App() {
 
     // alert(productId)
     // return
-    var graphqlData = 'mutation{removeFromCart(  toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){status,error,detail_data{_id,product_id{_id,name,\n              code,\n              price,\n              description,\n              image_id{\n                _id,\n                filename,\n                file_type\n              }\n            }\n            count,\n            device_id,\n            session_id,\n            toko_id{\n              slug\n            }\n          }\n        }\n      }';
+    var graphqlData = 'mutation{removeFromCart(  toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n              code,\n              price,\n              description,\n              image_id{\n                _id,\n                filename,\n                file_type\n              }\n            }\n            count,\n            device_id,\n            session_id,\n            toko_id{\n              slug\n            }\n          }\n        }\n      }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -235,9 +215,10 @@ function App() {
       return response.json();
     }).then(function (response) {
       console.log('response===>', response);
-      // response.json()
+      if (response.errors) return alert(JSON.stringify(response.errors));
       return response.data.removeFromCart;
     }).then(function (data) {
+      if (!data) return;
       setRemoveFromCartRequest({ error: data.error, isRequest: false });
 
       if (data.error) alert(data.error);else setProductCatalogRequest({ reload: reload + 1 });
@@ -246,9 +227,9 @@ function App() {
   var checkoutProcess = function checkoutProcess(_ref4) {
     var payload = _ref4.payload;
 
-    var graphqlData = 'mutation\n    {\n      checkoutProcess(\n            session_id: "' + localStorage.getItem('tokoonlinesessionid') + '",\n            device_id: "xxxx",\n            full_name: "' + payload.full_name + '",\n            phone_number: "' + payload.phone_number + '",\n            email: "' + payload.email + '",\n            cart_id: ' + JSON.stringify(productCatalogRequest.listData.map(function (v) {
+    var graphqlData = 'mutation\n    {\n      checkoutProcess(\n            session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '",\n            device_id: "xxxx",\n            full_name: "' + payload.full_name + '",\n            phone_number: "' + payload.phone_number + '",\n            email: "' + payload.email + '",\n            cart_id: ' + JSON.stringify(productCatalogRequest.listData.map(function (v) {
       return '' + v._id;
-    })) + ',\n            toko_id: "' + TOKOONLINE_TOKOID + '",\n            shipping_address: "' + payload.shipping_address + '",\n            shipping_amount: ' + payload.shipping_amount + '\n          )\n      {\n        status,\n        error,\n        detail_data\n        {\n          _id\n        }\n      }\n    }';
+    })) + ',\n            toko_id: "' + TOKOONLINE_TOKOID + '",\n            shipping_address: "' + payload.shipping_address + '",\n            shipping_amount: ' + (payload.shipping_amount || 0) + '\n          )\n      {\n        status,\n        error,\n        detail_data\n        {\n          _id\n        }\n      }\n    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -257,13 +238,13 @@ function App() {
     fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
       return response.json();
     }).then(function (response) {
-      console.log('response===>', response);
-      // response.json()
+      if (response.errors) return alert(JSON.stringify(response.errors));
       return response.data.checkoutProcess;
     }).then(function (data) {
-      setCheckoutProcessRequest({ error: data.error, isRequest: false, payload: checkoutProcessRequest.payload });
-
-      if (data.error) alert(data.error);else window.location.href = TOKOONLINE_PAGE_CHECKOUT_CONFIRMATION + '#' + data.detail_data._id;
+      if (!data) return;
+      var error = data.error;
+      setCheckoutProcessRequest({ error: error, isRequest: false, payload: checkoutProcessRequest.payload });
+      if (error) alert(error);else window.location.href = TOKOONLINE_PAGE_CHECKOUT_CONFIRMATION + '#' + data.detail_data._id;
       // console.log('data=====>' + data)
     });
   };
@@ -273,7 +254,7 @@ function App() {
   }, [doFetchData, pageIndex, pageSize, reload]);
 
   var doFetchDetailDataPo = React.useCallback(function () {
-    var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
+    var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -286,6 +267,7 @@ function App() {
       // response.json()
       return response.data.getDetailTokoPoBySessionId;
     }).then(function (data) {
+      if (!data) return;
       setPurchaseOrderDetailRequest({ detailData: data.data_detail, isRequest: false, error: null });
       setCheckoutProcessRequest({
         payload: {
@@ -421,13 +403,33 @@ function App() {
 
   var fullName = (purchaseOrderDetailRequest.detailData || {}).full_name;
   console.log('purchaseOrderDetailRequest.detailData======>', fullName);
+  var renderTextField = function renderTextField(_ref7) {
+    var name = _ref7.name,
+        label = _ref7.label,
+        value = _ref7.value,
+        defaultValue = _ref7.defaultValue;
+    return React.createElement(
+      Grid,
+      { item: true, xs: 12, sm: 6 },
+      React.createElement(TextField, {
+        id: name,
+        label: label,
+        fullWidth: true,
+        defaultValue: value || defaultValue,
+        value: value,
+        onChange: function onChange(e) {
+          return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, _defineProperty({}, name, e.target.value)) });
+        }
+      })
+    );
+  };
   return React.createElement(
     'div',
     null,
     React.createElement(CssBaseline, null),
     React.createElement(
       Grid,
-      { container: true, spacing: 4 },
+      { container: true },
       React.createElement(
         Grid,
         { item: true, xs: 12, sm: 12, md: 12, lg: 6 },
@@ -447,112 +449,44 @@ function App() {
         Grid,
         { item: true, xs: 12, sm: 12, md: 12, lg: 6 },
         React.createElement(
-          Typography,
-          { variant: 'h6', gutterBottom: true },
-          'Shipping address'
-        ),
-        React.createElement(
-          Grid,
-          { container: true, spacing: 3 },
-          React.createElement(
-            Grid,
-            { item: true, xs: 12, sm: 6 },
-            React.createElement(TextField, {
-              id: 'full_name',
-              label: 'full_name',
-              defaultValue: '-',
-              value: (checkoutProcessRequest.payload || {}).full_name,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { full_name: e.target.value }) });
-              }
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'phone_number',
-              name: 'phone_number',
-              label: 'phone_number',
-              fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { phone_number: e.target.value }) });
-              },
-              defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).phone_number
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'email',
-              name: 'email',
-              label: 'email',
-              fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { email: e.target.value }) });
-              },
-              defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).email
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'shipping_address',
-              name: 'shipping_address',
-              label: 'shipping_address',
-              fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { shipping_address: e.target.value }) });
-              },
-              defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).shipping_address
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'shipping_amount',
-              name: 'shipping_amount',
-              label: 'shipping_amount',
-              fullWidth: true,
-              onChange: function onChange(e) {
-                return setCheckoutProcessRequest({ payload: Object.assign({}, checkoutProcessRequest.payload, { shipping_amount: e.target.value }) });
-              },
-              defaultValue: '0',
-              value: (checkoutProcessRequest.payload || {}).shipping_amount
-            })
-          )
-        ),
-        React.createElement(
           'div',
-          { className: classes.buttons },
+          { style: { padding: 10 } },
           React.createElement(
-            Button,
-            { onClick: function onClick() {
-                window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG;
-              }, className: classes.button },
-            'Product Catalog'
+            Typography,
+            { variant: 'h6', gutterBottom: true },
+            'Customer Data'
           ),
           React.createElement(
-            Button,
-            {
-              variant: 'contained',
-              color: 'primary',
-              onClick: function onClick() {
-                return checkoutProcess({ payload: checkoutProcessRequest.payload });
+            Grid,
+            null,
+            renderTextField({ name: 'full_name', label: 'Nama Customer', value: (checkoutProcessRequest.payload || {}).full_name, defaultValue: '-' }),
+            renderTextField({ name: 'phone_number', label: 'Nomor Telepon', value: (checkoutProcessRequest.payload || {}).phone_number, defaultValue: '-' }),
+            renderTextField({ name: 'email', label: 'Email', value: (checkoutProcessRequest.payload || {}).email, defaultValue: '-' }),
+            renderTextField({ name: 'shipping_address', label: 'Alamat Pengiriman', value: (checkoutProcessRequest.payload || {}).shipping_address, defaultValue: '-' }),
+            renderTextField({ name: 'shipping_amount', label: 'Biaya Pengiriman', value: (checkoutProcessRequest.payload || {}).shipping_amount, defaultValue: 0 })
+          ),
+          React.createElement(
+            'div',
+            { className: classes.buttons },
+            React.createElement(
+              Button,
+              { onClick: function onClick() {
+                  window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG;
+                }, className: classes.button },
+              'Product Catalog'
+            ),
+            React.createElement(
+              Button,
+              {
+                variant: 'contained',
+                color: 'primary',
+                onClick: function onClick() {
+                  return checkoutProcess({ payload: checkoutProcessRequest.payload });
+                },
+                className: classes.button
               },
-              className: classes.button
-            },
-            'Check Out'
+              'Check Out'
+            )
           )
         )
       )

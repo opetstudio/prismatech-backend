@@ -29,7 +29,7 @@ const fetchAllPrivileges = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailPrivilege = async (args, context) => {
@@ -44,7 +44,7 @@ const fetchDetailPrivilege = async (args, context) => {
     }
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doPrivilegeCheckboxSubmit = async (args, context) => {
@@ -122,7 +122,7 @@ const doPrivilegeCheckboxSubmit = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doCreatePrivilege = async (args, context) => {
@@ -167,7 +167,7 @@ const doCreatePrivilege = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doUpdatePrivilege = async (args, context) => {
@@ -186,7 +186,7 @@ const doUpdatePrivilege = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await Privilege.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeletePrivilege = async (args, context) => {
@@ -217,7 +217,7 @@ const doDeletePrivilege = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 

@@ -52,8 +52,8 @@ var useStyles = makeStyles(function (theme) {
 });
 // class App extends React.Component {
 function App() {
-  var tokoonlinesessionid = localStorage.getItem('tokoonlinesessionid');
-  if (!tokoonlinesessionid) localStorage.setItem('tokoonlinesessionid', '' + new Date().getTime());
+  var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
+  if (!tokoonlinesessionid) localStorage.setItem(TOKOONLINE_TOKOID, '' + new Date().getTime());
   var classes = useStyles();
 
   var _React$useState = React.useState({
@@ -102,7 +102,7 @@ function App() {
   var doAddToCart = function doAddToCart(_ref2) {
     var productId = _ref2.productId;
 
-    var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
+    var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -112,9 +112,10 @@ function App() {
       return response.json();
     }).then(function (response) {
       console.log('response===>', response);
-      // response.json()
+      if (response.errors) return alert(JSON.stringify(response.errors));
       return response.data.addToCart;
     }).then(function (data) {
+      if (!data) return;
       setAddToCartRequest({ error: data.error, isRequest: false });
       if (!data.error) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;else alert(data.error);
     });
