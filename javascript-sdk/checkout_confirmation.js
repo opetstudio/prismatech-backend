@@ -20,7 +20,9 @@ var _MaterialUI = MaterialUI,
     useTheme = _MaterialUI.useTheme,
     TextField = _MaterialUI.TextField,
     FormControlLabel = _MaterialUI.FormControlLabel,
-    Checkbox = _MaterialUI.Checkbox;
+    Checkbox = _MaterialUI.Checkbox,
+    Modal = _MaterialUI.Modal,
+    CardActionArea = _MaterialUI.CardActionArea;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
@@ -86,6 +88,14 @@ var useStyles = makeStyles(function (theme) {
     button: {
       marginTop: theme.spacing(3),
       marginLeft: theme.spacing(1)
+    },
+    paper: {
+      position: 'absolute',
+      width: 400,
+      backgroundColor: theme.palette.background.paper,
+      border: '2px solid #000',
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3)
     }
   };
 });
@@ -115,8 +125,8 @@ function setCookie(cname, cvalue, exdays) {
   document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/*';
 }
 function App() {
-  var tokoonlinesessionid = localStorage.getItem('tokoonlinesessionid');
-  if (!tokoonlinesessionid) localStorage.setItem('tokoonlinesessionid', '' + new Date().getTime());
+  var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
+  if (!tokoonlinesessionid) localStorage.setItem(TOKOONLINE_TOKOID, '' + new Date().getTime());
   var classes = useStyles();
   var theme = useTheme();
 
@@ -145,29 +155,37 @@ function App() {
   var _React$useState5 = React.useState({
     payload: {},
     error: null,
-    isRequest: false,
-    detailData: {}
+    isRequest: false
   }),
       _React$useState6 = _slicedToArray(_React$useState5, 2),
       checkoutProcessRequest = _React$useState6[0],
       setCheckoutProcessRequest = _React$useState6[1];
 
   var _React$useState7 = React.useState({
+    modalOpen: false,
     error: null,
     isRequest: false
   }),
       _React$useState8 = _slicedToArray(_React$useState7, 2),
-      removeFromCartRequest = _React$useState8[0],
-      setRemoveFromCartRequest = _React$useState8[1];
+      paymentProcessRequest = _React$useState8[0],
+      setPaymentProcessRequest = _React$useState8[1];
 
   var _React$useState9 = React.useState({
+    error: null,
+    isRequest: false
+  }),
+      _React$useState10 = _slicedToArray(_React$useState9, 2),
+      removeFromCartRequest = _React$useState10[0],
+      setRemoveFromCartRequest = _React$useState10[1];
+
+  var _React$useState11 = React.useState({
     error: null,
     detailData: null,
     isRequest: false
   }),
-      _React$useState10 = _slicedToArray(_React$useState9, 2),
-      purchaseOrderDetailRequest = _React$useState10[0],
-      setPurchaseOrderDetailRequest = _React$useState10[1];
+      _React$useState12 = _slicedToArray(_React$useState11, 2),
+      purchaseOrderDetailRequest = _React$useState12[0],
+      setPurchaseOrderDetailRequest = _React$useState12[1];
 
   var count = productCatalogRequest.count,
       pageCount = productCatalogRequest.pageCount,
@@ -182,7 +200,7 @@ function App() {
 
     //     // fetch product
     // Simple POST request with a JSON body using fetch
-    var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem('tokoonlinesessionid') + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
+    var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -201,7 +219,7 @@ function App() {
   var doAddToCart = function doAddToCart(_ref2) {
     var productId = _ref2.productId;
 
-    var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        amount,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
+    var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        amount,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -210,10 +228,10 @@ function App() {
     fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
       return response.json();
     }).then(function (response) {
-      console.log('response===>', response);
-      // response.json()
+      if (response.errors) return alert(JSON.stringify(response.errors));
       return response.data.addToCart;
     }).then(function (data) {
+      if (!data) return;
       setAddToCartRequest({ error: data.error, isRequest: false });
       if (data.error) alert(data.error);else setProductCatalogRequest({ reload: reload + 1 });
       // if (!data.error) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART
@@ -225,7 +243,7 @@ function App() {
 
     // alert(productId)
     // return
-    var graphqlData = 'mutation{removeFromCart(  toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){status,error,detail_data{_id,product_id{_id,name,\n              code,\n              price,\n              description,\n              image_id{\n                _id,\n                filename,\n                file_type\n              }\n            }\n            count,\n            device_id,\n            session_id,\n            toko_id{\n              slug\n            }\n          }\n        }\n      }';
+    var graphqlData = 'mutation{removeFromCart(  toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n              code,\n              price,\n              description,\n              image_id{\n                _id,\n                filename,\n                file_type\n              }\n            }\n            count,\n            device_id,\n            session_id,\n            toko_id{\n              slug\n            }\n          }\n        }\n      }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -236,19 +254,18 @@ function App() {
     }).then(function (response) {
       console.log('response===>', response);
       // response.json()
+      if (response.errors) return alert(JSON.stringify(response.errors));
       return response.data.removeFromCart;
     }).then(function (data) {
+      if (!data) return;
       setRemoveFromCartRequest({ error: data.error, isRequest: false });
 
       if (data.error) alert(data.error);else setProductCatalogRequest({ reload: reload + 1 });
     });
   };
-  var checkoutProcess = function checkoutProcess(_ref4) {
-    var payload = _ref4.payload;
-
-    var graphqlData = 'mutation\n    {\n      checkoutProcess(\n            session_id: "' + localStorage.getItem('tokoonlinesessionid') + '",\n            device_id: "xxxx",\n            full_name: "' + payload.full_name + '",\n            phone_number: "' + payload.phone_number + '",\n            email: "' + payload.email + '",\n            cart_id: ' + JSON.stringify(productCatalogRequest.listData.map(function (v) {
-      return '' + v._id;
-    })) + ',\n            toko_id: "' + TOKOONLINE_TOKOID + '",\n            shipping_address: "' + payload.shipping_address + '",\n            shipping_amount: ' + payload.shipping_amount + '\n          )\n      {\n        status,\n        error,\n        detail_data\n        {\n          _id\n        }\n      }\n    }';
+  var paymentProcess = function paymentProcess() {
+    console.log('paymentProcess');
+    var graphqlData = 'mutation\n    {\n      paymentProcess(\n            session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"\n          )\n      {\n        status,\n        error,\n        payment_page_url,\n        debitin_paymentpage_backend_baseurl\n      }\n    }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -258,13 +275,16 @@ function App() {
       return response.json();
     }).then(function (response) {
       console.log('response===>', response);
-      // response.json()
-      return response.data.checkoutProcess;
+      if (response.errors) return alert(JSON.stringify(response.errors));
+      return response.data.paymentProcess;
     }).then(function (data) {
-      setCheckoutProcessRequest({ error: data.error, isRequest: false, payload: checkoutProcessRequest.payload });
+      if (!data) return;
+      setPaymentProcessRequest({ error: data.error, isRequest: false, modalOpen: false });
 
-      if (data.error) alert(data.error);else window.location.href = TOKOONLINE_PAGE_CHECKOUT_CONFIRMATION + '#' + data.detail_data._id;
-      // console.log('data=====>' + data)
+      console.log('data=====>' + data.error);
+      if (data.error) return alert(data.error);
+      localStorage.setItem(TOKOONLINE_TOKOID, '' + new Date().getTime());
+      window.location.href = data.debitin_paymentpage_backend_baseurl + data.payment_page_url;
     });
   };
 
@@ -273,7 +293,7 @@ function App() {
   }, [doFetchData, pageIndex, pageSize, reload]);
 
   var doFetchDetailDataPo = React.useCallback(function () {
-    var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
+    var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
     var requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -286,35 +306,7 @@ function App() {
       // response.json()
       return response.data.getDetailTokoPoBySessionId;
     }).then(function (data) {
-      setPurchaseOrderDetailRequest({ detailData: data.data_detail, isRequest: false, error: null });
-      setCheckoutProcessRequest({
-        payload: {
-          full_name: (data.data_detail || {}).full_name,
-          email: (data.data_detail || {}).email,
-          phone_number: (data.data_detail || {}).phone_number,
-          shipping_address: (data.data_detail || {}).shipping_address,
-          shipping_amount: (data.data_detail || {}).shipping_amount
-        }
-      });
-    });
-  }, []);
-  React.useEffect(function () {
-    doFetchDetailDataPo();
-  }, [doFetchDetailDataPo]);
-  var paymentProcess = React.useCallback(function () {
-    var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem('tokoonlinesessionid') + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
-    var requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: graphqlData })
-    };
-    fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
-      return response.json();
-    }).then(function (response) {
-      console.log('getDetailTokoPoBySessionId response===>', response);
-      // response.json()
-      return response.data.getDetailTokoPoBySessionId;
-    }).then(function (data) {
+      if (!data) return;
       setPurchaseOrderDetailRequest({ detailData: data.data_detail, isRequest: false, error: null });
       setCheckoutProcessRequest({
         payload: {
@@ -331,11 +323,15 @@ function App() {
     doFetchDetailDataPo();
   }, [doFetchDetailDataPo]);
 
-  var ThumbsView = function ThumbsView(_ref5) {
-    var productImage = _ref5.productImage,
-        productName = _ref5.productName,
-        productPrice = _ref5.productPrice,
-        index = _ref5.index;
+  React.useEffect(function () {
+    doFetchDetailDataPo();
+  }, [doFetchDetailDataPo]);
+
+  var ThumbsView = function ThumbsView(_ref4) {
+    var productImage = _ref4.productImage,
+        productName = _ref4.productName,
+        productPrice = _ref4.productPrice,
+        index = _ref4.index;
     return React.createElement(
       Grid,
       { item: true, key: index, xs: 12, sm: 6, md: 4 },
@@ -376,14 +372,14 @@ function App() {
       )
     );
   };
-  var ListView = function ListView(_ref6) {
-    var productImage = _ref6.productImage,
-        productName = _ref6.productName,
-        productPrice = _ref6.productPrice,
-        index = _ref6.index,
-        amount = _ref6.amount,
-        count = _ref6.count,
-        productId = _ref6.productId;
+  var ListView = function ListView(_ref5) {
+    var productImage = _ref5.productImage,
+        productName = _ref5.productName,
+        productPrice = _ref5.productPrice,
+        index = _ref5.index,
+        amount = _ref5.amount,
+        count = _ref5.count,
+        productId = _ref5.productId;
     return React.createElement(
       Grid,
       { item: true, key: index, xs: 12, sm: 12, md: 12 },
@@ -432,13 +428,31 @@ function App() {
 
   var fullName = (purchaseOrderDetailRequest.detailData || {}).full_name;
   console.log('purchaseOrderDetailRequest.detailData======>', fullName);
+  var renderTextField = function renderTextField(_ref6) {
+    var name = _ref6.name,
+        label = _ref6.label,
+        value = _ref6.value,
+        defaultValue = _ref6.defaultValue;
+    return React.createElement(
+      Grid,
+      { item: true, xs: 12, sm: 6 },
+      React.createElement(TextField, {
+        id: name,
+        label: label,
+        fullWidth: true,
+        defaultValue: value || defaultValue,
+        value: value,
+        disabled: true
+      })
+    );
+  };
   return React.createElement(
     'div',
     null,
     React.createElement(CssBaseline, null),
     React.createElement(
       Grid,
-      { container: true, spacing: 4 },
+      { container: true },
       React.createElement(
         Grid,
         { item: true, xs: 12, sm: 12, md: 12, lg: 6 },
@@ -458,103 +472,101 @@ function App() {
         Grid,
         { item: true, xs: 12, sm: 12, md: 12, lg: 6 },
         React.createElement(
-          Typography,
-          { variant: 'h6', gutterBottom: true },
-          'Shipping address'
-        ),
-        React.createElement(
-          Grid,
-          { container: true, spacing: 3 },
-          React.createElement(
-            Grid,
-            { item: true, xs: 12, sm: 6 },
-            React.createElement(TextField, {
-              id: 'full_name',
-              label: 'full_name',
-              defaultValue: '-',
-              value: (checkoutProcessRequest.payload || {}).full_name,
-              disabled: true
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'phone_number',
-              name: 'phone_number',
-              label: 'phone_number',
-              fullWidth: true,
-              defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).phone_number,
-              disabled: true
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'email',
-              name: 'email',
-              label: 'email',
-              fullWidth: true,
-              disabled: true,
-              defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).email
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'shipping_address',
-              name: 'shipping_address',
-              label: 'shipping_address',
-              fullWidth: true,
-              disabled: true,
-              defaultValue: 'Default Value',
-              value: (checkoutProcessRequest.payload || {}).shipping_address
-            })
-          ),
-          React.createElement(
-            Grid,
-            { item: true, xs: 12 },
-            React.createElement(TextField, {
-              required: true,
-              id: 'shipping_amount',
-              name: 'shipping_amount',
-              label: 'shipping_amount',
-              fullWidth: true,
-              disabled: true,
-              defaultValue: '0',
-              value: (checkoutProcessRequest.payload || {}).shipping_amount
-            })
-          )
-        ),
-        React.createElement(
           'div',
-          { className: classes.buttons },
+          { style: { padding: 10 } },
           React.createElement(
-            Button,
-            { onClick: function onClick() {
-                window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
-              }, className: classes.button },
-            'Shopping Cart'
+            Typography,
+            { variant: 'h6', gutterBottom: true },
+            'Customer Data'
           ),
           React.createElement(
-            Button,
-            {
-              variant: 'contained',
-              color: 'primary',
-              onClick: function onClick() {
-                return paymentProcess({ payload: checkoutProcessRequest.payload });
+            Grid,
+            null,
+            renderTextField({ name: 'full_name', label: 'Customer Name', value: (checkoutProcessRequest.payload || {}).full_name, defaultValue: '-' }),
+            renderTextField({ name: 'phone_number', label: 'Phone Number', value: (checkoutProcessRequest.payload || {}).phone_number, defaultValue: '-' }),
+            renderTextField({ name: 'email', label: 'Email', value: (checkoutProcessRequest.payload || {}).email, defaultValue: '-' }),
+            renderTextField({ name: 'shipping_address', label: 'Alamat Pengiriman', value: (checkoutProcessRequest.payload || {}).shipping_address, defaultValue: '-' }),
+            renderTextField({ name: 'shipping_amount', label: 'Biaya Pengiriman', value: (checkoutProcessRequest.payload || {}).shipping_amount, defaultValue: 0 })
+          ),
+          React.createElement(
+            'div',
+            { className: classes.buttons },
+            React.createElement(
+              Button,
+              { onClick: function onClick() {
+                  window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
+                }, className: classes.button },
+              'Shopping Cart'
+            ),
+            React.createElement(
+              Button,
+              {
+                variant: 'contained',
+                color: 'primary',
+                onClick: function onClick() {
+                  return setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, { modalOpen: true }));
+                },
+                className: classes.button
               },
-              className: classes.button
-            },
-            'Payment'
+              'Payment'
+            )
           )
+        )
+      )
+    ),
+    React.createElement(
+      Modal,
+      {
+        open: paymentProcessRequest.modalOpen,
+        onClose: function onClose() {
+          return setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, { modalOpen: false }));
+        },
+        'aria-labelledby': 'simple-modal-title',
+        'aria-describedby': 'simple-modal-description'
+      },
+      React.createElement(
+        'div',
+        {
+          style: {
+            top: 50 + '%',
+            left: 50 + '%',
+            transform: 'translate(-' + 50 + '%, -' + 50 + '%)'
+          }, className: classes.paper
+        },
+        React.createElement(
+          'h2',
+          { id: 'simple-modal-title' },
+          'Konfirmasi'
+        ),
+        React.createElement(
+          'p',
+          { id: 'simple-modal-description' },
+          'Anda akan melakukan pembayaran. Isi keranjang belanja tidak bisa lagi dirubah.'
+        ),
+        React.createElement(
+          'p',
+          null,
+          'Tolong dicatat nomor transaksi anda untuk melakukan pengecekan status transaksi:',
+          React.createElement('br', null),
+          React.createElement(
+            'b',
+            null,
+            localStorage.getItem(TOKOONLINE_TOKOID)
+          )
+        ),
+        React.createElement(
+          Button,
+          { type: 'button', size: 'small', color: 'primary', onClick: function onClick() {
+              return setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, { modalOpen: false }));
+            } },
+          'Cancel'
+        ),
+        React.createElement(
+          Button,
+          { type: 'button', size: 'small', color: 'primary', onClick: function onClick() {
+              return paymentProcess();
+            } },
+          'Ok'
         )
       )
     )

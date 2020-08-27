@@ -47,7 +47,8 @@ const paymentProcess = {
     fields: () => ({
       status: { type: GraphQLInt },
       error: { type: GraphQLString },
-      payment_page_url: { type: GraphQLString }
+      payment_page_url: { type: GraphQLString },
+      debitin_paymentpage_backend_baseurl: { type: GraphQLString }
     })
   }),
   args: {

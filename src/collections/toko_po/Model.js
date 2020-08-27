@@ -6,6 +6,9 @@ const schema = new mongoose.Schema({
   payment_page_url: {
     type: String
   },
+  debitin_paymentpage_backend_baseurl: {
+    type: String
+  },
   action: {
     type: String
   },

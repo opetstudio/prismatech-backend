@@ -26,7 +26,7 @@ const fetchAllRoles = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailRole = async (args, context) => {
@@ -38,7 +38,7 @@ const fetchDetailRole = async (args, context) => {
     const result = await Role.findOne({ _id: args.id }).populate({ path: 'created_by' }).populate({ path: 'updated_by' }).populate({ path: 'privilege_id' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doCreateRole = async (args, context) => {
@@ -57,7 +57,7 @@ const doCreateRole = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await Role.create(data) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doUpdateRole = async (args, context) => {
@@ -78,7 +78,7 @@ const doUpdateRole = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: updateRoleResp }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteRole = async (args, context) => {
@@ -91,7 +91,7 @@ const doDeleteRole = async (args, context) => {
     return { status: 200, success: 'Successfully delete Data', detail_data: await Role.remove({ _id: args._id, created_by: userId }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 
