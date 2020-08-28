@@ -24,11 +24,14 @@ const fields = {
   _id: { type: GraphQLID },
   owner: { type: UserType },
   name: { type: GraphQLString },
+  slug: { type: GraphQLString },
   description: { type: GraphQLString },
   website: { type: GraphQLString },
   facebook: { type: GraphQLString },
   instagram: { type: GraphQLString },
   youtube: { type: GraphQLString },
+  plink_merchant_id: { type: GraphQLString },
+  plink_merchant_key_id: { type: GraphQLString },
   status: { type: GraphQLString }
 }
 module.exports = {
@@ -37,21 +40,27 @@ module.exports = {
   updateArgs: {
     _id: { type: GraphQLID },
     name: { type: GraphQLString },
+    slug: { type: GraphQLString },
     description: { type: GraphQLString },
     website: { type: GraphQLString },
     facebook: { type: GraphQLString },
     instagram: { type: GraphQLString },
     youtube: { type: GraphQLString },
+    plink_merchant_id: { type: GraphQLString },
+    plink_merchant_key_id: { type: GraphQLString },
     status: { type: GraphQLString }
   },
   createArgs: {
     _id: { type: GraphQLID },
     name: { type: GraphQLString },
+    slug: { type: GraphQLString },
     description: { type: GraphQLString },
     website: { type: GraphQLString },
     facebook: { type: GraphQLString },
     instagram: { type: GraphQLString },
     youtube: { type: GraphQLString },
+    plink_merchant_id: { type: GraphQLString },
+    plink_merchant_key_id: { type: GraphQLString },
     status: { type: GraphQLString }
   },
   fields: {

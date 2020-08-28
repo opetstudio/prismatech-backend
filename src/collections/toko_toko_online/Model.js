@@ -7,6 +7,10 @@ const schema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  slug: {
+    type: String,
+    unique: true
+  },
   website: {
     type: String
   },
@@ -17,6 +21,12 @@ const schema = new mongoose.Schema({
     type: String
   },
   youtube: {
+    type: String
+  },
+  plink_merchant_id: {
+    type: String
+  },
+  plink_merchant_key_id: {
     type: String
   },
   description: {

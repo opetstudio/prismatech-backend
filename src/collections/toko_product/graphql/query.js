@@ -1,6 +1,7 @@
 const graphql = require('graphql')
 const GraphQLLong = require('graphql-type-long')
 const Type = require('./type')
+const { TokoCartType } = require('../../toko_cart/graphql/type')
 const Manifest = require('../manifest')
 const Services = require('../services')
 
@@ -51,6 +52,40 @@ const getDetailData = {
     return Services['fetchDetail' + Manifest.entity](args, context)
   }
 }
+const getDetailDataByCode = {
+  type: new GraphQLObjectType({
+    name: 'getDetail' + Manifest.entity + 'ByCodeResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      data_detail: { type: Type[Manifest.entity + 'Type'] }
+    })
+  }),
+  args: {
+    code: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.getDetailDataByCode(args, context)
+  }
+}
+const getDetailDataJoinCartByCode = {
+  type: new GraphQLObjectType({
+    name: 'getDetail' + Manifest.entity + 'JoinCartByCodeResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      data_detail: { type: Type[Manifest.entity + 'Type'] },
+      data_detail_in_cart: { type: TokoCartType }
+    })
+  }),
+  args: {
+    code: { type: GraphQLString },
+    session_id: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.getDetailDataJoinCartByCode(args, context)
+  }
+}
 
 // no need login
 const getAllDataByTokoId = {
@@ -99,6 +134,8 @@ const getAllDataByCategoryId = {
 module.exports = {
   ['getAll' + Manifest.entity + 's']: getAllData,
   ['getDetail' + Manifest.entity]: getDetailData,
+  ['getDetail' + Manifest.entity + 'ByCode']: getDetailDataByCode,
+  ['getDetail' + Manifest.entity + 'JoinCartByCode']: getDetailDataJoinCartByCode,
   ['getAll' + Manifest.entity + 's' + 'ByTokoId']: getAllDataByTokoId,
   ['getAll' + Manifest.entity + 's' + 'ByCategoryId']: getAllDataByCategoryId
 }

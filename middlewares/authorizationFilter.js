@@ -6,7 +6,7 @@ const _ = require('lodash')
 
 const authorizationFilter = async (resolve, parent, args, context, info) => {
   console.log('authorizationFilter ===>', info.fieldName)
-  console.log('JSESSIONID===>', context.req.cookies.JSESSIONID)
+  // console.log('JSESSIONID===>', context.req.cookies.JSESSIONID)
   // console.log('context.req.headers===>', context.req.headers)
   const { accesstoken } = context.req.headers
   const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))

@@ -1,0 +1,33 @@
+<div class="col-12 col-sm-6 col-md-3 d-flex align-items-stretch">
+  <div class="card bg-light">
+    <div class="card-header text-muted border-bottom-0">
+      <%=data.name%>
+    </div>
+    <div class="card-body p-0">
+      <img src="/renderfile/<%=data.image_id.filename%>.<%=data.image_id.file_type%>" alt="user-avatar" width="100%" class="product-image" style="margin-top:auto;margin-bottom:auto;vertical-align: middle;">
+    </div>
+    <div class="card-footer">
+      <div class="row">
+        <div class="col-md-12">
+          <ul class="ml-4 mb-0 fa-ul text-muted">
+            <!-- <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> <%=data.description%></li> -->
+            <li class="small"><span class="fa-li"><i class="fas fa-lg fa-money"></i></span> <%=data.price%></li>
+          </ul>
+          <div class="text-right">
+            <!-- <a href="#" class="btn btn-sm bg-teal">
+              <i class="fas fa-comments"></i>
+            </a> -->
+            <!-- <a href="#" class="btn btn-sm btn-primary">
+              Add to cart
+            </a> -->
+            <a href="/product-detail/<%=tokoSlug%>/<%=data.code%>" class="btn btn-sm btn-primary">
+              <!-- <i class="fas fa-user"></i> -->
+              Product Detail
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

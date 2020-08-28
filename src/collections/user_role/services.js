@@ -31,7 +31,7 @@ const fetchAllUserRoles = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailUserRole = async (args, context) => {
@@ -47,7 +47,7 @@ const fetchDetailUserRole = async (args, context) => {
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailUserRoleByMyUserId = async (args, context) => {
@@ -59,7 +59,7 @@ const fetchDetailUserRoleByMyUserId = async (args, context) => {
     const result = (await fetchDetailUserRoleByUserId(userId) || {}).data_detail
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailUserRoleByUserId = async (userId) => {
@@ -72,7 +72,7 @@ const fetchDetailUserRoleByUserId = async (userId) => {
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doCreateUserRole = async (args, context, { opts }) => {
@@ -92,7 +92,7 @@ const doCreateUserRole = async (args, context, { opts }) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await (await UserRole.create(data, opts)).populate({ path: 'user_id' }).populate({ path: 'role_id', populate: { path: 'privilege_id' } }).execPopulate() }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doUpdateUserRole = async (args, context) => {
@@ -111,7 +111,7 @@ const doUpdateUserRole = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await (await UserRole.findOneAndUpdate({ _id: args._id, created_by: userId }, data)).populate({ path: 'user_id' }).populate({ path: 'role_id', populate: { path: 'privilege_id' } }).populate({ path: 'created_by' }).populate({ path: 'updated_by' }).execPopulate() }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteUserRole = async (args, context) => {
@@ -123,7 +123,7 @@ const doDeleteUserRole = async (args, context) => {
     return { status: 200, success: 'Successfully delete Data', detail_data: await UserRole.remove({ _id: args._id, created_by: userId }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 

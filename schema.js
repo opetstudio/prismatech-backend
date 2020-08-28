@@ -26,7 +26,7 @@ const { getAllUserRoles, getDetailUserRole, getDetailUserRoleByMyUserId } = requ
 const { createUserRole, deleteUserRole, updateUserRole } = require('./src/collections/user_role/graphql/mutation')
 
 // toko product
-const { getAllTokoProducts, getDetailTokoProduct, getAllTokoProductsByTokoId, getAllTokoProductsByCategoryId } = require('./src/collections/toko_product/graphql/query')
+const { getAllTokoProducts, getDetailTokoProduct, getDetailTokoProductByCode, getDetailTokoProductJoinCartByCode, getAllTokoProductsByTokoId, getAllTokoProductsByCategoryId } = require('./src/collections/toko_product/graphql/query')
 const { createTokoProduct, deleteTokoProduct, updateTokoProduct } = require('./src/collections/toko_product/graphql/mutation')
 
 // tag
@@ -47,10 +47,10 @@ const { createTokoTeam, deleteTokoTeam, updateTokoTeam } = require('./src/collec
 
 // toko cart
 const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = require('./src/collections/toko_cart/graphql/query')
-const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart } = require('./src/collections/toko_cart/graphql/mutation')
+const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart, removeFromCart } = require('./src/collections/toko_cart/graphql/mutation')
 
 // toko po
-// const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = require('./src/collections/toko_cart/graphql/query')
+const { getDetailTokoPoBySessionId, getAllTokoPos, getDetailTokoPo } = require('./src/collections/toko_po/graphql/query')
 const { checkoutProcess, paymentProcess } = require('./src/collections/toko_po/graphql/mutation')
 
 const {
@@ -89,7 +89,8 @@ const RootQuery = new GraphQLObjectType({
     // toko product
     getAllTokoProducts,
     getDetailTokoProduct,
-
+    getDetailTokoProductByCode,
+    getDetailTokoProductJoinCartByCode,
     // tag
     getAllTags,
     getDetailTag,
@@ -109,7 +110,11 @@ const RootQuery = new GraphQLObjectType({
     // toko cart
     getAllTokoCarts,
     getDetailTokoCart,
-    getAllTokoCartsBySessionId
+    getAllTokoCartsBySessionId,
+    // toko po
+    getDetailTokoPoBySessionId,
+    getAllTokoPos,
+    getDetailTokoPo
   }
 })
 
@@ -175,6 +180,7 @@ const Mutation = new GraphQLObjectType({
     deleteTokoCart,
     updateTokoCart,
     addToCart,
+    removeFromCart,
     // toko po
     checkoutProcess,
     paymentProcess

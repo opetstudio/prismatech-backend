@@ -37,7 +37,7 @@ const fetchAllData = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const getAllDataByTokoId = async (args, context) => {
@@ -70,7 +70,7 @@ const getAllDataByTokoId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailData = async (args, context) => {
@@ -86,7 +86,7 @@ const fetchDetailData = async (args, context) => {
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doCreateData = async (args, context) => {
@@ -122,7 +122,7 @@ const doCreateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doUpdateData = async (args, context) => {
@@ -143,7 +143,7 @@ const doUpdateData = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await EntityModel.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteData = async (args, context) => {
@@ -165,7 +165,7 @@ const doDeleteData = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 

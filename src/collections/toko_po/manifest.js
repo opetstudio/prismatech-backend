@@ -23,9 +23,11 @@ const commonFields = {
 
 const fields = {
   _id: { type: GraphQLID },
+  action: { type: GraphQLString },
   payment_page_url: { type: GraphQLString },
   full_name: { type: GraphQLString },
   phone_number: { type: GraphQLString },
+  invoice_code: { type: GraphQLString },
   email: { type: GraphQLString },
   session_id: { type: GraphQLString },
   device_id: { type: GraphQLString },
@@ -45,10 +47,12 @@ module.exports = {
     device_id: { type: GraphQLString },
     session_id: { type: GraphQLString },
     full_name: { type: GraphQLString },
+    invoice_code: { type: GraphQLString },
     phone_number: { type: GraphQLString },
     email: { type: GraphQLString },
     cart_id: { type: GraphQLList(GraphQLString) },
     toko_id: { type: GraphQLString },
+    toko_slug: { type: GraphQLString },
     shipping_address: { type: GraphQLString },
     shipping_amount: { type: GraphQLInt }
   },
@@ -56,10 +60,12 @@ module.exports = {
     device_id: { type: GraphQLString },
     session_id: { type: GraphQLString },
     full_name: { type: GraphQLString },
+    invoice_code: { type: GraphQLString },
     phone_number: { type: GraphQLString },
     email: { type: GraphQLString },
     cart_id: { type: GraphQLList(GraphQLString) },
     toko_id: { type: GraphQLString },
+    toko_slug: { type: GraphQLString },
     shipping_address: { type: GraphQLString },
     shipping_amount: { type: GraphQLInt }
   },

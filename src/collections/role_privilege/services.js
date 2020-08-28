@@ -28,7 +28,7 @@ const fetchAllRoleprivilegesByRoleId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailRoleprivilege = async (args, context) => {
@@ -40,7 +40,7 @@ const fetchDetailRoleprivilege = async (args, context) => {
     const result = await Roleprivilege.findOne({ _id: args.id, created_by: userId }).populate({ path: 'created_by' }).populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doCreateRoleprivilege = async (args, context, { opts }) => {
@@ -58,7 +58,7 @@ const doCreateRoleprivilege = async (args, context, { opts }) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await Roleprivilege.create(data, opts) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doUpdateRoleprivilege = async (args, context) => {
@@ -77,7 +77,7 @@ const doUpdateRoleprivilege = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await Roleprivilege.findOneAndUpdate({ _id: args._id, created_by: userId }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteRoleprivilege = async (args, context) => {
@@ -89,7 +89,7 @@ const doDeleteRoleprivilege = async (args, context) => {
     return { status: 200, success: 'Successfully delete Data', detail_data: await Roleprivilege.remove({ _id: args._id, created_by: userId }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteRoleprivilegeByPrivilegeId = async ({ opts, args }) => {
@@ -99,7 +99,7 @@ const doDeleteRoleprivilegeByPrivilegeId = async ({ opts, args }) => {
     return { status: 200, success: 'Successfully delete Data', detail_data: {} }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 

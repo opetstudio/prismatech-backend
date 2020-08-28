@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const config = require('config')
 const request = require('request')
+const { path } = require('ramda')
 // var http = require('http')
 // var querystring = require('querystring')
 const _ = require('lodash')
@@ -9,25 +10,57 @@ const User = require('../user/Model')
 const entity = Manifest.entity
 const EntityModel = require('./Model')
 const TokoProductModel = require('../toko_product/Model')
+const TokoTeamModel = require('../toko_team/Model')
 const TokoCartModel = require('../toko_cart/Model')
+const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const { PostCode } = require('../../utils/services')
 // import { create } from 'apisauce'
 const Apisauce = require('apisauce')
 const fetchAllData = async (args, context) => {
   try {
     const filter = {}
-    const $and = []
-    if (!_.isEmpty($and)) filter.$and = $and
-    // const { accesstoken } = context.req.headers
-    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
-    // const { user_id: userId } = bodyAt
-    // if (!_.isEmpty(args.string_to_search)) {
-    //   filter.$and.push({
-    //     $or: [
-    //       { name: { $regex: args.string_to_search, $options: 'i' } }
-    //     ]
-    //   })
-    // }
+    filter.$and = []
+    const { accesstoken } = context.req.headers
+    const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    const { user_id: userId } = bodyAt
+    if (!_.isEmpty(args.string_to_search)) {
+      filter.$and.push({
+        $or: [
+          { full_name: { $regex: args.string_to_search, $options: 'i' } },
+          { email: { $regex: args.string_to_search, $options: 'i' } },
+          { action: { $regex: args.string_to_search, $options: 'i' } },
+          { session_id: { $regex: args.string_to_search, $options: 'i' } },
+          { phone_number: { $regex: args.string_to_search, $options: 'i' } }
+        ]
+      })
+    }
+
+    // check authorization
+    let isEligible = false
+    const $or = []
+    const myListToko = await TokoTeamModel.find({ user_id: userId })
+    if (myListToko) {
+      console.log('myListToko=>', myListToko)
+      myListToko.forEach(v => {
+        $or.push({ toko_id: '' + v.toko_id })
+      })
+      isEligible = true
+    }
+    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    if (myOwnListToko) {
+      myOwnListToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+      isEligible = true
+    }
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    if (_.isEmpty(filter.$and)) isEligible = false
+    if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
+
     const result = await EntityModel.find(filter)
       .sort({ updated_at: 'desc' })
       .skip(args.page_index * args.page_size)
@@ -40,14 +73,14 @@ const fetchAllData = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchAllDataBySessionId = async (args, context) => {
   try {
     const filter = {}
     const $and = []
-    const sessionId = args.session_id || context.req.cookies.JSESSIONID
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
     $and.push({ session_id: sessionId })
     if (!_.isEmpty($and)) filter.$and = $and
     // const { accesstoken } = context.req.headers
@@ -64,7 +97,7 @@ const fetchAllDataBySessionId = async (args, context) => {
       .sort({ updated_at: 'desc' })
       .skip(args.page_index * args.page_size)
       .limit(args.page_size)
-      .populate({ path: 'product_id' })
+      .populate({ path: 'cart_id', populate: { path: 'product_id' } })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     const count = await EntityModel.countDocuments(filter)
@@ -72,7 +105,7 @@ const fetchAllDataBySessionId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const fetchDetailData = async (args, context) => {
@@ -81,12 +114,29 @@ const fetchDetailData = async (args, context) => {
     // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     // const { user_id: userId } = bodyAt
     const result = await EntityModel.findOne({ _id: args.id })
-      .populate({ path: 'product_id' })
+      .populate({ path: 'cart_id', populate: { path: 'product_id' } })
+      .populate({ path: 'toko_id' })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
+  }
+}
+const getDetailDataBySessionId = async (args, context) => {
+  try {
+    // const { accesstoken } = context.req.headers
+    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    // const { user_id: userId } = bodyAt
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
+    const result = await EntityModel.findOne({ session_id: sessionId })
+      .populate({ path: 'cart_id', populate: { path: 'product_id' } })
+      .populate({ path: 'toko_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
+    return { status: 200, success: 'Successfully get Data', data_detail: result }
+  } catch (err) {
+    return { status: 400, error: err.message }
   }
 }
 const doCreateData = async (args, context) => {
@@ -106,7 +156,7 @@ const doCreateData = async (args, context) => {
     const data = args
     // data.created_by = userDetail._id
     // data.updated_by = userDetail._id
-    data.session_id = args.session_id || context.req.cookies.JSESSIONID
+    data.session_id = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
     data.created_at = now
     data.updated_at = now
     console.log('dataCart====>', data)
@@ -132,7 +182,7 @@ const doCreateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const checkoutProcess = async (args, context) => {
@@ -141,6 +191,15 @@ const checkoutProcess = async (args, context) => {
   try {
     const opts = { session }
     const now = Date.now()
+
+    // validasi
+    if (!args.full_name || args.full_name === '-' || args.full_name === 'undefined') throw new Error('Data Nama Customer masih kosong')
+    if (!args.phone_number || args.phone_number === '-' || args.phone_number === 'undefined') throw new Error('Data Nomor Telepon masih kosong')
+    if (!args.email || args.email === '-' || args.email === 'undefined') throw new Error('Data Email masih kosong')
+    if (!args.shipping_address || args.shipping_address === '-' || args.shipping_address === 'undefined') throw new Error('Data Alamat Pengiriman masih kosong')
+    if (!args.shipping_amount || args.shipping_amount === '0' || args.shipping_amount === 'undefined') throw new Error('Data Biaya Pengiriman masih kosong')
+    if (_.isEmpty(args.cart_id) || args.cart_id === 'undefined') throw new Error('Keranjang belanja masih kosong')
+
     const { accesstoken } = context.req.headers
     let myUserId
     try {
@@ -150,29 +209,45 @@ const checkoutProcess = async (args, context) => {
     } catch (e) {
 
     }
+    const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
 
     // const userDetail = await User.findById(userId)
+    const tokoSlug = args.toko_slug
+    let tokoId = args.toko_id
+    let tokoDetail = {}
+    if (_.isEmpty(tokoId)) {
+      // get toko detail by toko slug
+      tokoDetail = await TokoTokoOnlineModel.findOne({ slug: tokoSlug })
+      tokoId = '' + tokoDetail._id
+    }
 
     // get all cart
-    const allOpenCart = await TokoCartModel.find({ session_id: args.session_id, toko_id: args.toko_id, status: 'open' })
+    const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: tokoId, status: 'open' })
     if (_.isEmpty(allOpenCart)) throw new Error('Checkout Failed. The cart is empty')
+    console.log('allOpenCart===>', allOpenCart)
 
     const totalProductAmount = allOpenCart.map(v => v.amount).reduce((a, b) => a + b, 0) // args.total_amount
+    console.log('totalProductAmount===>', totalProductAmount)
 
     const dataPo = {}
     dataPo.full_name = args.full_name
     dataPo.phone_number = args.phone_number
     dataPo.email = args.email
-    dataPo.session_id = args.session_id
+    dataPo.session_id = sessionId
     dataPo.device_id = args.device_id
     dataPo.shipping_address = args.shipping_address
-    dataPo.total_product_amount = totalProductAmount
-    dataPo.total_amount = totalProductAmount + args.shipping_amount // args.total_amount
     dataPo.shipping_amount = args.shipping_amount
+    dataPo.total_product_amount = totalProductAmount
+    dataPo.total_amount = totalProductAmount
+    if (!_.isEmpty(args.shipping_amount)) {
+      dataPo.total_amount = totalProductAmount + args.shipping_amount // args.total_amount
+      dataPo.shipping_amount = args.shipping_amount
+    }
     dataPo.cart_id = allOpenCart.map(v => '' + v._id)
-    dataPo.toko_id = args.toko_id
+    dataPo.toko_id = tokoId
     if (myUserId) dataPo.user_id = myUserId
     dataPo.action = 'checkoutProcess'
+    dataPo.invoice_code = '' + now
     dataPo.created_at = now
     dataPo.updated_at = now
     dataPo.created_by = myUserId || null
@@ -186,6 +261,7 @@ const checkoutProcess = async (args, context) => {
     const set = {}
     set.$set = dataPo
     // if (!args.count) set.$inc = { count: 1 }
+    console.log('set===>', set)
 
     // validate product & toko id
     const upsertResponse = await EntityModel.findOneAndUpdate(
@@ -206,14 +282,14 @@ const checkoutProcess = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const paymentProcess = async (args, context) => {
-  // const session = await EntityModel.db.startSession()
-  // session.startTransaction()
+  const session = await EntityModel.db.startSession()
+  session.startTransaction()
   try {
-    // const opts = { session }
+    const opts = { session }
     const now = Date.now()
     // const { accesstoken } = context.req.headers
     let myUserId
@@ -226,32 +302,46 @@ const paymentProcess = async (args, context) => {
     }
 
     // toko po detail
-    const tokoPoDetail = await EntityModel.findOne({ _id: args._id, session_id: args.session_id })
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Purchase Failed.')
 
-    var bodyHit = {
-      transmission_date_time: '2019-10-09 08:24:57.100 +0700',
-      merchant_key_id: '872a02ad-b2a8-46eb-8f08-835169bc470c',
-      merchant_id: '000000070070071',
-      merchant_ref_no: 'INV12345673',
-      backend_callback_url: 'http://elevenia.com/backend',
-      frontend_callback_url: 'http://elevenia.com/frontend',
-      user_id: 'nofrets.poai11@gmail.com',
-      user_contact: '089634679074',
-      user_name: 'Nofrets P',
-      user_email: 'nofrets.poai1@gmail.com',
-      fds_user_device_id: 'samsungS9Plus',
-      fds_user_ip_address: '127.0.0.1',
-      fds_product_details: '[{"item_code":"kaos123","item_title":"kaos","quantity":2,"total":"50000", "currency": "IDR"},{"item_code":"kaos345","item_title":"sepatu adidas copa","quantity":4,"total":"400000", "currency": "IDR"}]',
-      fds_shipping_details: '{"address":"jl.sanusi","telephoneNumber":"089634679074","handphoneNumber":"089634679074"}',
-      transaction_amount: 60000,
-      transaction_date_time: '2019-10-09 08:24:57.100 +0700',
-      transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "pembayaran hunian, no unit 125"}]'
-    }
+    // toko online detail
+    const tokoDetail = await TokoTokoOnlineModel.findById(tokoPoDetail.toko_id)
+    if (_.isEmpty(tokoDetail)) throw new Error('Gagal Purchase. Data toko tidak ditemukan')
+    if (_.isEmpty(tokoDetail.plink_merchant_key_id)) throw new Error('Gagal Purchase. Plink Merchant Key Id masih kosong. Hubungi pemilik toko.')
+    if (_.isEmpty(tokoDetail.plink_merchant_id)) throw new Error('Gagal Purchase. Plink Merchant Id masih kosong. Hubungi pemilik toko.')
 
+    const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
+
+    const nowDateTime = new Date()
+    const tz = new Date().toString().match(/([-\+][0-9]+)\s/)[1]
+    const formatedDateTime = `${nowDateTime.getFullYear()}-${('' + nowDateTime.getMonth()).padStart(2, '0')}-${('' + nowDateTime.getDate()).padStart(2, '0')} ${('' + nowDateTime.getHours()).padStart(2, '0')}:${('' + nowDateTime.getMinutes()).padStart(2, '0')}:${('' + nowDateTime.getSeconds()).padStart(2, '0')} ${tz}`
+
+    var bodyHit = {
+      transmission_date_time: formatedDateTime,
+      merchant_key_id: tokoDetail.plink_merchant_key_id,
+      merchant_id: tokoDetail.plink_merchant_id,
+      merchant_ref_no: tokoPoDetail.session_id,
+      backend_callback_url: '',
+      frontend_callback_url: '',
+
+      user_id: tokoPoDetail.email,
+      user_contact: tokoPoDetail.phone_number,
+      user_name: tokoPoDetail.full_name,
+      user_email: tokoPoDetail.email,
+
+      fds_user_device_id: tokoPoDetail.device_id,
+      fds_user_ip_address: '127.0.0.1',
+      fds_product_details: JSON.stringify(productsInCart),
+      fds_shipping_details: '{"address":"' + tokoPoDetail.shipping_address + '","telephoneNumber":"' + tokoPoDetail.phone_number + '","handphoneNumber":"' + tokoPoDetail.phone_number + '"}',
+
+      transaction_amount: tokoPoDetail.total_amount,
+      transaction_date_time: formatedDateTime
+      // transaction_description: '[{"period": "August 2019"}, {"productCode": "125"}, {"description": "belanja bulanan"}]'
+    }
     // define the api
     const api = Apisauce.create({
-      baseURL: 'http://localhost:8283',
+      baseURL: config.get('debitinPaymentPageBackendBaseUrl'),
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -261,7 +351,6 @@ const paymentProcess = async (args, context) => {
         channelid: 'WEB'
       }
     })
-
     // start making calls
     // api
     //   .get('/repos/skellock/apisauce/commits')
@@ -278,7 +367,33 @@ const paymentProcess = async (args, context) => {
     console.log('resp.status====>', resp.status)
     console.log('resp.ok====>', resp.ok)
     console.log('resp.data====>', resp.data)
+    console.log('bodyHit====>', bodyHit)
     // console.log('resp====>', resp)
+    if (!resp.ok) throw new Error('' + resp.problem)
+
+    if (_.isEmpty(resp.data.url)) throw new Error('Gagal request payment page')
+
+    // update po
+    // update cart
+
+    const data = {}
+    // data.created_by = userDetail._id
+    // data.updated_by = userDetail._id
+    data.session_id = args.session_id
+    data.created_at = now
+    data.updated_at = now
+
+    const set = {}
+    set.$set = data
+    // if (!args.count) set.$inc = { count: 1 }
+    tokoPoDetail.action = 'paymentProcess'
+    tokoPoDetail.updated_at = now
+    tokoPoDetail.payment_page_url = resp.data.url
+    tokoPoDetail.debitin_paymentpage_backend_baseurl = config.get('debitinPaymentPageBackendBaseUrl')
+    await tokoPoDetail.save(opts)
+
+    await TokoCartModel.updateMany({ session_id: args.session_id }, { $set: { status: 'close' } }).session(session)
+    // User.updateMany({"created": false}, {"$set":{"created": true}});
 
     // get all cart
     // const allOpenCart = await TokoCartModel.find({ session_id: args.session_id, toko_id: args.toko_id, status: 'open' })
@@ -324,14 +439,15 @@ const paymentProcess = async (args, context) => {
     // console.log('upsertResponse====>', upsertResponse)
     // if (!upsertResponse) throw new Error('Checkout Failed.')
 
-    // await session.commitTransaction()
-    // session.endSession()
-    return { status: 200, success: 'Successfully save Data', detail_data: {} }
+    await session.commitTransaction()
+    session.endSession()
+    console.log('return response ', resp.data)
+    return { status: 200, success: 'Successfully save Data', payment_page_url: resp.data.url, debitin_paymentpage_backend_baseurl: config.get('debitinPaymentPageBackendBaseUrl') }
   } catch (err) {
     console.log('errorrr====>', err)
-    // await session.abortTransaction()
-    // session.endSession()
-    return { status: 400, error: err }
+    await session.abortTransaction()
+    session.endSession()
+    return { status: 400, error: err.message }
   }
 }
 const doUpdateData = async (args, context) => {
@@ -351,7 +467,7 @@ const doUpdateData = async (args, context) => {
     return { status: 200, success: 'Successfully save Data', detail_data: await EntityModel.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
   } catch (err) {
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 const doDeleteData = async (args, context) => {
@@ -374,7 +490,7 @@ const doDeleteData = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err }
+    return { status: 400, error: err.message }
   }
 }
 
@@ -386,5 +502,6 @@ module.exports = {
   ['doUpdate' + entity]: doUpdateData,
   ['doDelete' + entity]: doDeleteData,
   checkoutProcess,
-  paymentProcess
+  paymentProcess,
+  getDetailDataBySessionId
 }

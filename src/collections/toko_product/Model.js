@@ -6,6 +6,9 @@ const schema = new mongoose.Schema({
   name: {
     type: String
   },
+  content1: {
+    type: String
+  },
   code: {
     type: String,
     unique: true
@@ -19,7 +22,7 @@ const schema = new mongoose.Schema({
     default: null
   },
   tag_id: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'tag' }],
-  toko_id: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'toko_toko_online' }],
+  toko_id: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'toko_toko_online', required: true }],
   category_id: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'category' }],
   description: {
     type: String
