@@ -21,7 +21,8 @@ mongoose.connect(config.get('mongoUrl'), { useNewUrlParser: true, useUnifiedTopo
   .catch((err) => console.log('Cannot connect to MongoDB...', err))
 
 var indexRouter = require('./routes/index')
-var usersRouter = require('./routes/users')
+// var usersRouter = require('./routes/users')
+// var adminRouter = require('./routes/admin')
 const graphqlRouter = require('./routes/graphql')(app.io)
 
 const port = process.env.PORT || 3000
@@ -65,9 +66,9 @@ app.use(cors(corsOptions))
 
 // app.use(corsAccess())
 
-app.use('/', indexRouter)
 // app.use('/users', usersRouter)
 app.use('/graphql', graphqlRouter)
+app.use('/', indexRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
