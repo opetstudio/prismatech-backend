@@ -99,6 +99,8 @@ const doCreateData = async (args, context) => {
     data.updated_by = userDetail._id
     data.created_at = now
     data.updated_at = now
+
+
     if (!_.isEmpty(data.name)) data.slug = (data.name || '').toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
     const createResponse = (await EntityModel.create([data], opts))[0]
     console.log('createResponse====>', createResponse)
