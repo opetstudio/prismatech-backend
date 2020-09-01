@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development nodemon app.js",
+    "devecomm": "NODE_ENV=developmentecomm nodemon app.js",
+    "devlms": "NODE_ENV=developmentlms nodemon app.js",
     "start": "node ./bin/www",
     "prod": "NODE_ENV=production nodemon app.js",
     "local": "NODE_ENV=local nodemon app.js",
