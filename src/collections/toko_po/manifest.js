@@ -78,7 +78,8 @@ module.exports = {
     shipping_postal_code: {
       type: GraphQLString
     },
-    shipping_amount: { type: GraphQLInt }
+    shipping_amount: { type: GraphQLInt },
+    unique_code: { type: GraphQLInt }
   },
   createArgs: {
     device_id: { type: GraphQLString },

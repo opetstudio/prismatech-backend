@@ -51,6 +51,9 @@ const schema = new mongoose.Schema({
   total_amount: {
     type: Number
   },
+  unique_code: {
+    type: Number
+  },
   shipping_amount: {
     type: Number
   },
