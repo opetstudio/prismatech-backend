@@ -5,24 +5,47 @@ const jwt = require('jsonwebtoken')
 const config = require('config')
 const formidable = require('formidable')
 const FileModel = require('../src/collections/file/Model')
+const TokoTokoOnlineModel = require('../src/collections/toko_toko_online/Model')
 const pathmodule = require('path')
 const TokoProductService = require('../src/collections/toko_product/services')
 const TokoCartService = require('../src/collections/toko_cart/services')
 const TokoPoService = require('../src/collections/toko_po/services')
 const Moment = require('moment')
 
-
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' })
+  res.render('backoffice/index', { title: 'Express' })
 })
 router.get('/renderfile/:filename', (req, res, next) => {
   res.sendFile(pathmodule.join(__dirname + '/../uploadfile/' + req.params.filename))
   // res.sendFile(__dirname + './uploadfile/1595349658069.png')
 })
 router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
-  res.sendFile(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
-  // res.sendFile(__dirname + './uploadfile/1595349658069.png')
+  var origin = 'http://dev.plink.co.id'
+  // var origin = req.get('origin')
+  // get toko id by origin url
+  // var tokoId = '5f3373db203efa581d2354a2'
+  // var tokoId = req.query.id
+  console.log('origin=====>', origin)
+  TokoTokoOnlineModel.findOne({ website: origin }, (err, doc) => {
+    if (err || !doc) return res.send('error')
+    console.log('doc====>', doc)
+    var tokoId = '' + doc._id
+    var backendBaseUrl = 'http://dev.plink.co.id'
+    // res.sendFile(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
+    res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
+    res.write('var tokoId="' + tokoId + '";var baseUrl="' + backendBaseUrl + '";')
+    // res.write('var tokoId="5f3373db203efa581d2354a2";')
+    fs.createReadStream(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
+    // .pipe(newLineStream())
+    // .pipe(parser)
+      .on('end', () => {
+      // console.log('cekkkkk')
+      // res.write('\n<!-- End stream -->')
+      }).pipe(res)
+    // res.sendFile(__dirname + './uploadfile/1595349658069.png')
+    // res.sendFile(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
+  })
 })
 router.post('/uploadfile', (req, res, next) => {
   const form = formidable({ multiples: true })
@@ -107,6 +130,9 @@ router.get('/shopping-invoice/:tokoSlug/:tokoPoId', async function (req, res, ne
   console.log('detalDataTokoPo===>', detalDataTokoPo)
   console.log('sessionId===>', sessionId)
   res.render('tokoonline/shopping-invoice', { title: 'Express', detalDataTokoPo: detalDataTokoPo || {}, tokoSlug: req.params.tokoSlug, dateTime: Moment().format('MMMM Do YYYY, h:mm:ss a') })
+})
+router.all('/*', (req, res, next) => {
+  res.render('backoffice/index', { title: 'Express' })
 })
 
 module.exports = router

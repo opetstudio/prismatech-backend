@@ -32,6 +32,18 @@ const fields = {
   session_id: { type: GraphQLString },
   device_id: { type: GraphQLString },
   shipping_address: { type: GraphQLString },
+  shipping_province: {
+    type: GraphQLString
+  },
+  shipping_city: {
+    type: GraphQLString
+  },
+  shipping_currier: {
+    type: GraphQLString
+  },
+  shipping_postal_code: {
+    type: GraphQLString
+  },
   total_product_amount: { type: GraphQLString },
   total_amount: { type: GraphQLString },
   shipping_amount: { type: GraphQLString },
@@ -54,7 +66,20 @@ module.exports = {
     toko_id: { type: GraphQLString },
     toko_slug: { type: GraphQLString },
     shipping_address: { type: GraphQLString },
-    shipping_amount: { type: GraphQLInt }
+    shipping_province: {
+      type: GraphQLString
+    },
+    shipping_city: {
+      type: GraphQLString
+    },
+    shipping_currier: {
+      type: GraphQLString
+    },
+    shipping_postal_code: {
+      type: GraphQLString
+    },
+    shipping_amount: { type: GraphQLInt },
+    unique_code: { type: GraphQLInt }
   },
   createArgs: {
     device_id: { type: GraphQLString },
@@ -67,6 +92,18 @@ module.exports = {
     toko_id: { type: GraphQLString },
     toko_slug: { type: GraphQLString },
     shipping_address: { type: GraphQLString },
+    shipping_province: {
+      type: GraphQLString
+    },
+    shipping_city: {
+      type: GraphQLString
+    },
+    shipping_currier: {
+      type: GraphQLString
+    },
+    shipping_postal_code: {
+      type: GraphQLString
+    },
     shipping_amount: { type: GraphQLInt }
   },
   fields: {
