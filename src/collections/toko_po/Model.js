@@ -30,6 +30,18 @@ const schema = new mongoose.Schema({
   shipping_address: {
     type: String
   },
+  shipping_province: {
+    type: String
+  },
+  shipping_city: {
+    type: String
+  },
+  shipping_currier: {
+    type: String
+  },
+  shipping_postal_code: {
+    type: String
+  },
   invoice_code: {
     type: String
   },
