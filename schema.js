@@ -71,6 +71,10 @@ const { getTeacherById, getAllTeachers } = require('./src/collections/lms_teache
 const { createCourse, updateCourse, deleteCourse } = require('./src/collections/lms_course/graphql/mutation')
 const { getCourseById, getAllCourses, getDetailCourse, getAllPublishedCourses, getDetailPublishedCourse } = require('./src/collections/lms_course/graphql/query')
 
+// lms grading
+const { getAllLmsGradings, getDetailLmsGrading, getAllGradingsByCourseId } = require('./src/collections/lms_grading/graphql/query')
+const { createLmsGrading, deleteLmsGrading, updateLmsGrading } = require('./src/collections/lms_grading/graphql/mutation')
+
 // Subject
 const { createSubject, updateSubject, deleteSubject } = require('./src/collections/lms_subject/graphql/mutation')
 const { getAllSubjects, getDetailSubject } = require('./src/collections/lms_subject/graphql/query')
@@ -141,6 +145,11 @@ const RootQuery = new GraphQLObjectType({
     // subject unit
     getAllLmsSubjectUnits,
     getDetailLmsSubjectUnit,
+
+    // lms grading
+    getAllLmsGradings,
+    getDetailLmsGrading,
+    getAllGradingsByCourseId,
 
     // RAYAPAY
     // emoney
@@ -239,6 +248,11 @@ const Mutation = new GraphQLObjectType({
     createCourse,
     updateCourse,
     deleteCourse,
+
+    // lms grading
+    createLmsGrading,
+    updateLmsGrading,
+    deleteLmsGrading,
 
     // subject
     createSubject,
