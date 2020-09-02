@@ -336,15 +336,15 @@ const paymentProcess = async (args, context) => {
     const formatedDateTime = `${nowDateTime.getFullYear()}-${('' + nowDateTime.getMonth()).padStart(2, '0')}-${('' + nowDateTime.getDate()).padStart(2, '0')} ${('' + nowDateTime.getHours()).padStart(2, '0')}:${('' + nowDateTime.getMinutes()).padStart(2, '0')}:${('' + nowDateTime.getSeconds()).padStart(2, '0')} ${tz}`
 
     // validasi otp
-    try {
-      const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
-      if (paymentProcessValidateOtpServiceResp.status !== 200) {
-        const er = paymentProcessValidateOtpServiceResp.error
-        throw new Error(er)
-      }
-    } catch (e) {
-      throw new Error('Gagal validasi otp')
-    }
+    // try {
+    //   const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
+    //   if (paymentProcessValidateOtpServiceResp.status !== 200) {
+    //     const er = paymentProcessValidateOtpServiceResp.error
+    //     throw new Error(er)
+    //   }
+    // } catch (e) {
+    //   throw new Error('Gagal validasi otp')
+    // }
 
     var bodyHit = {
       transmission_date_time: formatedDateTime,
