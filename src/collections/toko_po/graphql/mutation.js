@@ -53,10 +53,29 @@ const paymentProcess = {
   }),
   args: {
     _id: { type: GraphQLID },
-    session_id: { type: GraphQLString }
+    session_id: { type: GraphQLString },
+    top: { type: GraphQLString },
+    otpRefNum: { type: GraphQLString }
   },
   async resolve (parent, args, context) {
     return Services.paymentProcess(args, context)
+  }
+}
+const paymentProcessSendOtp = {
+  type: new GraphQLObjectType({
+    name: 'paymentProcessSendOtpResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      payment_page_url: { type: GraphQLString },
+      debitin_paymentpage_backend_baseurl: { type: GraphQLString }
+    })
+  }),
+  args: {
+    email: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.paymentProcessSendOtp(args, context)
   }
 }
 const updateData = {
@@ -94,5 +113,6 @@ module.exports = {
   ['update' + Manifest.entity]: updateData,
   ['delete' + Manifest.entity]: deleteData,
   checkoutProcess,
-  paymentProcess
+  paymentProcess,
+  paymentProcessSendOtp
 }

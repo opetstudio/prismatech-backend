@@ -85,6 +85,20 @@ const sendMailVerification = async (model) => {
           otp: ${model.otp}`
     }
   }
+  if (model.type === 'paymentProcessSendOtp') {
+    // type: 'paymentProcessSendOtp',
+    //   email,
+    //   otp: otpString || generateRandomNumber(4),
+    //   emailBody,
+    //   emailSubject
+    mailOptions = {
+      from: 'prismalinkdev@gmail.com',
+      to: model.email,
+      subject: model.emailSubject || 'Plink Market Validasi Email Untuk Pembayaran',
+      text: model.emailBody || `Gunakan Otp berikut, untuk melakukan validasi email.
+          otp: ${model.otp}`
+    }
+  }
 
   if (model.type === 'merchantSignup') {
     mailOptions = {

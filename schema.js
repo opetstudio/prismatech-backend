@@ -113,7 +113,7 @@ const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart, removeFromCar
 
 // toko po
 const { getDetailTokoPoBySessionId, getAllTokoPos, getDetailTokoPo } = require('./src/collections/toko_po/graphql/query')
-const { checkoutProcess, paymentProcess } = require('./src/collections/toko_po/graphql/mutation')
+const { checkoutProcess, paymentProcess, paymentProcessSendOtp } = require('./src/collections/toko_po/graphql/mutation')
 
 const {
   GraphQLObjectType,
@@ -371,7 +371,8 @@ const Mutation = new GraphQLObjectType({
     removeFromCart,
     // toko po
     checkoutProcess,
-    paymentProcess
+    paymentProcess,
+    paymentProcessSendOtp
   }
 })
 
