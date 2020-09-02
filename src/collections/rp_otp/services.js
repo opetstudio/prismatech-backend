@@ -210,6 +210,7 @@ const paymentProcessSendOtpService = async ({ email, otpString, emailBody, email
 
     return { status: 200, success: 'Successfully send otp', otpRefNum: otp.otp_reference_number }
   } catch (err) {
+    // console.log('err====>', err)
     return { status: 400, error: err || 'Failed send new password' }
   }
 }
