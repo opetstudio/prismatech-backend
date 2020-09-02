@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'myapp',
-      script: 'npm run dev',
+      script: 'npm run devecomm',
       watch: true,
       env: {
         PORT: 3000,
