@@ -54,7 +54,7 @@ const paymentProcess = {
   args: {
     _id: { type: GraphQLID },
     session_id: { type: GraphQLString },
-    top: { type: GraphQLString },
+    otp: { type: GraphQLString },
     otpRefNum: { type: GraphQLString }
   },
   async resolve (parent, args, context) {
