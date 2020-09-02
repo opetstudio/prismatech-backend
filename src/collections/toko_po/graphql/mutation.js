@@ -72,7 +72,8 @@ const paymentProcessSendOtp = {
     })
   }),
   args: {
-    email: { type: GraphQLString }
+    email: { type: GraphQLString },
+    session_id: { type: GraphQLString }
   },
   async resolve (parent, args, context) {
     return Services.paymentProcessSendOtp(args, context)

@@ -293,7 +293,7 @@ const paymentProcessSendOtp = async (args, context) => {
     const otp = generateRandomNumber(4)
     const paymentProcessSendOtpServiceResp = await paymentProcessSendOtpService({
       email: args.email,
-      emailBody: `Gunakan Otp berikut, untuk melakukan validasi email.
+      emailBody: `Tolong dicatat Nomor transaksi anda: ${args.session_id}. Lalu gunakan otp berikut, untuk melakukan validasi email.
       otp: ${otp}`
     })
     if (paymentProcessSendOtpServiceResp.status !== 200) throw new Error('Gagal kirim otp')
