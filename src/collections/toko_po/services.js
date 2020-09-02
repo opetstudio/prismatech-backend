@@ -14,6 +14,8 @@ const TokoTeamModel = require('../toko_team/Model')
 const TokoCartModel = require('../toko_cart/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const { PostCode } = require('../../utils/services')
+const { paymentProcessSendOtpService, paymentProcessValidateOtpService } = require('../rp_otp/services')
+const { generateRandomNumber } = require('../../utils/services/supportServices')
 // import { create } from 'apisauce'
 const Apisauce = require('apisauce')
 const fetchAllData = async (args, context) => {
@@ -239,6 +241,7 @@ const checkoutProcess = async (args, context) => {
     dataPo.shipping_amount = args.shipping_amount
     dataPo.total_product_amount = totalProductAmount
     dataPo.total_amount = totalProductAmount
+    dataPo.unique_code = 123
     if (!_.isEmpty(args.shipping_amount)) {
       dataPo.total_amount = totalProductAmount + args.shipping_amount // args.total_amount
       dataPo.shipping_amount = args.shipping_amount
@@ -285,6 +288,21 @@ const checkoutProcess = async (args, context) => {
     return { status: 400, error: err.message }
   }
 }
+const paymentProcessSendOtp = async (args, context) => {
+  try {
+    const otp = generateRandomNumber(4)
+    const paymentProcessSendOtpServiceResp = await paymentProcessSendOtpService({
+      email: args.email,
+      emailBody: `Tolong dicatat Nomor transaksi anda: ${args.session_id}. Lalu gunakan otp berikut, untuk melakukan validasi email.
+      otp: ${otp}`
+    })
+    if (paymentProcessSendOtpServiceResp.status !== 200) throw new Error('Gagal kirim otp')
+    return { status: 200, success: 'Berhasil kirim otp', otpRefNum: paymentProcessSendOtpServiceResp.otpRefNum }
+  } catch (e) {
+    return { status: 400, error: e.message }
+    // throw new Error('Gagal kirim email untuk validasi alamat email.')
+  }
+}
 const paymentProcess = async (args, context) => {
   const session = await EntityModel.db.startSession()
   session.startTransaction()
@@ -316,6 +334,17 @@ const paymentProcess = async (args, context) => {
     const nowDateTime = new Date()
     const tz = new Date().toString().match(/([-\+][0-9]+)\s/)[1]
     const formatedDateTime = `${nowDateTime.getFullYear()}-${('' + nowDateTime.getMonth()).padStart(2, '0')}-${('' + nowDateTime.getDate()).padStart(2, '0')} ${('' + nowDateTime.getHours()).padStart(2, '0')}:${('' + nowDateTime.getMinutes()).padStart(2, '0')}:${('' + nowDateTime.getSeconds()).padStart(2, '0')} ${tz}`
+
+    // validasi otp
+    try {
+      const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
+      if (paymentProcessValidateOtpServiceResp.status !== 200) {
+        const er = paymentProcessValidateOtpServiceResp.error
+        throw new Error(er)
+      }
+    } catch (e) {
+      throw new Error('Gagal validasi otp')
+    }
 
     var bodyHit = {
       transmission_date_time: formatedDateTime,
@@ -503,5 +532,6 @@ module.exports = {
   ['doDelete' + entity]: doDeleteData,
   checkoutProcess,
   paymentProcess,
-  getDetailDataBySessionId
+  getDetailDataBySessionId,
+  paymentProcessSendOtp
 }
