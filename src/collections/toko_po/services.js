@@ -241,7 +241,7 @@ const checkoutProcess = async (args, context) => {
     dataPo.shipping_amount = args.shipping_amount
     dataPo.total_product_amount = totalProductAmount
     dataPo.unique_code = generateRandomNumber(3)
-    dataPo.total_amount = totalProductAmount + dataPo.unique_code
+    dataPo.total_amount = parseInt(totalProductAmount) + parseInt(dataPo.unique_code)
     if (!_.isEmpty(args.shipping_amount)) {
       dataPo.total_amount = dataPo.total_amount + args.shipping_amount // args.total_amount
       dataPo.shipping_amount = args.shipping_amount
