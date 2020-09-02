@@ -24,7 +24,8 @@ var _MaterialUI = MaterialUI,
     ShopingCartIcon = _MaterialUI.ShopingCartIcon,
     AddIcon = _MaterialUI.AddIcon,
     RemoveIcon = _MaterialUI.RemoveIcon,
-    TextField = _MaterialUI.TextField;
+    TextField = _MaterialUI.TextField,
+    Snackbar = _MaterialUI.Snackbar;
 
 var e = React.createElement;
 
@@ -168,8 +169,7 @@ function App() {
         setAddToCartRequest = _React$useState4[1];
 
     var doAddToCart = function doAddToCart(_ref) {
-        var productId = _ref.productId,
-            isStay = _ref.isStay;
+        var productId = _ref.productId;
 
         if (qty < 1) return;
         var graphqlData = 'mutation{addToCart(count:' + qty + ', toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                            code,\n                            price,\n                            description,\n                            image_id{\n                              _id,\n                              filename,\n                              file_type\n                            }\n                          }\n                          count,\n                          amount,\n                          device_id,\n                          session_id,\n                          toko_id{\n                            slug\n                          }\n                        }\n                      }\n                      }';
@@ -189,12 +189,36 @@ function App() {
             setAddToCartRequest({ error: data.error, isRequest: false });
             // if (data.error) alert(data.error)
             // else setProductCatalogRequest({ reload: reload + 1 })
-            if (data.error) return alert(data.error);
-            if (!isStay) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
+            if (!data.error) handleToastOpen(); //window.location.href = TOKOONLINE_PAGE_SHOPPING_CART
+            else alert(data.error);
         });
     };
 
-    var _React$useState5 = React.useState(0),
+    var doFastOrder = function doFastOrder(_ref2) {
+        var productId = _ref2.productId;
+
+        var graphqlData = 'mutation{addToCart(count:' + (qty === 0 ? 1 : qty) + ', toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                            code,\n                            price,\n                            description,\n                            image_id{\n                              _id,\n                              filename,\n                              file_type\n                            }\n                          }\n                          count,\n                          amount,\n                          device_id,\n                          session_id,\n                          toko_id{\n                            slug\n                          }\n                        }\n                      }\n                      }';
+        var requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: graphqlData })
+        };
+        fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
+            return response.json();
+        }).then(function (response) {
+            console.log('response===>', response);
+            if (response.errors) return alert(JSON.stringify(response.errors));
+            return response.data.addToCart;
+        }).then(function (data) {
+            if (!data) return;
+            setAddToCartRequest({ error: data.error, isRequest: false });
+            // if (data.error) alert(data.error)
+            // else setProductCatalogRequest({ reload: reload + 1 })
+            if (!data.error) window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;else alert(data.error);
+        });
+    };
+
+    var _React$useState5 = React.useState(1),
         _React$useState6 = _slicedToArray(_React$useState5, 2),
         qty = _React$useState6[0],
         setQty = _React$useState6[1];
@@ -236,6 +260,30 @@ function App() {
         setQty(qty + 1);
     };
 
+    var convertRupiah = function convertRupiah(param) {
+        var reverse = param.toString().split('').reverse().join(''),
+            ribuan = reverse.match(/\d{1,3}/g);
+        ribuan = ribuan.join('.').split('').reverse().join('');
+
+        return "Rp. " + ribuan;
+    };
+
+    var _React$useState7 = React.useState(false),
+        _React$useState8 = _slicedToArray(_React$useState7, 2),
+        open = _React$useState8[0],
+        setOpen = _React$useState8[1];
+
+    var handleToastOpen = function handleToastOpen() {
+        setOpen(true);
+    };
+
+    var handleToastClose = function handleToastClose(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
+
     return (
         // newest
         React.createElement(
@@ -244,6 +292,16 @@ function App() {
             React.createElement(
                 Container,
                 null,
+                React.createElement(Snackbar, {
+                    anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                    },
+                    open: open,
+                    autoHideDuration: 1000,
+                    onClose: handleToastClose,
+                    message: 'Berhasil ditambahkan'
+                }),
                 React.createElement(
                     'div',
                     { className: classes.heroContent },
@@ -304,7 +362,7 @@ function App() {
                                 React.createElement(
                                     Typography,
                                     { className: classes.priceContainer },
-                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: '30%' }) : "Rp. " + detailData.price
+                                    isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: '30%' }) : convertRupiah(detailData.price || 0)
                                 ),
                                 React.createElement(
                                     Grid,
@@ -344,7 +402,7 @@ function App() {
                                                 React.createElement(
                                                     Button,
                                                     { size: 'small', onClick: handleDecreaseItem },
-                                                    'Min'
+                                                    '-'
                                                 ),
                                                 React.createElement(TextField, {
                                                     id: 'outlined-size-small',
@@ -360,7 +418,7 @@ function App() {
                                                 React.createElement(
                                                     Button,
                                                     { size: 'small', onClick: handleIncreaseItem },
-                                                    'Plus'
+                                                    '+'
                                                 )
                                             )
                                         )
@@ -372,10 +430,10 @@ function App() {
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 200,
                                         style: { marginRight: '1rem' } }) : React.createElement(
                                         Button,
-                                        { variant: 'outlined', color: 'secondary',
+                                        { variant: 'outlined', color: 'primary',
                                             className: classes.btnActionRed,
                                             onClick: function onClick() {
-                                                return doAddToCart({ productId: detailData._id, isStay: true });
+                                                return doAddToCart({ productId: detailData._id });
                                             }
                                         },
                                         'Tambah ke keranjang'
@@ -383,11 +441,10 @@ function App() {
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
                                         Button,
                                         { variant: 'contained', color: 'secondary',
-                                            className: classes.btnActionRed,
                                             onClick: function onClick() {
-                                                return doAddToCart({ productId: detailData._id });
-                                            }
-                                        },
+                                                return doFastOrder({ productId: detailData._id });
+                                            },
+                                            className: classes.btnActionRed },
                                         'Beli Sekarang'
                                     )
                                 ),
@@ -408,11 +465,10 @@ function App() {
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
                                         Button,
                                         { variant: 'contained', color: 'secondary',
-                                            className: classes.btnActionRed,
                                             onClick: function onClick() {
-                                                return doAddToCart({ productId: detailData._id });
-                                            }
-                                        },
+                                                return doFastOrder({ productId: detailData._id });
+                                            },
+                                            className: classes.btnActionRed },
                                         'Beli Sekarang'
                                     )
                                 )
