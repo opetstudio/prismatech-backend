@@ -215,39 +215,24 @@ const paymentProcessSendOtpService = async ({ email, otpString, emailBody, email
   }
 }
 const paymentProcessValidateOtpService = async (otp, email, otpRefNum) => {
-  if (!otp) return { status: 400, error: 'Invalid otp' }
-
+  // if (!otp) return { status: 400, error: 'Invalid otp' }
   try {
-    const otpChecker = await Otp.findOne({ otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'PAYMENT PROCESS' })
+    const filter = { new_email: email, otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'PAYMENT PROCESS' }
+    console.log('filter otp=>', filter)
+    const otpChecker = await Otp.findOne(filter)
     if (!otpChecker) {
-      const isEmailValid = await Otp.findOne({ new_email: email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' })
-      if (isEmailValid) {
-        if (isEmailValid.status !== 'ACTIVE') {
-          return { status: 400, error: 'Otp expired' }
-        }
-        if (isEmailValid.isValidLimit <= 2) {
-          if (isEmailValid.isValidLimit >= 2) {
-            await Otp.findOneAndUpdate({ new_email: email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' }, { status: 'INACTIVE', isValidLimit: isEmailValid.isValidLimit + 1, updated_at: getUnixTime() })
-            return { status: 400, error: 'Otp expired' }
-          }
-          await Otp.findOneAndUpdate({ new_email: email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' }, { isValidLimit: isEmailValid.isValidLimit + 1, updated_at: getUnixTime() })
-          return { status: 400, error: 'Invalid otp' }
-        } else {
-          await Otp.findOneAndUpdate({ email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' }, { status: 'INACTIVE', updated_at: getUnixTime() })
-          return { status: 400, error: 'Otp expired' }
-        }
-      } else {
-        return { status: 400, error: 'Invalid otp' }
-      }
+      return { status: 400, error: 'Invalid otp' }
     }
     const otpTime = parseInt(otpChecker.created_at)
     const time = await expireOtpChecker({ getOtpTime: otpTime, otp })
     if (!time) return { status: 400, error: 'Otp expired' }
-
-    await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
-
+    otpChecker.status = 'INACTIVE'
+    otpChecker.updated_at = new Date().getTime()
+    await otpChecker.save()
+    // await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
     return { status: 200, success: 'Successfully validate otp' }
   } catch (err) {
+    console.log('err====>', err)
     return { status: 400, error: 'Failed validate otp' }
   }
 }

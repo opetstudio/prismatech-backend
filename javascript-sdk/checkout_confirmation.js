@@ -161,6 +161,16 @@ function App() {
         ongkir = _React$useState14[0],
         setOngkir = _React$useState14[1];
 
+    var _React$useState15 = React.useState(""),
+        _React$useState16 = _slicedToArray(_React$useState15, 2),
+        otpRefNum = _React$useState16[0],
+        setOtpRefNum = _React$useState16[1];
+
+    var _React$useState17 = React.useState(""),
+        _React$useState18 = _slicedToArray(_React$useState17, 2),
+        otp = _React$useState18[0],
+        setOtp = _React$useState18[1];
+
     var count = productCatalogRequest.count,
         pageCount = productCatalogRequest.pageCount,
         listData = productCatalogRequest.listData,
@@ -198,7 +208,9 @@ function App() {
 
     var paymentProcess = function paymentProcess() {
         console.log('paymentProcess');
-        var graphqlData = 'mutation\n    {\n      paymentProcess(\n            session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"\n          )\n      {\n        status,\n        error,\n        payment_page_url,\n        debitin_paymentpage_backend_baseurl\n      }\n    }';
+        if (otp === 'undefined' || otp == null) return alert("otp kosong");
+        var graphqlData = 'mutation\n    {\n      paymentProcess(\n            session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '",\n            otp: "' + otp + '",\n            otpRefNum: "' + otpRefNum + '"\n          )\n      {\n        status,\n        error,\n        payment_page_url,\n        debitin_paymentpage_backend_baseurl\n      }\n    }';
+        console.log("req =====> " + graphqlData);
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -213,11 +225,34 @@ function App() {
         }).then(function (data) {
             if (!data) return;
             setPaymentProcessRequest({ error: data.error, isRequest: false, modalOpen: false });
-
             console.log('data=====>' + data.error);
             if (data.error) return alert(data.error);
             localStorage.setItem(TOKOONLINE_TOKOID, '' + new Date().getTime());
             window.location.href = data.debitin_paymentpage_backend_baseurl + data.payment_page_url;
+        });
+    };
+
+    var doSendOtp = function doSendOtp() {
+        var graphqlData = 'mutation{\n              paymentProcessSendOtp(email: "' + (checkoutProcessRequest.payload || {}).email + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n                status,\n                error,\n                otpRefNum\n              }\n            }';
+
+        var requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: graphqlData })
+        };
+
+        fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
+            return response.json();
+        }).then(function (response) {
+            console.log('response===>', response);
+            if (response.errors) return alert(JSON.stringify(response.errors));
+            return response.data.paymentProcessSendOtp;
+        }).then(function (data) {
+            if (data.error) return alert(data.error);
+            setOtpRefNum(data.otpRefNum);
+            setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, {
+                modalOpen: true
+            }));
         });
     };
 
@@ -259,6 +294,10 @@ function App() {
     React.useEffect(function () {
         doFetchDetailDataPo();
     }, [doFetchDetailDataPo]);
+
+    var handleOtp = function handleOtp(e) {
+        setOtp(e.target.value);
+    };
 
     var ListView = function ListView(_ref2) {
         var productImage = _ref2.productImage,
@@ -342,7 +381,7 @@ function App() {
         );
     };
     var convertRupiah = function convertRupiah(param) {
-        var reverse = param.toString().split('').reverse().join(''),
+        var reverse = (param || 0).toString().split('').reverse().join(''),
             ribuan = reverse.match(/\d{1,3}/g);
         ribuan = ribuan.join('.').split('').reverse().join('');
 
@@ -499,12 +538,12 @@ function App() {
                             {
                                 style: { margin: 8 },
                                 size: 'small',
-                                variant: 'contained', color: 'primary', disableElevation: true,
-                                onClick: function onClick() {
-                                    return setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, {
-                                        modalOpen: true
-                                    }));
-                                },
+                                variant: 'contained', color: 'primary', disableElevation: true
+                                // onClick={() => setPaymentProcessRequest({
+                                //     ...paymentProcessRequest,
+                                //     modalOpen: true
+                                // })}
+                                , onClick: doSendOtp,
                                 className: classes.button
                             },
                             'Checkout'
@@ -522,6 +561,7 @@ function App() {
                 },
                 'aria-labelledby': 'transition-modal-title',
                 'aria-describedby': 'transition-modal-description',
+                disableBackdropClick: true,
                 BackdropComponent: Backdrop,
                 BackdropProps: {
                     timeout: 500
@@ -535,40 +575,47 @@ function App() {
                     'div',
                     { className: classes.paper },
                     React.createElement(
-                        'h2',
-                        { id: 'simple-modal-title' },
-                        'Konfirmasi'
-                    ),
-                    React.createElement(
-                        'p',
-                        { id: 'simple-modal-description' },
-                        'Anda akan melakukan pembayaran. Isi keranjang belanja tidak bisa lagi dirubah.'
-                    ),
-                    React.createElement(
-                        'p',
-                        null,
-                        'Tolong dicatat nomor transaksi anda untuk melakukan pengecekan status transaksi:',
-                        React.createElement('br', null),
+                        Grid,
+                        { container: true, spacing: 2, direction: 'column', justify: 'center',
+                            alignItems: 'center' },
                         React.createElement(
-                            'b',
-                            null,
-                            localStorage.getItem(TOKOONLINE_TOKOID)
+                            'h2',
+                            { id: 'simple-modal-title' },
+                            'Konfirmasi'
+                        ),
+                        React.createElement(
+                            'p',
+                            { id: 'simple-modal-description' },
+                            'Masukkan kode otp yang dikirimkan ke email anda'
+                        ),
+                        React.createElement(TextField, { onChange: handleOtp, id: 'outlined-basic', label: 'OTP', variant: 'outlined', style: { maxWidth: 70 } }),
+                        React.createElement(
+                            Grid,
+                            {
+                                container: true,
+                                direction: 'row',
+                                justify: 'space-around',
+                                alignItems: 'center',
+                                style: { marginTop: 20 }
+                            },
+                            React.createElement(
+                                Button,
+                                { type: 'button', size: 'small', color: 'secondary',
+                                    onClick: function onClick() {
+                                        return setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, {
+                                            modalOpen: false
+                                        }));
+                                    } },
+                                'Batal'
+                            ),
+                            React.createElement(
+                                Button,
+                                { type: 'button', size: 'small', color: 'primary', onClick: function onClick() {
+                                        return paymentProcess();
+                                    } },
+                                'Ok'
+                            )
                         )
-                    ),
-                    React.createElement(
-                        Button,
-                        { type: 'button', size: 'small', color: 'secondary',
-                            onClick: function onClick() {
-                                return setPaymentProcessRequest(Object.assign({}, paymentProcessRequest, { modalOpen: false }));
-                            } },
-                        'Batal'
-                    ),
-                    React.createElement(
-                        Button,
-                        { type: 'button', size: 'small', color: 'primary', onClick: function onClick() {
-                                return paymentProcess();
-                            } },
-                        'Ok'
                     )
                 )
             )

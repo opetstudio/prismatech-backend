@@ -238,6 +238,10 @@ const checkoutProcess = async (args, context) => {
     dataPo.session_id = sessionId
     dataPo.device_id = args.device_id
     dataPo.shipping_address = args.shipping_address
+    dataPo.shipping_city = args.shipping_city
+    dataPo.shipping_province = args.shipping_province
+    dataPo.shipping_currier = args.shipping_currier
+    dataPo.shipping_postal_code = args.shipping_postal_code
     dataPo.shipping_amount = args.shipping_amount
     dataPo.total_product_amount = totalProductAmount
     dataPo.unique_code = generateRandomNumber(3)
@@ -336,15 +340,17 @@ const paymentProcess = async (args, context) => {
     const formatedDateTime = `${nowDateTime.getFullYear()}-${('' + nowDateTime.getMonth()).padStart(2, '0')}-${('' + nowDateTime.getDate()).padStart(2, '0')} ${('' + nowDateTime.getHours()).padStart(2, '0')}:${('' + nowDateTime.getMinutes()).padStart(2, '0')}:${('' + nowDateTime.getSeconds()).padStart(2, '0')} ${tz}`
 
     // validasi otp
-    // try {
-    //   const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
-    //   if (paymentProcessValidateOtpServiceResp.status !== 200) {
-    //     const er = paymentProcessValidateOtpServiceResp.error
-    //     throw new Error(er)
-    //   }
-    // } catch (e) {
-    //   throw new Error('Gagal validasi otp')
-    // }
+    try {
+      const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
+      console.log('paymentProcessValidateOtpServiceResp===>', paymentProcessValidateOtpServiceResp)
+      if (paymentProcessValidateOtpServiceResp.status !== 200) {
+        const er = paymentProcessValidateOtpServiceResp.error
+        throw new Error(er)
+      }
+    } catch (e) {
+      console.log('e===>', e)
+      throw new Error('Gagal validasi otp')
+    }
 
     var bodyHit = {
       transmission_date_time: formatedDateTime,

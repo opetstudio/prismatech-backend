@@ -120,7 +120,7 @@ function App() {
         provinsiData = _React$useState14[0],
         setProvinsiData = _React$useState14[1];
 
-    var _React$useState15 = React.useState(""),
+    var _React$useState15 = React.useState({}),
         _React$useState16 = _slicedToArray(_React$useState15, 2),
         provinsi = _React$useState16[0],
         setProvinsi = _React$useState16[1];
@@ -130,7 +130,7 @@ function App() {
         kotaData = _React$useState18[0],
         setKotaData = _React$useState18[1];
 
-    var _React$useState19 = React.useState(""),
+    var _React$useState19 = React.useState({}),
         _React$useState20 = _slicedToArray(_React$useState19, 2),
         kota = _React$useState20[0],
         setKota = _React$useState20[1];
@@ -139,6 +139,11 @@ function App() {
         _React$useState22 = _slicedToArray(_React$useState21, 2),
         layananKurir = _React$useState22[0],
         setLayananKurir = _React$useState22[1];
+
+    var _React$useState23 = React.useState({}),
+        _React$useState24 = _slicedToArray(_React$useState23, 2),
+        kurir = _React$useState24[0],
+        setKurir = _React$useState24[1];
 
     var count = productCatalogRequest.count,
         pageCount = productCatalogRequest.pageCount,
@@ -226,7 +231,7 @@ function App() {
 
         var graphqlData = 'mutation\n            {\n              checkoutProcess(\n                    session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '",\n                    device_id: "xxxx",\n                    full_name: "' + payload.full_name + '",\n                    phone_number: "' + payload.phone_number + '",\n                    email: "' + payload.email + '",\n                    cart_id: ' + JSON.stringify(productCatalogRequest.listData.map(function (v) {
             return '' + v._id;
-        })) + ',\n                    toko_id: "' + TOKOONLINE_TOKOID + '",\n                    shipping_address: "' + payload.shipping_address + '",\n                    shipping_amount: ' + ongkir + '\n                  )\n              {\n                status,\n                error,\n                detail_data\n                {\n                  _id\n                }\n              }\n            }';
+        })) + ',\n                    toko_id: "' + TOKOONLINE_TOKOID + '",\n                    shipping_address: "' + payload.shipping_address + '",\n                    shipping_province: "' + provinsi.province + '",\n                    shipping_city: "' + kota.city_name + '",\n                    shipping_currier: "' + kurir.service + '",\n                    shipping_postal_code: "' + payload.shipping_postal_code + '",\n                    shipping_amount: ' + ongkir + '\n                  )\n              {\n                status,\n                error,\n                detail_data\n                {\n                  _id\n                }\n              }\n            }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -255,7 +260,7 @@ function App() {
     }, [doFetchData, pageIndex, pageSize, reload]);
 
     var doFetchDetailDataPo = React.useCallback(function () {
-        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
+        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount,\n            shipping_province,\n            shipping_city,\n            shipping_currier,\n            shipping_postal_code\n          }\n        }\n      }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -276,7 +281,11 @@ function App() {
                     email: (data.data_detail || {}).email,
                     phone_number: (data.data_detail || {}).phone_number,
                     shipping_address: (data.data_detail || {}).shipping_address,
-                    shipping_amount: (data.data_detail || {}).shipping_amount
+                    shipping_amount: (data.data_detail || {}).shipping_amount,
+                    shipping_province: (data.data_detail || {}).shipping_province,
+                    shipping_city: (data.data_detail || {}).shipping_city,
+                    shipping_currier: (data.data_detail || {}).shipping_currier,
+                    shipping_postal_code: (data.data_detail || {}).shipping_postal_code
                 }
             });
         });
@@ -308,8 +317,9 @@ function App() {
     }, [doFetchProvinsi]);
 
     var handleProvince = function handleProvince(event) {
+        console.log(event);
         setProvinsi(event.target.value);
-        fetch("http://dev.plink.co.id:8081/plink/v1/city?province=" + event.target.value, {
+        fetch("http://dev.plink.co.id:8081/plink/v1/city?province=" + event.target.value.province_id, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -328,7 +338,7 @@ function App() {
         setKota(event.target.value);
         var countDistanceRequest = {
             origin: "152",
-            destination: event.target.value,
+            destination: event.target.value.city_id,
             weight: 500,
             courier: "jne"
         };
@@ -349,12 +359,8 @@ function App() {
     };
 
     var handleOngkir = function handleOngkir(event) {
-        setOngkir(event.target.value);
-        // setCheckoutProcessRequest({
-        //     payload: {
-        //         shipping_amount: (event.target.value)
-        //     }
-        // })
+        setOngkir(event.target.value.cost[0].value);
+        setKurir(event.target.value);
     };
 
     var ListView = function ListView(_ref5) {
@@ -617,7 +623,8 @@ function App() {
                                         provinsiData.map(function (prov) {
                                             return React.createElement(
                                                 MenuItem,
-                                                { key: prov.province_id, value: prov.province_id },
+                                                { key: prov.province_id,
+                                                    value: prov },
                                                 prov.province
                                             );
                                         })
@@ -660,7 +667,7 @@ function App() {
                                         kotaData.map(function (city) {
                                             return React.createElement(
                                                 MenuItem,
-                                                { key: city.city_id, value: city.city_id },
+                                                { key: city.city_id, value: city },
                                                 city.city_name
                                             );
                                         })
@@ -688,7 +695,7 @@ function App() {
                                         {
                                             labelId: 'demo-simple-select-helper-label',
                                             id: 'demo-simple-select-helper',
-                                            value: ongkir,
+                                            value: kurir,
                                             onChange: handleOngkir
                                         },
                                         React.createElement(
@@ -701,7 +708,8 @@ function App() {
                                                 MenuItem,
                                                 {
                                                     key: layanan.service,
-                                                    value: layanan.cost[0].value
+                                                    name: layanan.service,
+                                                    value: layanan
                                                 },
                                                 "JNE - " + layanan.service
                                             );
@@ -715,8 +723,9 @@ function App() {
                                 )
                             ),
                             renderTextField({
-                                name: 'kode_pos',
+                                name: 'shipping_postal_code',
                                 label: 'Kode pos',
+                                value: (checkoutProcessRequest.payload || {}).shipping_postal_code,
                                 defaultValue: ''
                             })
                         ),

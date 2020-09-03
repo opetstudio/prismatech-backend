@@ -140,7 +140,8 @@ var useStyles = makeStyles(function (theme) {
         },
         success_color: {
             background: '#357a38',
-            color: "#fff"
+            color: "#fff",
+            marginRight: "0.5rem"
         }
     };
 });
@@ -224,7 +225,7 @@ function App() {
         setQty = _React$useState6[1];
 
     var doFetchData = React.useCallback(function () {
-        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -233,7 +234,7 @@ function App() {
         fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
             return response.json();
         }).then(function (response) {
-            // console.log('response===>', response)
+            console.log('cat===>', JSON.stringify(response));
             // response.json()
             return response.data.getDetailTokoProductJoinCartByCode;
         }).then(function (data) {
@@ -348,7 +349,11 @@ function App() {
                                     { item: true },
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 60, width: '5rem' }) :
                                     // need to return category from backend
-                                    React.createElement(Chip, { label: 'ButuhKategori', className: classes.success_color })
+                                    (detailData.category_id || []).map(function (key) {
+                                        // console.log(key.title)
+                                        return React.createElement(Chip, { key: key._id, label: key.title,
+                                            className: classes.success_color });
+                                    })
                                 )
                             ),
                             React.createElement(
