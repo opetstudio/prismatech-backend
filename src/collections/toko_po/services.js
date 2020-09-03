@@ -231,6 +231,8 @@ const checkoutProcess = async (args, context) => {
     const totalProductAmount = allOpenCart.map(v => v.amount).reduce((a, b) => a + b, 0) // args.total_amount
     console.log('totalProductAmount===>', totalProductAmount)
 
+    const shippinAmount = !_.isEmpty(args.shipping_amount) ? parseInt(args.shipping_amount) : 0
+
     const dataPo = {}
     dataPo.full_name = args.full_name
     dataPo.phone_number = args.phone_number
@@ -242,14 +244,10 @@ const checkoutProcess = async (args, context) => {
     dataPo.shipping_province = args.shipping_province
     dataPo.shipping_currier = args.shipping_currier
     dataPo.shipping_postal_code = args.shipping_postal_code
-    dataPo.shipping_amount = args.shipping_amount
+    dataPo.shipping_amount = shippinAmount
     dataPo.total_product_amount = totalProductAmount
     dataPo.unique_code = generateRandomNumber(3)
-    dataPo.total_amount = parseInt(totalProductAmount) + parseInt(dataPo.unique_code)
-    if (!_.isEmpty(args.shipping_amount)) {
-      dataPo.total_amount = dataPo.total_amount + args.shipping_amount // args.total_amount
-      dataPo.shipping_amount = args.shipping_amount
-    }
+    dataPo.total_amount = parseInt(totalProductAmount) + parseInt(dataPo.unique_code) + shippinAmount
     dataPo.cart_id = allOpenCart.map(v => '' + v._id)
     dataPo.toko_id = tokoId
     if (myUserId) dataPo.user_id = myUserId
