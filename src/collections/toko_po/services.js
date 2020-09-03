@@ -298,7 +298,8 @@ const paymentProcessSendOtp = async (args, context) => {
     const paymentProcessSendOtpServiceResp = await paymentProcessSendOtpService({
       email: args.email,
       emailBody: `Tolong dicatat Nomor transaksi anda: ${args.session_id}. Lalu gunakan otp berikut, untuk melakukan validasi email.
-      otp: ${otp}`
+      otp: ${otp}`,
+      otpString: otp
     })
     if (paymentProcessSendOtpServiceResp.status !== 200) throw new Error('Gagal kirim otp')
     return { status: 200, success: 'Berhasil kirim otp', otpRefNum: paymentProcessSendOtpServiceResp.otpRefNum }
