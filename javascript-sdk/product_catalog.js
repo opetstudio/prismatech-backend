@@ -115,6 +115,7 @@ function App() {
             });
         });
     }, []);
+
     var doAddToCart = function doAddToCart(_ref2) {
         var productId = _ref2.productId;
 
@@ -133,8 +134,9 @@ function App() {
         }).then(function (data) {
             if (!data) return;
             setAddToCartRequest({ error: data.error, isRequest: false });
-            if (!data.error) handleToastOpen(); //window.location.href = TOKOONLINE_PAGE_SHOPPING_CART
-            else alert(data.error);
+            if (!data.error) {
+                handleToastOpen(); //window.location.href = TOKOONLINE_PAGE_SHOPPING_CART
+            } else alert(data.error);
         });
     };
 
@@ -175,6 +177,15 @@ function App() {
         return "Rp. " + ribuan;
     };
 
+    var goToCart = function goToCart() {
+        window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
+    };
+
+    var _React$useState7 = React.useState(0),
+        _React$useState8 = _slicedToArray(_React$useState7, 2),
+        cart = _React$useState8[0],
+        setCart = _React$useState8[1];
+
     return React.createElement(
         'div',
         null,
@@ -192,7 +203,7 @@ function App() {
                 },
                 React.createElement(
                     Badge,
-                    { badgeContent: 4, color: 'secondary', style: { position: 'fixed', zIndex: 2 } },
+                    { onClick: goToCart, badgeContent: cart, color: 'secondary', style: { position: 'fixed', zIndex: 2 } },
                     React.createElement(
                         Fab,
                         { color: 'inherit', size: 'small', variant: 'extended', style: { marginTop: -2, marginRight: -5 } },
