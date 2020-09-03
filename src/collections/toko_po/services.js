@@ -14,7 +14,7 @@ const TokoTeamModel = require('../toko_team/Model')
 const TokoCartModel = require('../toko_cart/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
 const { PostCode } = require('../../utils/services')
-const { paymentProcessSendOtpService, paymentProcessValidateOtpService } = require('../rp_otp/services')
+const { paymentProcessSendOtpService, paymentProcessValidateOtpService, purchaseorderCheckStatusSendOtp, purchaseorderCheckStatusValidateOtp } = require('../rp_otp/services')
 const { generateRandomNumber } = require('../../utils/services/supportServices')
 // import { create } from 'apisauce'
 const Apisauce = require('apisauce')
@@ -306,6 +306,42 @@ const paymentProcessSendOtp = async (args, context) => {
     // throw new Error('Gagal kirim email untuk validasi alamat email.')
   }
 }
+const purchaseorderCheckStatusRequestOtp = async (args, context) => {
+  try {
+    // toko po detail
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.trxid, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
+    if (_.isEmpty(tokoPoDetail)) throw new Error('Transaksi tidak ditemukan.')
+    const otp = generateRandomNumber(4)
+    const purchaseorderCheckStatusRequestOtpResp = await purchaseorderCheckStatusSendOtp({
+      email: args.email,
+      emailBody: `Gunakan otp berikut, untuk melakukan validasi email.
+      otp: ${otp}`,
+      otpString: otp
+    })
+    if (purchaseorderCheckStatusRequestOtpResp.status !== 200) throw new Error('Gagal kirim otp')
+    return { status: 200, success: 'Berhasil kirim otp', otpRefNum: purchaseorderCheckStatusRequestOtpResp.otpRefNum }
+  } catch (e) {
+    return { status: 400, error: e.message }
+    // throw new Error('Gagal kirim email untuk validasi alamat email.')
+  }
+}
+const purchaseorderCheckStatus = async (args, context) => {
+  try {
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.trxid, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
+    if (_.isEmpty(tokoPoDetail)) throw new Error('Purchase Failed.')
+    // validasi otp
+    const purchaseorderCheckStatusValidateOtpResp = await purchaseorderCheckStatusValidateOtp(args.otp, tokoPoDetail.email, args.otpRefNum)
+    console.log('purchaseorderCheckStatusValidateOtpResp===>', purchaseorderCheckStatusValidateOtpResp)
+    if (purchaseorderCheckStatusValidateOtpResp.status !== 200) {
+      const er = purchaseorderCheckStatusValidateOtpResp.error
+      throw new Error(er)
+    }
+    return { status: 200, success: 'Berhasil kirim otp', data_detail: tokoPoDetail }
+  } catch (e) {
+    return { status: 400, error: e.message }
+    // throw new Error('Gagal kirim email untuk validasi alamat email.')
+  }
+}
 const paymentProcess = async (args, context) => {
   const session = await EntityModel.db.startSession()
   session.startTransaction()
@@ -538,5 +574,7 @@ module.exports = {
   checkoutProcess,
   paymentProcess,
   getDetailDataBySessionId,
-  paymentProcessSendOtp
+  paymentProcessSendOtp,
+  purchaseorderCheckStatusRequestOtp,
+  purchaseorderCheckStatus
 }

@@ -107,6 +107,23 @@ const deleteData = {
     return Services['doDelete' + Manifest.entity](args, context)
   }
 }
+const purchaseorderCheckStatusRequestOtp = {
+  type: new GraphQLObjectType({
+    name: 'purchaseorderCheckStatusRequestOtpResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      otpRefNum: { type: GraphQLString }
+    })
+  }),
+  args: {
+    email: { type: GraphQLString },
+    trxid: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.purchaseorderCheckStatusRequestOtp(args, context)
+  }
+}
 
 module.exports = {
   ['create' + Manifest.entity]: createData,
@@ -114,5 +131,6 @@ module.exports = {
   ['delete' + Manifest.entity]: deleteData,
   checkoutProcess,
   paymentProcess,
-  paymentProcessSendOtp
+  paymentProcessSendOtp,
+  purchaseorderCheckStatusRequestOtp
 }
