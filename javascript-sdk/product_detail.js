@@ -25,7 +25,11 @@ var _MaterialUI = MaterialUI,
     AddIcon = _MaterialUI.AddIcon,
     RemoveIcon = _MaterialUI.RemoveIcon,
     TextField = _MaterialUI.TextField,
-    Snackbar = _MaterialUI.Snackbar;
+    Snackbar = _MaterialUI.Snackbar,
+    CircularProgress = _MaterialUI.CircularProgress,
+    IconButton = _MaterialUI.IconButton,
+    SvgIcon = _MaterialUI.SvgIcon,
+    Badge = _MaterialUI.Badge;
 
 var e = React.createElement;
 
@@ -154,8 +158,7 @@ function App() {
     var _React$useState = React.useState({
         error: null,
         detailData: null,
-        cartDetail: {},
-        isRequest: false
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productDetailRequest = _React$useState2[0],
@@ -285,12 +288,32 @@ function App() {
         setOpen(false);
     };
 
+    var _React$useState9 = React.useState(0),
+        _React$useState10 = _slicedToArray(_React$useState9, 2),
+        cart = _React$useState10[0],
+        setCart = _React$useState10[1];
+
+    var goToCart = function goToCart() {
+        window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
+    };
+
     return (
         // newest
         React.createElement(
             'div',
             null,
-            React.createElement(
+            productDetailRequest.isRequest ? React.createElement(
+                Grid,
+                {
+                    container: true,
+                    spacing: 0,
+                    direction: 'column',
+                    alignItems: 'center',
+                    justify: 'center',
+                    style: { minHeight: '100vh' }
+                },
+                React.createElement(CircularProgress, null)
+            ) : React.createElement(
                 Container,
                 null,
                 React.createElement(Snackbar, {
@@ -460,11 +483,7 @@ function App() {
                                         style: { marginRight: '1rem' } }) : React.createElement(
                                         Button,
                                         { variant: 'outlined', color: 'secondary',
-                                            className: classes.btnActionRed,
-                                            onClick: function onClick() {
-                                                return doAddToCart({ productId: detailData._id, isStay: true });
-                                            }
-                                        },
+                                            className: classes.btnActionRed },
                                         'Tambah ke keranjang'
                                     ),
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(

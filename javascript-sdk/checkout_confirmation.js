@@ -37,7 +37,8 @@ var _MaterialUI = MaterialUI,
     Modal = _MaterialUI.Modal,
     List = _MaterialUI.List,
     Backdrop = _MaterialUI.Backdrop,
-    Fade = _MaterialUI.Fade;
+    Fade = _MaterialUI.Fade,
+    CircularProgress = _MaterialUI.CircularProgress;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
@@ -107,7 +108,7 @@ function App() {
         pageSize: 0,
         count: 0,
         reload: 0,
-        isRequest: false
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productCatalogRequest = _React$useState2[0],
@@ -261,7 +262,7 @@ function App() {
     }, [doFetchData, pageIndex, pageSize, reload]);
 
     var doFetchDetailDataPo = React.useCallback(function () {
-        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
+        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount,\n            shipping_province,\n            shipping_city,\n            shipping_currier,\n            shipping_postal_code\n          }\n        }\n      }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -283,7 +284,11 @@ function App() {
                     email: (data.data_detail || {}).email,
                     phone_number: (data.data_detail || {}).phone_number,
                     shipping_address: (data.data_detail || {}).shipping_address,
-                    shipping_amount: (data.data_detail || {}).shipping_amount
+                    shipping_amount: (data.data_detail || {}).shipping_amount,
+                    shipping_province: (data.data_detail || {}).shipping_province,
+                    shipping_city: (data.data_detail || {}).shipping_city,
+                    shipping_currier: (data.data_detail || {}).shipping_currier,
+                    shipping_postal_code: (data.data_detail || {}).shipping_postal_code
                 }
             });
         });
@@ -392,7 +397,18 @@ function App() {
         'div',
         null,
         React.createElement(CssBaseline, null),
-        React.createElement(
+        productCatalogRequest.isRequest ? React.createElement(
+            Grid,
+            {
+                container: true,
+                spacing: 0,
+                direction: 'column',
+                alignItems: 'center',
+                justify: 'center',
+                style: { minHeight: '100vh' }
+            },
+            React.createElement(CircularProgress, null)
+        ) : React.createElement(
             Grid,
             { container: true },
             React.createElement(
@@ -508,6 +524,30 @@ function App() {
                                 label: 'Email *',
                                 option: 'area',
                                 value: (checkoutProcessRequest.payload || {}).email,
+                                defaultValue: ''
+                            }),
+                            renderTextField({
+                                name: 'shipping_province',
+                                label: 'Provinsi *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_province,
+                                defaultValue: ''
+                            }),
+                            renderTextField({
+                                name: 'shipping_city',
+                                label: 'Kota *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_city,
+                                defaultValue: ''
+                            }),
+                            renderTextField({
+                                name: 'shipping_currier',
+                                label: 'Layanan kurir *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_currier,
+                                defaultValue: ''
+                            }),
+                            renderTextField({
+                                name: 'shipping_postal_code',
+                                label: 'Kode pos',
+                                value: (checkoutProcessRequest.payload || {}).shipping_postal_code,
                                 defaultValue: ''
                             }),
                             renderTextField({

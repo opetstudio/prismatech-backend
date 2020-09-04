@@ -34,7 +34,9 @@ var _MaterialUI = MaterialUI,
     InputLabel = _MaterialUI.InputLabel,
     Select = _MaterialUI.Select,
     MenuItem = _MaterialUI.MenuItem,
-    FormHelperText = _MaterialUI.FormHelperText;
+    FormHelperText = _MaterialUI.FormHelperText,
+    CircularProgress = _MaterialUI.CircularProgress,
+    Switch = _MaterialUI.Switch;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
@@ -69,7 +71,7 @@ function App() {
         pageSize: 0,
         count: 0,
         reload: 0,
-        isRequest: false
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productCatalogRequest = _React$useState2[0],
@@ -470,7 +472,18 @@ function App() {
         'div',
         null,
         React.createElement(CssBaseline, null),
-        React.createElement(
+        productCatalogRequest.isRequest ? React.createElement(
+            Grid,
+            {
+                container: true,
+                spacing: 0,
+                direction: 'column',
+                alignItems: 'center',
+                justify: 'center',
+                style: { minHeight: '100vh' }
+            },
+            React.createElement(CircularProgress, null)
+        ) : React.createElement(
             Grid,
             { container: true },
             React.createElement(
