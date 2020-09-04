@@ -338,15 +338,17 @@ function App() {
     var handleCity = function handleCity(event) {
         setKota(event.target.value);
         var weight = (listData || []).map(function (key) {
+            console.log("ctaashd" + key.product_id.weight);
             return key.product_id.weight;
         }).reduce(function (x, y) {
-            return parseInt(x) + parseInt(y);
+            console.log("asdasd" + x + "-" + y);
+            return parseFloat(x) + parseFloat(y);
         }, 0);
 
         var countDistanceRequest = {
             origin: "152",
             destination: event.target.value.city_id,
-            weight: weight,
+            weight: weight * 1000,
             courier: "jne"
         };
         console.log("countDistanceRequest " + JSON.stringify(countDistanceRequest));
