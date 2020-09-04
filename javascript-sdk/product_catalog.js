@@ -17,7 +17,10 @@ var _MaterialUI = MaterialUI,
     Badge = _MaterialUI.Badge,
     Snackbar = _MaterialUI.Snackbar,
     Alert = _MaterialUI.Alert,
-    CardActionArea = _MaterialUI.CardActionArea;
+    CardActionArea = _MaterialUI.CardActionArea,
+    CircularProgress = _MaterialUI.CircularProgress,
+    IconButton = _MaterialUI.IconButton,
+    SvgIcon = _MaterialUI.SvgIcon;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
@@ -74,7 +77,7 @@ function App() {
         pageIndex: 0,
         pageSize: 0,
         count: 0,
-        isRequest: false
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productCatalogRequest = _React$useState2[0],
@@ -88,13 +91,10 @@ function App() {
         addToCartRequest = _React$useState4[0],
         setAddToCartRequest = _React$useState4[1];
 
-    var doFetchData = React.useCallback(function (_ref) {
-        var pageSize = _ref.pageSize,
-            pageIndex = _ref.pageIndex;
-
+    var doFetchData = React.useCallback(function (page) {
         //     // fetch product
         // Simple POST request with a JSON body using fetch
-        var graphqlData = 'query{\n      getAllTokoProductsByTokoId(toko_id: "' + TOKOONLINE_TOKOID + '" ,page_size: 10, page_index: 0, string_to_search: ""){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n      getAllTokoProductsByTokoId(toko_id: "' + TOKOONLINE_TOKOID + '" ,page_size: 10, page_index: ' + page + ', string_to_search: ""){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -116,8 +116,8 @@ function App() {
         });
     }, []);
 
-    var doAddToCart = function doAddToCart(_ref2) {
-        var productId = _ref2.productId;
+    var doAddToCart = function doAddToCart(_ref) {
+        var productId = _ref.productId;
 
         var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
         var requestOptions = {
@@ -164,10 +164,14 @@ function App() {
         pageIndex = productCatalogRequest.pageIndex,
         pageSize = productCatalogRequest.pageSize;
 
+    var _React$useState7 = React.useState(0),
+        _React$useState8 = _slicedToArray(_React$useState7, 2),
+        page = _React$useState8[0],
+        setPage = _React$useState8[1];
 
     React.useEffect(function () {
-        doFetchData({ pageSize: pageSize, pageIndex: pageIndex });
-    }, [doFetchData, pageIndex, pageSize]);
+        doFetchData(page);
+    }, [page]);
 
     var convertRupiah = function convertRupiah(param) {
         var reverse = param.toString().split('').reverse().join(''),
@@ -181,16 +185,31 @@ function App() {
         window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
     };
 
-    var _React$useState7 = React.useState(0),
-        _React$useState8 = _slicedToArray(_React$useState7, 2),
-        cart = _React$useState8[0],
-        setCart = _React$useState8[1];
+    var _React$useState9 = React.useState(0),
+        _React$useState10 = _slicedToArray(_React$useState9, 2),
+        cart = _React$useState10[0],
+        setCart = _React$useState10[1];
+
+    var handlePage = function handlePage(param) {
+        param ? setPage(page + 1) : page === 0 ? setPage(0) : setPage(page - 1);
+    };
 
     return React.createElement(
         'div',
         null,
         React.createElement(CssBaseline, null),
-        React.createElement(
+        productCatalogRequest.isRequest ? React.createElement(
+            Grid,
+            {
+                container: true,
+                spacing: 0,
+                direction: 'column',
+                alignItems: 'center',
+                justify: 'center',
+                style: { minHeight: '100vh' }
+            },
+            React.createElement(CircularProgress, null)
+        ) : React.createElement(
             Container,
             { className: classes.cardGrid, maxWidth: 'md' },
             React.createElement(
@@ -203,11 +222,18 @@ function App() {
                 },
                 React.createElement(
                     Badge,
-                    { onClick: goToCart, badgeContent: cart, color: 'secondary', style: { position: 'fixed', zIndex: 2 } },
+                    { onClick: goToCart, badgeContent: cart, color: 'secondary',
+                        style: { position: 'fixed', zIndex: 2 } },
                     React.createElement(
-                        Fab,
-                        { color: 'inherit', size: 'small', variant: 'extended', style: { marginTop: -2, marginRight: -5 } },
-                        'Keranjang saya'
+                        IconButton,
+                        { edge: 'end', 'aria-label': 'delete',
+                            style: { marginTop: -2, marginRight: -5, backgroundColor: '#efefef' } },
+                        React.createElement(
+                            SvgIcon,
+                            null,
+                            React.createElement('path', {
+                                d: 'M10 19.5c0 .829-.672 1.5-1.5 1.5s-1.5-.671-1.5-1.5c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5zm3.5-1.5c-.828 0-1.5.671-1.5 1.5s.672 1.5 1.5 1.5 1.5-.671 1.5-1.5c0-.828-.672-1.5-1.5-1.5zm1.336-5l1.977-7h-16.813l2.938 7h11.898zm4.969-10l-3.432 12h-12.597l.839 2h13.239l3.474-12h1.929l.743-2h-4.195z' })
+                        )
                     )
                 )
             ),
@@ -273,6 +299,46 @@ function App() {
                         )
                     );
                 })
+            ),
+            React.createElement(
+                Grid,
+                {
+                    container: true,
+                    direction: 'row',
+                    justify: 'center',
+                    alignItems: 'center'
+                },
+                React.createElement(
+                    IconButton,
+                    { onClick: function onClick() {
+                            return handlePage();
+                        }, edge: 'end', 'aria-label': 'delete',
+                        style: { marginTop: 20, marginRight: 10 } },
+                    React.createElement(
+                        SvgIcon,
+                        null,
+                        React.createElement('path', {
+                            d: 'M0 12c0 6.627 5.373 12 12 12s12-5.373 12-12-5.373-12-12-12-12 5.373-12 12zm7.58 0l5.988-5.995 1.414 1.416-4.574 4.579 4.574 4.59-1.414 1.416-5.988-6.006z' })
+                    )
+                ),
+                React.createElement(
+                    'h4',
+                    { style: { marginTop: 20, paddingTop: 15 } },
+                    page + 1
+                ),
+                React.createElement(
+                    IconButton,
+                    { onClick: function onClick() {
+                            return handlePage(true);
+                        }, edge: 'end', 'aria-label': 'delete',
+                        style: { marginTop: 20, marginLeft: 10 } },
+                    React.createElement(
+                        SvgIcon,
+                        null,
+                        React.createElement('path', {
+                            d: 'M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.568 18.005l-1.414-1.415 4.574-4.59-4.574-4.579 1.414-1.416 5.988 5.995-5.988 6.005z' })
+                    )
+                )
             )
         )
     );

@@ -29,7 +29,7 @@ const fields = {
   code: { type: GraphQLString },
   isneed_shipping: { type: GraphQLString },
   price: { type: GraphQLInt },
-  weight: { type: GraphQLInt },
+  weight: { type: GraphQLString },
   description: { type: GraphQLString },
   image_id: { type: FileType },
   category_id: { type: GraphQLList(CategoryType) },
@@ -53,7 +53,7 @@ module.exports = {
     category_id: { type: GraphQLList(GraphQLString) },
     status: { type: GraphQLString },
     isneed_shipping: { type: GraphQLString },
-    weight: { type: GraphQLInt }
+    weight: { type: GraphQLString }
   },
   createArgs: {
     name: { type: GraphQLString },
@@ -67,7 +67,7 @@ module.exports = {
     image_id: { type: GraphQLString },
     status: { type: GraphQLString },
     isneed_shipping: { type: GraphQLString },
-    weight: { type: GraphQLInt }
+    weight: { type: GraphQLString }
   },
   fields: {
     ...fields,
