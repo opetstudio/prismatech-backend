@@ -18,7 +18,7 @@ const otpSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['FORGET PASSWORD', 'CHANGE EMAIL'],
+    enum: ['FORGET PASSWORD', 'CHANGE EMAIL', 'PAYMENT PROCESS', 'CHECK PAYMENT PROCESS'],
     default: 'CHANGE EMAIL'
   },
   created_at: {

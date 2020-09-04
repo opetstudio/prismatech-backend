@@ -169,6 +169,73 @@ const forgetPasswordSendOtpService = async (email) => {
     return { status: 400, error: err || 'Failed send new password' }
   }
 }
+const purchaseorderCheckStatusSendOtp = async ({ email, otpString, emailBody, emailSubject }) => {
+  if (!email) return { status: 400, error: 'Invalid email' }
+
+  // const { error } = User.validation({ email })
+  // if (error) return { status: 400, error: error.details[0].message }
+
+  try {
+    // const user = await User.findOne({ email })
+    // if (!user) return { status: 400, error: 'Email not found' }
+
+    // check if already sent forget password otp before
+    const alreadySentOtp = await Otp.findOne({ new_email: email, status: 'ACTIVE', type: 'CHECK PAYMENT PROCESS' })
+    if (alreadySentOtp) {
+      await Otp.findOneAndUpdate({ new_email: email, status: 'ACTIVE', type: 'CHECK PAYMENT PROCESS' }, { status: 'INACTIVE', updated_at: getUnixTime() })
+    }
+
+    const model = {
+      type: 'purchaseorderCheckStatusRequestOtp',
+      email,
+      otp: otpString || generateRandomNumber(4),
+      emailBody,
+      emailSubject
+    }
+
+    await sendMailVerification(model)
+
+    const otp = await new Otp({
+      status: 'ACTIVE',
+      otp_number: model.otp,
+      otp_id: generateID(RANDOM_STRING_FOR_CONCAT),
+      otp_reference_number: generateRandomNumber(6),
+      new_email: email,
+      type: 'CHECK PAYMENT PROCESS',
+      created_at: new Date().getTime(),
+      updated_at: new Date().getTime()
+    })
+
+    await otp.save()
+
+    return { status: 200, success: 'Successfully send otp', otpRefNum: otp.otp_reference_number }
+  } catch (err) {
+    // console.log('err====>', err)
+    return { status: 400, error: err || 'Failed send new password' }
+  }
+}
+const purchaseorderCheckStatusValidateOtp = async (otp, email, otpRefNum) => {
+  // if (!otp) return { status: 400, error: 'Invalid otp' }
+  try {
+    const filter = { new_email: email, otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'CHECK PAYMENT PROCESS' }
+    console.log('filter otp=>', filter)
+    const otpChecker = await Otp.findOne(filter)
+    if (!otpChecker) {
+      return { status: 400, error: 'Invalid otp' }
+    }
+    const otpTime = parseInt(otpChecker.created_at)
+    const time = await expireOtpChecker({ getOtpTime: otpTime, otp })
+    if (!time) return { status: 400, error: 'Otp expired' }
+    otpChecker.status = 'INACTIVE'
+    otpChecker.updated_at = new Date().getTime()
+    await otpChecker.save()
+    // await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
+    return { status: 200, success: 'Successfully validate otp' }
+  } catch (err) {
+    console.log('err====>', err)
+    return { status: 400, error: 'Failed validate otp' }
+  }
+}
 const paymentProcessSendOtpService = async ({ email, otpString, emailBody, emailSubject }) => {
   if (!email) return { status: 400, error: 'Invalid email' }
 
@@ -210,43 +277,29 @@ const paymentProcessSendOtpService = async ({ email, otpString, emailBody, email
 
     return { status: 200, success: 'Successfully send otp', otpRefNum: otp.otp_reference_number }
   } catch (err) {
+    // console.log('err====>', err)
     return { status: 400, error: err || 'Failed send new password' }
   }
 }
 const paymentProcessValidateOtpService = async (otp, email, otpRefNum) => {
-  if (!otp) return { status: 400, error: 'Invalid otp' }
-
+  // if (!otp) return { status: 400, error: 'Invalid otp' }
   try {
-    const otpChecker = await Otp.findOne({ otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'PAYMENT PROCESS' })
+    const filter = { new_email: email, otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'PAYMENT PROCESS' }
+    console.log('filter otp=>', filter)
+    const otpChecker = await Otp.findOne(filter)
     if (!otpChecker) {
-      const isEmailValid = await Otp.findOne({ new_email: email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' })
-      if (isEmailValid) {
-        if (isEmailValid.status !== 'ACTIVE') {
-          return { status: 400, error: 'Otp expired' }
-        }
-        if (isEmailValid.isValidLimit <= 2) {
-          if (isEmailValid.isValidLimit >= 2) {
-            await Otp.findOneAndUpdate({ new_email: email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' }, { status: 'INACTIVE', isValidLimit: isEmailValid.isValidLimit + 1, updated_at: getUnixTime() })
-            return { status: 400, error: 'Otp expired' }
-          }
-          await Otp.findOneAndUpdate({ new_email: email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' }, { isValidLimit: isEmailValid.isValidLimit + 1, updated_at: getUnixTime() })
-          return { status: 400, error: 'Invalid otp' }
-        } else {
-          await Otp.findOneAndUpdate({ email, otp_reference_number: otpRefNum, type: 'FORGET PASSWORD' }, { status: 'INACTIVE', updated_at: getUnixTime() })
-          return { status: 400, error: 'Otp expired' }
-        }
-      } else {
-        return { status: 400, error: 'Invalid otp' }
-      }
+      return { status: 400, error: 'Invalid otp' }
     }
     const otpTime = parseInt(otpChecker.created_at)
     const time = await expireOtpChecker({ getOtpTime: otpTime, otp })
     if (!time) return { status: 400, error: 'Otp expired' }
-
-    await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
-
+    otpChecker.status = 'INACTIVE'
+    otpChecker.updated_at = new Date().getTime()
+    await otpChecker.save()
+    // await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
     return { status: 200, success: 'Successfully validate otp' }
   } catch (err) {
+    console.log('err====>', err)
     return { status: 400, error: 'Failed validate otp' }
   }
 }
@@ -487,6 +540,8 @@ module.exports.paymentProcessSendOtpService = paymentProcessSendOtpService
 module.exports.paymentProcessValidateOtpService = paymentProcessValidateOtpService
 module.exports.forgetPasswordSendOtpService = forgetPasswordSendOtpService
 module.exports.changePasswordViaForgetPasswordService = changePasswordViaForgetPasswordService
+module.exports.purchaseorderCheckStatusSendOtp = purchaseorderCheckStatusSendOtp
+module.exports.purchaseorderCheckStatusValidateOtp = purchaseorderCheckStatusValidateOtp
 // module.exports.merchantForgetPasswordSendOtpService = merchantForgetPasswordSendOtpService
 // module.exports.merchantChangePasswordViaForgetPasswordService = merchantChangePasswordViaForgetPasswordService
 // module.exports.institutionForgetPasswordSendOtpService = institutionForgetPasswordSendOtpService

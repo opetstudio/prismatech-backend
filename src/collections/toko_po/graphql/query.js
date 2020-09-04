@@ -88,10 +88,30 @@ const getDetailDataBySessionId = {
     return Services.getDetailDataBySessionId(args, context)
   }
 }
+const purchaseorderCheckStatus = {
+  type: new GraphQLObjectType({
+    name: 'purchaseorderCheckStatusResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      data_detail: { type: Type[Manifest.entity + 'Type'] }
+    })
+  }),
+  args: {
+    email: { type: GraphQLString },
+    trxid: { type: GraphQLString },
+    otpRefNum: { type: GraphQLString },
+    otp: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return Services.purchaseorderCheckStatus(args, context)
+  }
+}
 
 module.exports = {
   ['getAll' + Manifest.entity + 's']: getAllData,
   ['getAll' + Manifest.entity + 's' + 'BySessionId']: getAllDataBySessionId,
   ['getDetail' + Manifest.entity + 'BySessionId']: getDetailDataBySessionId,
-  ['getDetail' + Manifest.entity]: getDetailData
+  ['getDetail' + Manifest.entity]: getDetailData,
+  purchaseorderCheckStatus
 }

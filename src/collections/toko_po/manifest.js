@@ -24,6 +24,7 @@ const commonFields = {
 const fields = {
   _id: { type: GraphQLID },
   action: { type: GraphQLString },
+  debitin_paymentpage_backend_baseurl: { type: GraphQLString },
   payment_page_url: { type: GraphQLString },
   full_name: { type: GraphQLString },
   phone_number: { type: GraphQLString },
