@@ -224,9 +224,9 @@ const checkoutProcess = async (args, context) => {
     // get all cart
     const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: tokoId, status: 'open' }).populate({ path: 'product_id' })
     if (_.isEmpty(allOpenCart)) throw new Error('Checkout Failed. The cart is empty')
-    console.log('allOpenCart===>', allOpenCart)
+    // console.log('allOpenCart===>', allOpenCart)
 
-    let shippinAmount = !_.isEmpty(args.shipping_amount) ? parseInt(args.shipping_amount) : 0
+    let shippinAmount = parseInt(args.shipping_amount)
     const isNeedShippingArr = allOpenCart.map(v => v.product_id.isneed_shipping) // args.total_amount
     let isneedShipping = 'N'
     if (isNeedShippingArr.includes('Y')) {
