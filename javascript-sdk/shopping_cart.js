@@ -71,6 +71,7 @@ function App() {
         pageSize: 0,
         count: 0,
         reload: 0,
+        isNeedShipping: null,
         isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -160,7 +161,7 @@ function App() {
 
         //     // fetch product
         // Simple POST request with a JSON body using fetch
-        var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
+        var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        is_need_shipping,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            },\n            weight\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -176,6 +177,7 @@ function App() {
             return setProductCatalogRequest({
                 listData: data.list_data,
                 pageCount: data.page_count,
+                isNeedShipping: data.is_need_shipping,
                 count: data.count,
                 isRequest: false
             });
@@ -240,9 +242,6 @@ function App() {
             body: JSON.stringify({ query: graphqlData })
         };
         console.log("graphqlData : " + graphqlData);
-        if (provinsi == "") return alert("Silahkan pilih provinsi");
-        if (kota == "") return alert("Silahkan pilih kota");
-        if (ongkir == 0) return alert("Silahkan pilih kurir");
         fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
             return response.json();
         }).then(function (response) {
@@ -338,12 +337,19 @@ function App() {
 
     var handleCity = function handleCity(event) {
         setKota(event.target.value);
+        var weight = (listData || []).map(function (key) {
+            return key.product_id.weight;
+        }).reduce(function (x, y) {
+            return parseInt(x) + parseInt(y);
+        }, 0);
+
         var countDistanceRequest = {
             origin: "152",
             destination: event.target.value.city_id,
-            weight: 500,
+            weight: weight,
             courier: "jne"
         };
+        console.log("countDistanceRequest " + JSON.stringify(countDistanceRequest));
         fetch("http://dev.plink.co.id:8081/plink/v1/cost", {
             method: "POST",
             headers: {
@@ -354,6 +360,7 @@ function App() {
         }).then(function (res) {
             return res.json();
         }).then(function (result) {
+            console.log("result" + JSON.stringify(result));
             setLayananKurir(result.rajaongkir.results[0].costs);
         }, function (error) {
             console.log(JSON.stringify(error));
@@ -517,7 +524,7 @@ function App() {
                                     productId: productId
                                 });
                             }),
-                            React.createElement(
+                            productCatalogRequest.isNeedShipping == "Y" ? React.createElement(
                                 Grid,
                                 {
                                     container: true,
@@ -527,7 +534,8 @@ function App() {
                                 },
                                 React.createElement(
                                     Typography,
-                                    { variant: 'caption', style: { marginLeft: 16, marginTop: 16 } },
+                                    { variant: 'caption',
+                                        style: { marginLeft: 16, marginTop: 16 } },
                                     'Ongkir'
                                 ),
                                 React.createElement(
@@ -536,7 +544,7 @@ function App() {
                                         style: { marginRight: 16, marginTop: 16 } },
                                     convertRupiah(ongkir)
                                 )
-                            ),
+                            ) : React.createElement(Grid, null),
                             React.createElement(
                                 Grid,
                                 {
@@ -602,7 +610,7 @@ function App() {
                                 defaultValue: ''
                             })
                         ),
-                        React.createElement(
+                        productCatalogRequest.isNeedShipping == "Y" ? React.createElement(
                             Grid,
                             { container: true, spacing: 2, style: { marginTop: 8 } },
                             React.createElement(
@@ -741,7 +749,7 @@ function App() {
                                 value: (checkoutProcessRequest.payload || {}).shipping_postal_code,
                                 defaultValue: ''
                             })
-                        ),
+                        ) : React.createElement(Grid, null),
                         React.createElement(
                             Grid,
                             { container: true, spacing: 2 },
