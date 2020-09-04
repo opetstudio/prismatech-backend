@@ -27,7 +27,9 @@ const fields = {
   name: { type: GraphQLString },
   content1: { type: GraphQLString },
   code: { type: GraphQLString },
+  isneed_shipping: { type: GraphQLString },
   price: { type: GraphQLInt },
+  weight: { type: GraphQLInt },
   description: { type: GraphQLString },
   image_id: { type: FileType },
   category_id: { type: GraphQLList(CategoryType) },
@@ -49,7 +51,9 @@ module.exports = {
     toko_id: { type: GraphQLList(GraphQLString) },
     tag_id: { type: GraphQLList(GraphQLString) },
     category_id: { type: GraphQLList(GraphQLString) },
-    status: { type: GraphQLString }
+    status: { type: GraphQLString },
+    isneed_shipping: { type: GraphQLString },
+    weight: { type: GraphQLInt }
   },
   createArgs: {
     name: { type: GraphQLString },
@@ -61,7 +65,9 @@ module.exports = {
     toko_id: { type: GraphQLList(GraphQLString) },
     tag_id: { type: GraphQLList(GraphQLString) },
     image_id: { type: GraphQLString },
-    status: { type: GraphQLString }
+    status: { type: GraphQLString },
+    isneed_shipping: { type: GraphQLString },
+    weight: { type: GraphQLInt }
   },
   fields: {
     ...fields,

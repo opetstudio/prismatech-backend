@@ -31,6 +31,7 @@ const fields = {
   invoice_code: { type: GraphQLString },
   email: { type: GraphQLString },
   session_id: { type: GraphQLString },
+  isneed_shipping: { type: GraphQLString },
   device_id: { type: GraphQLString },
   shipping_address: { type: GraphQLString },
   shipping_province: {
