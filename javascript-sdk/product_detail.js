@@ -123,7 +123,7 @@ var useStyles = makeStyles(function (theme) {
         },
         spesifikasiContainer: {
             margin: '0 0 1.5rem',
-            padding: '3rem 2rem',
+            padding: '2rem 2rem',
             background: '#fff'
         },
         spesifikasiTitleContainer: {
@@ -228,7 +228,7 @@ function App() {
         setQty = _React$useState6[1];
 
     var doFetchData = React.useCallback(function () {
-        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          content1,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -395,11 +395,7 @@ function App() {
                                 React.createElement(
                                     Grid,
                                     { item: true, style: { padding: 0, marginTop: 10 } },
-                                    React.createElement(
-                                        Typography,
-                                        { className: classes.spesifikasiTitle },
-                                        'Detail Produk'
-                                    ),
+                                    React.createElement(Typography, { className: classes.spesifikasiTitle }),
                                     React.createElement(
                                         Typography,
                                         null,
@@ -499,6 +495,20 @@ function App() {
                             )
                         )
                     )
+                ),
+                React.createElement(
+                    'div',
+                    { className: classes.spesifikasiContainer },
+                    React.createElement(
+                        Container,
+                        { className: classes.spesifikasiTitleContainer },
+                        React.createElement(
+                            Typography,
+                            { className: classes.spesifikasiTitle },
+                            'Spesifikasi'
+                        )
+                    ),
+                    React.createElement('div', { className: classes.product_detail, dangerouslySetInnerHTML: { __html: decodeURIComponent(detailData.content1) } })
                 )
             )
         )
