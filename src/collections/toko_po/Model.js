@@ -42,6 +42,11 @@ const schema = new mongoose.Schema({
   shipping_postal_code: {
     type: String
   },
+  isneed_shipping: {
+    type: String,
+    enum: ['Y', 'N'],
+    default: 'Y'
+  },
   invoice_code: {
     type: String
   },

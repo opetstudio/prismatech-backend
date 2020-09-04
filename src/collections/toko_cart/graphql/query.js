@@ -41,6 +41,7 @@ const getAllDataBySessionId = {
     fields: () => ({
       status: { type: GraphQLInt },
       error: { type: GraphQLString },
+      is_need_shipping: { type: GraphQLString },
       list_data: { type: GraphQLList(Type[Manifest.entity + 'Type']) },
       count: { type: GraphQLLong },
       page_count: { type: GraphQLLong }
