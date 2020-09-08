@@ -241,7 +241,12 @@ function App() {
             // response.json()
             return response.data.getDetailTokoProductJoinCartByCode;
         }).then(function (data) {
-            setProductDetailRequest({ cartDetail: data.data_detail_in_cart, detailData: data.data_detail, isRequest: false, error: null });
+            setProductDetailRequest({
+                cartDetail: data.data_detail_in_cart,
+                detailData: data.data_detail,
+                isRequest: false,
+                error: null
+            });
             setQty((data.data_detail_in_cart || {}).count || 1);
         });
     }, []);
@@ -504,7 +509,8 @@ function App() {
                             'Deskripsi produk'
                         )
                     ),
-                    React.createElement('div', { className: classes.product_detail, dangerouslySetInnerHTML: { __html: decodeURIComponent(detailData.content1) } })
+                    React.createElement('div', { className: classes.product_detail,
+                        dangerouslySetInnerHTML: { __html: decodeURIComponent(detailData.content1) } })
                 )
             )
         )
