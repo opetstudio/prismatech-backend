@@ -36,6 +36,9 @@ const schema = new mongoose.Schema({
   shipping_city: {
     type: String
   },
+  shipping_subcity: {
+    type: String
+  },
   shipping_currier: {
     type: String
   },
