@@ -249,6 +249,7 @@ const checkoutProcess = async (args, context) => {
     dataPo.shipping_address = args.shipping_address
     dataPo.isneed_shipping = isneedShipping
     dataPo.shipping_city = args.shipping_city
+    dataPo.shipping_subcity = args.shipping_subcity
     dataPo.shipping_province = args.shipping_province
     dataPo.shipping_currier = args.shipping_currier
     dataPo.shipping_postal_code = args.shipping_postal_code
