@@ -40,6 +40,9 @@ const fields = {
   shipping_city: {
     type: GraphQLString
   },
+  shipping_subcity: {
+    type: GraphQLString
+  },
   shipping_currier: {
     type: GraphQLString
   },
@@ -74,6 +77,9 @@ module.exports = {
     shipping_city: {
       type: GraphQLString
     },
+    shipping_subcity: {
+      type: GraphQLString
+    },
     shipping_currier: {
       type: GraphQLString
     },
@@ -98,6 +104,9 @@ module.exports = {
       type: GraphQLString
     },
     shipping_city: {
+      type: GraphQLString
+    },
+    shipping_subcity: {
       type: GraphQLString
     },
     shipping_currier: {

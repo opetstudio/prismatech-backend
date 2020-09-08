@@ -14,6 +14,15 @@ const schema = new mongoose.Schema({
   website: {
     type: String
   },
+  province: {
+    type: String
+  },
+  city: {
+    type: String
+  },
+  subcity: {
+    type: String
+  },
   facebook: {
     type: String
   },

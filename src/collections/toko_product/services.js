@@ -383,6 +383,10 @@ const doUpdateData = async (args, context) => {
         console.log('args.tag_id => ', args.tag_id)
       }
     }
+    if (_.isEmpty(args.toko_id)) {
+      const productDetail = await EntityModel.findOne({ _id: args._id }).populate({ path: 'toko_id' })
+      args.toko_id = productDetail.toko_id.map(v => '' + (v || {})._id)
+    }
     // check authorization
     let isEligible = false
     const myListToko = await TokoTeamModel.find({ user_id: userId })
@@ -395,6 +399,7 @@ const doUpdateData = async (args, context) => {
     }
     const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
     if (myOwnListToko) {
+      console.log('myOwnListToko=>', myOwnListToko)
       myOwnListToko.forEach(v => {
         if ((args.toko_id || []).includes('' + v._id)) isEligible = true
         if (isEligible) return true
