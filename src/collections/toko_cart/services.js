@@ -64,6 +64,7 @@ const fetchAllDataBySessionId = async (args, context = {}) => {
       .skip(args.page_index * args.page_size)
       .limit(args.page_size)
       .populate({ path: 'product_id', populate: { path: 'image_id' } })
+      .populate({ path: 'toko_id' })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     const isNeedShippingArr = (result || []).map(v => v.product_id.isneed_shipping) // args.total_amount
