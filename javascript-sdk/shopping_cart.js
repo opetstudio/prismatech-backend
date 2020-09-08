@@ -148,6 +148,11 @@ function App() {
         kurir = _React$useState24[0],
         setKurir = _React$useState24[1];
 
+    var _React$useState25 = React.useState(0),
+        _React$useState26 = _slicedToArray(_React$useState25, 2),
+        weight = _React$useState26[0],
+        setWeight = _React$useState26[1];
+
     var count = productCatalogRequest.count,
         pageCount = productCatalogRequest.pageCount,
         listData = productCatalogRequest.listData,
@@ -174,13 +179,20 @@ function App() {
             // response.json()
             return response.data.getAllTokoCartsBySessionId;
         }).then(function (data) {
-            return setProductCatalogRequest({
+            setProductCatalogRequest({
                 listData: data.list_data,
                 pageCount: data.page_count,
                 isNeedShipping: data.is_need_shipping,
                 count: data.count,
                 isRequest: false
             });
+            setWeight((data.list_data || []).map(function (key) {
+                console.log("ctaashd" + key.product_id.weight);
+                return parseFloat(key.product_id.weight) * key.count;
+            }).reduce(function (x, y) {
+                console.log("asdasd" + x + "-" + y);
+                return parseFloat(x) + parseFloat(y);
+            }, 0));
         });
     }, []);
     var doAddToCart = function doAddToCart(_ref2) {
@@ -336,18 +348,19 @@ function App() {
     };
 
     var handleCity = function handleCity(event) {
-        setKota(event.target.value);
-        var weight = (listData || []).map(function (key) {
-            console.log("ctaashd" + key.product_id.weight);
-            return key.product_id.weight;
-        }).reduce(function (x, y) {
-            console.log("asdasd" + x + "-" + y);
-            return parseFloat(x) + parseFloat(y);
-        }, 0);
+        if (event == null) return;
+        setKota(event);
+        // let weight = (listData || []).map((key)=>{
+        //     console.log("ctaashd"+key.product_id.weight)
+        //     return  parseFloat(key.product_id.weight)*key.count
+        // }).reduce(function (x, y) {
+        //     console.log("asdasd"+x +"-"+ y)
+        //     return parseFloat(x)+parseFloat(y)
+        // }, 0)
 
         var countDistanceRequest = {
             origin: "152",
-            destination: event.target.value.city_id,
+            destination: event.city_id,
             weight: weight * 1000,
             courier: "jne"
         };
@@ -373,6 +386,10 @@ function App() {
         setOngkir(event.target.value.cost[0].value);
         setKurir(event.target.value);
     };
+
+    React.useEffect(function () {
+        handleCity(kota);
+    }, [weight]);
 
     var ListView = function ListView(_ref5) {
         var productImage = _ref5.productImage,
@@ -676,7 +693,9 @@ function App() {
                                             labelId: 'demo-simple-select-helper-label',
                                             id: 'demo-simple-select-helper',
                                             value: kota,
-                                            onChange: handleCity
+                                            onChange: function onChange(event) {
+                                                return handleCity(event.target.value);
+                                            }
                                         },
                                         React.createElement(
                                             MenuItem,

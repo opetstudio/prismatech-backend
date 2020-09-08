@@ -242,7 +242,7 @@ function App() {
             return response.data.getDetailTokoProductJoinCartByCode;
         }).then(function (data) {
             setProductDetailRequest({ cartDetail: data.data_detail_in_cart, detailData: data.data_detail, isRequest: false, error: null });
-            setQty((data.data_detail_in_cart || {}).count || 0);
+            setQty((data.data_detail_in_cart || {}).count || 1);
         });
     }, []);
     var error = productDetailRequest.error,
@@ -254,13 +254,13 @@ function App() {
         doFetchData();
     }, [doFetchData]);
 
-    var handleDecreaseItem = function handleDecreaseItem(event, index) {
-        if (qty > 0) {
+    var handleDecreaseItem = function handleDecreaseItem() {
+        if (qty > 1) {
             setQty(qty - 1);
         }
     };
 
-    var handleIncreaseItem = function handleIncreaseItem(event, index) {
+    var handleIncreaseItem = function handleIncreaseItem() {
         setQty(qty + 1);
     };
 
@@ -398,7 +398,7 @@ function App() {
                                     React.createElement(Typography, { className: classes.spesifikasiTitle }),
                                     React.createElement(
                                         Typography,
-                                        null,
+                                        { style: { marginBottom: 10 } },
                                         detailData.description
                                     )
                                 ),
@@ -430,12 +430,8 @@ function App() {
                                                 ),
                                                 React.createElement(TextField, {
                                                     id: 'outlined-size-small',
-                                                    defaultValue: '0',
                                                     value: qty,
                                                     variant: 'outlined',
-                                                    onChange: function onChange(e) {
-                                                        return setQty(e.target.value);
-                                                    },
                                                     type: 'number',
                                                     size: 'small'
                                                 }),
@@ -505,7 +501,7 @@ function App() {
                         React.createElement(
                             Typography,
                             { className: classes.spesifikasiTitle },
-                            'Spesifikasi'
+                            'Deskripsi produk'
                         )
                     ),
                     React.createElement('div', { className: classes.product_detail, dangerouslySetInnerHTML: { __html: decodeURIComponent(detailData.content1) } })
