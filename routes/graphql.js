@@ -1,6 +1,7 @@
 const express = require('express')
 const graphqlHTTP = require('express-graphql')
 const schema = require('../schema')
+const config = require('config')
 const { applyMiddleware } = require('graphql-middleware')
 
 // bheem
@@ -24,7 +25,7 @@ module.exports = function (io) {
   return Router.all('/', (req, res) => {
     return graphqlHTTP({
       schema,
-      graphiql: true,
+      graphiql: config.get('isGraphiqlActive'),
       context: { req, res }
     })(req, res)
   })

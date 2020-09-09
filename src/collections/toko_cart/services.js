@@ -300,9 +300,9 @@ const doDeleteData = async (args, context) => {
   session.startTransaction()
   const opts = { session }
   try {
-    // const { accesstoken } = context.req.headers
-    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
-    // const { user_id: userId } = bodyAt
+    const { accesstoken } = context.req.headers
+    const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    const { user_id: userId } = bodyAt
     console.log('delete invoked args=', args)
     const sessionId = context.req.sessionID
     // delete privilege

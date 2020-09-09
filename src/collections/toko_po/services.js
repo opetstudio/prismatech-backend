@@ -301,6 +301,9 @@ const checkoutProcess = async (args, context) => {
 }
 const paymentProcessSendOtp = async (args, context) => {
   try {
+    // toko po detail
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
+    if (_.isEmpty(tokoPoDetail)) throw new Error('Data pembelian tidak ditemukan')
     const otp = generateRandomNumber(4)
     const paymentProcessSendOtpServiceResp = await paymentProcessSendOtpService({
       email: args.email,
