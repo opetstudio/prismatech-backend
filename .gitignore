@@ -26,3 +26,4 @@ publicv2/
 
 config/
 uploadfile/
+*.js.map
