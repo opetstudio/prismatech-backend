@@ -405,13 +405,14 @@ function App() {
 
     var handleKurir = function handleKurir(event) {
         if (subcity === null) return;
+        if (weight == 0) return;
         setKurir(event);
         var countDistanceRequest = {
-            origin: originRequest.originCity,
-            originType: "city",
-            destination: kota.city_id,
-            destinationType: 'city',
-            weight: weight === 0 ? 1 : weight * 1000,
+            origin: originRequest.originSubcity,
+            originType: "subdistrict",
+            destination: subcity.subdistrict_id,
+            destinationType: 'subdistrict',
+            weight: weight * 1000,
             courier: event
         };
         console.log("countDistanceRequest " + JSON.stringify(countDistanceRequest));
