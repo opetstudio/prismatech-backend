@@ -20,6 +20,7 @@ mongoose.connect(config.get('mongoUrl'), { useNewUrlParser: true, useUnifiedTopo
   .then((res) => console.log('Connected to MongoDB... ', config.get('mongoUrl')))
   .catch((err) => console.log('Cannot connect to MongoDB...', err))
 
+var apiRouter = require('./routes/api')
 var indexRouter = require('./routes/index')
 // var usersRouter = require('./routes/users')
 // var adminRouter = require('./routes/admin')
@@ -67,6 +68,7 @@ app.use(cors(corsOptions))
 // app.use(corsAccess())
 
 // app.use('/users', usersRouter)
+app.use('/api', apiRouter)
 app.use('/graphql', graphqlRouter)
 app.use('/', indexRouter)
 
