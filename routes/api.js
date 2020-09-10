@@ -81,5 +81,33 @@ router.get('/v1/fetchdata-subcity', async function (req, res, next) {
   if (!resp.ok) throw new Error('' + resp.problem)
   res.json(resp.data)
 })
+router.post('/v1/fetchdata-cost', async function (req, res, next) {
+  const bodyHit = {
+    origin: req.body.origin,
+    destination: req.body.destination,
+    weight: req.body.weight,
+    courier: req.body.courier
+  }
+  const api = Apisauce.create({
+    baseURL: config.get('rajaongkirBackendBaseUrl'),
+    headers: {
+      'Content-Type': 'application/json',
+      // 'Access-Control-Allow-Origin': '*',
+      // xsrfCookieName: 'myCatx',
+      // timeout: 10000,
+      key: 'a6d84c88b9fc6cbdf502972c57885da1'
+    }
+  })
+  const resp = await api.post('/plink/v1/cost', bodyHit)
+  // console.log('resp.duration====>', resp.duration)
+  console.log('resp.problem====>', resp.problem)
+  // console.log('resp.status====>', resp.status)
+  console.log('resp.ok====>', resp.ok)
+  // console.log('resp.data====>', resp.data)
+  // console.log('bodyHit====>', bodyHit)
+  // console.log('resp====>', resp)
+  if (!resp.ok) throw new Error('' + resp.problem)
+  res.json(resp.data)
+})
 
 module.exports = router
