@@ -123,7 +123,7 @@ function App() {
         provinsiData = _React$useState14[0],
         setProvinsiData = _React$useState14[1];
 
-    var _React$useState15 = React.useState({}),
+    var _React$useState15 = React.useState(null),
         _React$useState16 = _slicedToArray(_React$useState15, 2),
         provinsi = _React$useState16[0],
         setProvinsi = _React$useState16[1];
@@ -133,7 +133,7 @@ function App() {
         kotaData = _React$useState18[0],
         setKotaData = _React$useState18[1];
 
-    var _React$useState19 = React.useState({}),
+    var _React$useState19 = React.useState(null),
         _React$useState20 = _slicedToArray(_React$useState19, 2),
         kota = _React$useState20[0],
         setKota = _React$useState20[1];
@@ -337,7 +337,7 @@ function App() {
     }, [doFetchDetailDataPo]);
 
     var doFetchProvinsi = React.useCallback(function () {
-        fetch("http://dev.plink.co.id:8081/plink/v1/province", {
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-province", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -361,7 +361,7 @@ function App() {
     var handleProvince = function handleProvince(event) {
         console.log(event);
         setProvinsi(event.target.value);
-        fetch("http://dev.plink.co.id:8081/plink/v1/city?province=" + event.target.value.province_id, {
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-city?province=" + event.target.value.province_id, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -378,7 +378,7 @@ function App() {
 
     var handleCity = function handleCity(event) {
         setKota(event);
-        fetch("http://dev.plink.co.id:8081/plink/v1/subcity?city=" + event.city_id, {
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-subcity?city=" + event.city_id, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -398,7 +398,7 @@ function App() {
         setSubcity(event);
     };
 
-    var _React$useState33 = React.useState({}),
+    var _React$useState33 = React.useState(null),
         _React$useState34 = _slicedToArray(_React$useState33, 2),
         kurirservis = _React$useState34[0],
         setKurirservis = _React$useState34[1];
@@ -416,7 +416,7 @@ function App() {
             courier: event
         };
         console.log("countDistanceRequest " + JSON.stringify(countDistanceRequest));
-        fetch("http://dev.plink.co.id:8081/plink/v1/cost", {
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-cost", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -665,21 +665,18 @@ function App() {
                             renderTextField({
                                 name: 'full_name',
                                 label: 'Nama *',
-                                value: (checkoutProcessRequest.payload || {}).full_name,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).full_name
                             }),
                             renderTextField({
                                 name: 'phone_number',
                                 label: 'Nomor Telepon *',
-                                value: (checkoutProcessRequest.payload || {}).phone_number,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).phone_number
                             }),
                             renderTextField({
                                 name: 'email',
                                 label: 'Email *',
                                 option: 'area',
-                                value: (checkoutProcessRequest.payload || {}).email,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).email
                             })
                         ),
                         productCatalogRequest.isNeedShipping == "Y" ? React.createElement(
@@ -795,8 +792,7 @@ function App() {
                             renderTextField({
                                 name: 'shipping_postal_code',
                                 label: 'Kode pos',
-                                value: checkoutProcessRequest.payload.shipping_postal_code == 'undefined' ? '' : (checkoutProcessRequest.payload || '').shipping_postal_code,
-                                defaultValue: ''
+                                value: checkoutProcessRequest.payload.shipping_postal_code == 'undefined' ? '' : (checkoutProcessRequest.payload || '').shipping_postal_code
                             }),
                             React.createElement(
                                 Grid,
@@ -807,7 +803,7 @@ function App() {
                                     React.createElement(
                                         InputLabel,
                                         { id: 'demo-simple-select-helper-label' },
-                                        'Layanan Kurir *'
+                                        'Kurir *'
                                     ),
                                     React.createElement(
                                         Select,
@@ -847,7 +843,7 @@ function App() {
                                     React.createElement(
                                         FormHelperText,
                                         null,
-                                        'Pilih Layanan Kurir'
+                                        'Pilih Kurir'
                                     )
                                 )
                             ),
@@ -898,8 +894,7 @@ function App() {
                                 label: 'Alamat lengkap *',
                                 option: 'area',
                                 row: 4,
-                                value: (checkoutProcessRequest.payload || {}).shipping_address,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).shipping_address
                             })
                         )
                     ),
