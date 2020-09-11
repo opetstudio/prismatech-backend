@@ -323,6 +323,12 @@ const purchaseorderCheckStatusRequestOtp = async (args, context) => {
     // toko po detail
     const tokoPoDetail = await EntityModel.findOne({ session_id: args.trxid, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Transaksi tidak ditemukan.')
+    // toko online detail
+    const tokoDetail = await TokoTokoOnlineModel.findById(tokoPoDetail.toko_id)
+    if (_.isEmpty(tokoDetail)) throw new Error('Gagal Purchase. Data toko tidak ditemukan')
+    if (_.isEmpty(tokoDetail.plink_merchant_key_id)) throw new Error('Gagal Purchase. Plink Merchant Key Id masih kosong. Hubungi pemilik toko.')
+    if (_.isEmpty(tokoDetail.plink_merchant_id)) throw new Error('Gagal Purchase. Plink Merchant Id masih kosong. Hubungi pemilik toko.')
+
     const otp = generateRandomNumber(4)
     const purchaseorderCheckStatusRequestOtpResp = await purchaseorderCheckStatusSendOtp({
       email: args.email,
