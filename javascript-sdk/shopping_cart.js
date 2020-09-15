@@ -34,7 +34,9 @@ var _MaterialUI = MaterialUI,
     InputLabel = _MaterialUI.InputLabel,
     Select = _MaterialUI.Select,
     MenuItem = _MaterialUI.MenuItem,
-    FormHelperText = _MaterialUI.FormHelperText;
+    FormHelperText = _MaterialUI.FormHelperText,
+    CircularProgress = _MaterialUI.CircularProgress,
+    Switch = _MaterialUI.Switch;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
@@ -69,7 +71,8 @@ function App() {
         pageSize: 0,
         count: 0,
         reload: 0,
-        isRequest: false
+        isNeedShipping: null,
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productCatalogRequest = _React$useState2[0],
@@ -120,7 +123,7 @@ function App() {
         provinsiData = _React$useState14[0],
         setProvinsiData = _React$useState14[1];
 
-    var _React$useState15 = React.useState({}),
+    var _React$useState15 = React.useState(null),
         _React$useState16 = _slicedToArray(_React$useState15, 2),
         provinsi = _React$useState16[0],
         setProvinsi = _React$useState16[1];
@@ -130,20 +133,35 @@ function App() {
         kotaData = _React$useState18[0],
         setKotaData = _React$useState18[1];
 
-    var _React$useState19 = React.useState({}),
+    var _React$useState19 = React.useState(null),
         _React$useState20 = _slicedToArray(_React$useState19, 2),
         kota = _React$useState20[0],
         setKota = _React$useState20[1];
 
-    var _React$useState21 = React.useState([]),
+    var _React$useState21 = React.useState(null),
         _React$useState22 = _slicedToArray(_React$useState21, 2),
-        layananKurir = _React$useState22[0],
-        setLayananKurir = _React$useState22[1];
+        subcity = _React$useState22[0],
+        setSubcity = _React$useState22[1];
 
-    var _React$useState23 = React.useState({}),
+    var _React$useState23 = React.useState([]),
         _React$useState24 = _slicedToArray(_React$useState23, 2),
-        kurir = _React$useState24[0],
-        setKurir = _React$useState24[1];
+        layananKurir = _React$useState24[0],
+        setLayananKurir = _React$useState24[1];
+
+    var _React$useState25 = React.useState([]),
+        _React$useState26 = _slicedToArray(_React$useState25, 2),
+        subcityData = _React$useState26[0],
+        setSubcityData = _React$useState26[1];
+
+    var _React$useState27 = React.useState(""),
+        _React$useState28 = _slicedToArray(_React$useState27, 2),
+        kurir = _React$useState28[0],
+        setKurir = _React$useState28[1];
+
+    var _React$useState29 = React.useState(0),
+        _React$useState30 = _slicedToArray(_React$useState29, 2),
+        weight = _React$useState30[0],
+        setWeight = _React$useState30[1];
 
     var count = productCatalogRequest.count,
         pageCount = productCatalogRequest.pageCount,
@@ -152,13 +170,26 @@ function App() {
         pageSize = productCatalogRequest.pageSize,
         reload = productCatalogRequest.reload;
 
+    var _React$useState31 = React.useState({
+        originProv: null,
+        originCity: null,
+        originSubcity: null
+    }),
+        _React$useState32 = _slicedToArray(_React$useState31, 2),
+        originRequest = _React$useState32[0],
+        setOriginRequest = _React$useState32[1];
+
+    var originProv = originRequest.originProv,
+        originCity = originRequest.originCity,
+        originSubcity = originRequest.originSubcity;
+
     var doFetchData = React.useCallback(function (_ref) {
         var pageSize = _ref.pageSize,
             pageIndex = _ref.pageIndex;
 
         //     // fetch product
         // Simple POST request with a JSON body using fetch
-        var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
+        var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        is_need_shipping,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            },\n            weight\n          },\n          toko_id{\n            name,\n            province,\n            city,\n            subcity\n          },\n          count,\n          amount\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -167,16 +198,29 @@ function App() {
         fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
             return response.json();
         }).then(function (response) {
-            console.log('response ctr===>', response);
+            console.log('response getAllTokoCartsBySessionId===>', response);
             // response.json()
             return response.data.getAllTokoCartsBySessionId;
         }).then(function (data) {
-            return setProductCatalogRequest({
+            setProductCatalogRequest({
                 listData: data.list_data,
                 pageCount: data.page_count,
+                isNeedShipping: data.is_need_shipping,
                 count: data.count,
                 isRequest: false
             });
+            setWeight((data.list_data || []).map(function (key) {
+                return parseFloat(key.product_id.weight) * key.count;
+            }).reduce(function (x, y) {
+                return parseFloat(x) + parseFloat(y);
+            }, 0));
+            if (data.list_data.length !== 0) {
+                setOriginRequest({
+                    originProv: data.list_data[0].toko_id.province,
+                    originCity: data.list_data[0].toko_id.city,
+                    originSubcity: data.list_data[0].toko_id.subcity
+                });
+            }
         });
     }, []);
     var doAddToCart = function doAddToCart(_ref2) {
@@ -231,16 +275,13 @@ function App() {
 
         var graphqlData = 'mutation\n            {\n              checkoutProcess(\n                    session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '",\n                    device_id: "xxxx",\n                    full_name: "' + payload.full_name + '",\n                    phone_number: "' + payload.phone_number + '",\n                    email: "' + payload.email + '",\n                    cart_id: ' + JSON.stringify(productCatalogRequest.listData.map(function (v) {
             return '' + v._id;
-        })) + ',\n                    toko_id: "' + TOKOONLINE_TOKOID + '",\n                    shipping_address: "' + payload.shipping_address + '",\n                    shipping_province: "' + provinsi.province + '",\n                    shipping_city: "' + kota.city_name + '",\n                    shipping_currier: "' + kurir.service + '",\n                    shipping_postal_code: "' + payload.shipping_postal_code + '",\n                    shipping_amount: ' + ongkir + '\n                  )\n              {\n                status,\n                error,\n                detail_data\n                {\n                  _id\n                }\n              }\n            }';
+        })) + ',\n                    toko_id: "' + TOKOONLINE_TOKOID + '",\n                    shipping_address: "' + payload.shipping_address + '",\n                    shipping_province: "' + provinsi.province + '",\n                    shipping_city: "' + kota.city_name + '",\n                    shipping_subcity: "' + subcity.subdistrict_name + '",\n                    shipping_currier: "' + (kurir == undefined ? "" : kurir.toUpperCase() + " - " + kurirservis.service) + '",\n                    shipping_postal_code: "' + payload.shipping_postal_code + '",\n                    shipping_amount: ' + ongkir + '\n                  )\n              {\n                status,\n                error,\n                detail_data\n                {\n                  _id\n                }\n              }\n            }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: graphqlData })
         };
         console.log("graphqlData : " + graphqlData);
-        if (provinsi == "") return alert("Silahkan pilih provinsi");
-        if (kota == "") return alert("Silahkan pilih kota");
-        if (ongkir == 0) return alert("Silahkan pilih kurir");
         fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
             return response.json();
         }).then(function (response) {
@@ -260,7 +301,7 @@ function App() {
     }, [doFetchData, pageIndex, pageSize, reload]);
 
     var doFetchDetailDataPo = React.useCallback(function () {
-        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount,\n            shipping_province,\n            shipping_city,\n            shipping_currier,\n            shipping_postal_code\n          }\n        }\n      }';
+        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount,\n            shipping_province,\n            shipping_city,\n            shipping_subcity,\n            shipping_currier,\n            shipping_postal_code\n          }\n        }\n      }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -269,7 +310,7 @@ function App() {
         fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
             return response.json();
         }).then(function (response) {
-            console.log('getDetailTokoPoBySessionId response===>', response);
+            // console.log('getDetailTokoPoBySessionId response===>', response)
             // response.json()
             return response.data.getDetailTokoPoBySessionId;
         }).then(function (data) {
@@ -284,6 +325,7 @@ function App() {
                     shipping_amount: (data.data_detail || {}).shipping_amount,
                     shipping_province: (data.data_detail || {}).shipping_province,
                     shipping_city: (data.data_detail || {}).shipping_city,
+                    shipping_subcity: (data.data_detail || {}).shipping_subcity,
                     shipping_currier: (data.data_detail || {}).shipping_currier,
                     shipping_postal_code: (data.data_detail || {}).shipping_postal_code
                 }
@@ -295,7 +337,7 @@ function App() {
     }, [doFetchDetailDataPo]);
 
     var doFetchProvinsi = React.useCallback(function () {
-        fetch("http://dev.plink.co.id:8081/plink/v1/province", {
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-province", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -319,7 +361,7 @@ function App() {
     var handleProvince = function handleProvince(event) {
         console.log(event);
         setProvinsi(event.target.value);
-        fetch("http://dev.plink.co.id:8081/plink/v1/city?province=" + event.target.value.province_id, {
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-city?province=" + event.target.value.province_id, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -335,14 +377,46 @@ function App() {
     };
 
     var handleCity = function handleCity(event) {
-        setKota(event.target.value);
+        setKota(event);
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-subcity?city=" + event.city_id, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            }
+        }).then(function (res) {
+            return res.json();
+        }).then(function (result) {
+            console.log("kec:" + JSON.stringify(result));
+            setSubcityData(result.rajaongkir.results);
+        }, function (error) {
+            console.log(JSON.stringify(error));
+        });
+    };
+
+    var handleSubcity = function handleSubcity(event) {
+        setSubcity(event);
+    };
+
+    var _React$useState33 = React.useState(null),
+        _React$useState34 = _slicedToArray(_React$useState33, 2),
+        kurirservis = _React$useState34[0],
+        setKurirservis = _React$useState34[1];
+
+    var handleKurir = function handleKurir(event) {
+        if (subcity === null) return;
+        if (weight == 0) return;
+        setKurir(event);
         var countDistanceRequest = {
-            origin: "152",
-            destination: event.target.value.city_id,
-            weight: 500,
-            courier: "jne"
+            origin: originRequest.originSubcity,
+            originType: "subdistrict",
+            destination: subcity.subdistrict_id,
+            destinationType: 'subdistrict',
+            weight: weight * 1000,
+            courier: event
         };
-        fetch("http://dev.plink.co.id:8081/plink/v1/cost", {
+        console.log("countDistanceRequest " + JSON.stringify(countDistanceRequest));
+        fetch("https://market-studio.plink.co.id/api/v1/fetchdata-cost", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -352,6 +426,7 @@ function App() {
         }).then(function (res) {
             return res.json();
         }).then(function (result) {
+            console.log("result" + JSON.stringify(result));
             setLayananKurir(result.rajaongkir.results[0].costs);
         }, function (error) {
             console.log(JSON.stringify(error));
@@ -360,8 +435,14 @@ function App() {
 
     var handleOngkir = function handleOngkir(event) {
         setOngkir(event.target.value.cost[0].value);
-        setKurir(event.target.value);
+        setKurirservis(event.target.value);
     };
+
+    React.useEffect(function () {
+        {
+            productCatalogRequest.isNeedShipping == "Y" && kurir != '' ? handleKurir() : {};
+        }
+    }, [weight]);
 
     var ListView = function ListView(_ref5) {
         var productImage = _ref5.productImage,
@@ -436,7 +517,7 @@ function App() {
     };
 
     var fullName = (purchaseOrderDetailRequest.detailData || {}).full_name;
-    console.log('purchaseOrderDetailRequest.detailData======>', fullName);
+    // console.log('purchaseOrderDetailRequest.detailData======>', fullName)
     var renderTextField = function renderTextField(_ref6) {
         var _React$createElement;
 
@@ -470,7 +551,18 @@ function App() {
         'div',
         null,
         React.createElement(CssBaseline, null),
-        React.createElement(
+        productCatalogRequest.isRequest ? React.createElement(
+            Grid,
+            {
+                container: true,
+                spacing: 0,
+                direction: 'column',
+                alignItems: 'center',
+                justify: 'center',
+                style: { minHeight: '100vh' }
+            },
+            React.createElement(CircularProgress, null)
+        ) : React.createElement(
             Grid,
             { container: true },
             React.createElement(
@@ -504,7 +596,7 @@ function App() {
                                     productId: productId
                                 });
                             }),
-                            React.createElement(
+                            productCatalogRequest.isNeedShipping == "Y" ? React.createElement(
                                 Grid,
                                 {
                                     container: true,
@@ -514,7 +606,8 @@ function App() {
                                 },
                                 React.createElement(
                                     Typography,
-                                    { variant: 'caption', style: { marginLeft: 16, marginTop: 16 } },
+                                    { variant: 'caption',
+                                        style: { marginLeft: 16, marginTop: 16 } },
                                     'Ongkir'
                                 ),
                                 React.createElement(
@@ -523,7 +616,7 @@ function App() {
                                         style: { marginRight: 16, marginTop: 16 } },
                                     convertRupiah(ongkir)
                                 )
-                            ),
+                            ) : React.createElement(Grid, null),
                             React.createElement(
                                 Grid,
                                 {
@@ -572,24 +665,21 @@ function App() {
                             renderTextField({
                                 name: 'full_name',
                                 label: 'Nama *',
-                                value: (checkoutProcessRequest.payload || {}).full_name,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).full_name
                             }),
                             renderTextField({
                                 name: 'phone_number',
                                 label: 'Nomor Telepon *',
-                                value: (checkoutProcessRequest.payload || {}).phone_number,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).phone_number
                             }),
                             renderTextField({
                                 name: 'email',
                                 label: 'Email *',
                                 option: 'area',
-                                value: (checkoutProcessRequest.payload || {}).email,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).email
                             })
                         ),
-                        React.createElement(
+                        productCatalogRequest.isNeedShipping == "Y" ? React.createElement(
                             Grid,
                             { container: true, spacing: 2, style: { marginTop: 8 } },
                             React.createElement(
@@ -611,15 +701,6 @@ function App() {
                                             value: provinsi,
                                             onChange: handleProvince
                                         },
-                                        React.createElement(
-                                            MenuItem,
-                                            { value: '' },
-                                            React.createElement(
-                                                'em',
-                                                null,
-                                                'None'
-                                            )
-                                        ),
                                         provinsiData.map(function (prov) {
                                             return React.createElement(
                                                 MenuItem,
@@ -645,7 +726,7 @@ function App() {
                                     React.createElement(
                                         InputLabel,
                                         { id: 'demo-simple-select-helper-label' },
-                                        'Kota *'
+                                        'Kabupaten *'
                                     ),
                                     React.createElement(
                                         Select,
@@ -653,17 +734,10 @@ function App() {
                                             labelId: 'demo-simple-select-helper-label',
                                             id: 'demo-simple-select-helper',
                                             value: kota,
-                                            onChange: handleCity
+                                            onChange: function onChange(event) {
+                                                return handleCity(event.target.value);
+                                            }
                                         },
-                                        React.createElement(
-                                            MenuItem,
-                                            { value: '' },
-                                            React.createElement(
-                                                'em',
-                                                null,
-                                                'None'
-                                            )
-                                        ),
                                         kotaData.map(function (city) {
                                             return React.createElement(
                                                 MenuItem,
@@ -688,7 +762,48 @@ function App() {
                                     React.createElement(
                                         InputLabel,
                                         { id: 'demo-simple-select-helper-label' },
-                                        'Layanan Kurir *'
+                                        'Kecamatan *'
+                                    ),
+                                    React.createElement(
+                                        Select,
+                                        {
+                                            labelId: 'demo-simple-select-helper-label',
+                                            id: 'demo-simple-select-helper',
+                                            value: subcity,
+                                            onChange: function onChange(event) {
+                                                return handleSubcity(event.target.value);
+                                            }
+                                        },
+                                        subcityData.map(function (city) {
+                                            return React.createElement(
+                                                MenuItem,
+                                                { key: city.subdistrict_id, value: city },
+                                                city.subdistrict_name
+                                            );
+                                        })
+                                    ),
+                                    React.createElement(
+                                        FormHelperText,
+                                        null,
+                                        'Pilih kecamatan'
+                                    )
+                                )
+                            ),
+                            renderTextField({
+                                name: 'shipping_postal_code',
+                                label: 'Kode pos',
+                                value: checkoutProcessRequest.payload.shipping_postal_code == 'undefined' ? '' : (checkoutProcessRequest.payload || '').shipping_postal_code
+                            }),
+                            React.createElement(
+                                Grid,
+                                { item: true, xs: 12, md: 6 },
+                                React.createElement(
+                                    FormControl,
+                                    { className: classes.formControl, fullWidth: true },
+                                    React.createElement(
+                                        InputLabel,
+                                        { id: 'demo-simple-select-helper-label' },
+                                        'Kurir *'
                                     ),
                                     React.createElement(
                                         Select,
@@ -696,13 +811,61 @@ function App() {
                                             labelId: 'demo-simple-select-helper-label',
                                             id: 'demo-simple-select-helper',
                                             value: kurir,
-                                            onChange: handleOngkir
+                                            onChange: function onChange(event) {
+                                                return handleKurir(event.target.value);
+                                            }
                                         },
                                         React.createElement(
                                             MenuItem,
-                                            { value: 0 },
-                                            '-'
+                                            {
+                                                name: 'jne',
+                                                value: 'jne'
+                                            },
+                                            'JNE'
                                         ),
+                                        React.createElement(
+                                            MenuItem,
+                                            {
+                                                name: 'pos',
+                                                value: 'pos'
+                                            },
+                                            'POS'
+                                        ),
+                                        React.createElement(
+                                            MenuItem,
+                                            {
+                                                name: 'tiki',
+                                                value: 'tiki'
+                                            },
+                                            'TIKI'
+                                        )
+                                    ),
+                                    React.createElement(
+                                        FormHelperText,
+                                        null,
+                                        'Pilih Kurir'
+                                    )
+                                )
+                            ),
+                            React.createElement(
+                                Grid,
+                                { item: true, xs: 12, md: 6 },
+                                React.createElement(
+                                    FormControl,
+                                    { className: classes.formControl, fullWidth: true },
+                                    React.createElement(
+                                        InputLabel,
+                                        { id: 'demo-simple-select-helper-label' },
+                                        'Layanan Kurir *'
+                                    ),
+                                    React.createElement(
+                                        Select,
+                                        {
+                                            labelId: 'demo-simple-select-helper-label',
+                                            id: 'demo-simple-select-helper',
+                                            value: kurirservis,
+                                            onChange: handleOngkir
+                                        },
                                         (layananKurir || []).map(function (layanan) {
                                             return React.createElement(
                                                 MenuItem,
@@ -711,7 +874,7 @@ function App() {
                                                     name: layanan.service,
                                                     value: layanan
                                                 },
-                                                "JNE - " + layanan.service
+                                                layanan.service
                                             );
                                         })
                                     ),
@@ -721,14 +884,8 @@ function App() {
                                         'Pilih Layanan Kurir'
                                     )
                                 )
-                            ),
-                            renderTextField({
-                                name: 'shipping_postal_code',
-                                label: 'Kode pos',
-                                value: (checkoutProcessRequest.payload || {}).shipping_postal_code,
-                                defaultValue: ''
-                            })
-                        ),
+                            )
+                        ) : React.createElement(Grid, null),
                         React.createElement(
                             Grid,
                             { container: true, spacing: 2 },
@@ -737,8 +894,7 @@ function App() {
                                 label: 'Alamat lengkap *',
                                 option: 'area',
                                 row: 4,
-                                value: (checkoutProcessRequest.payload || {}).shipping_address,
-                                defaultValue: ''
+                                value: (checkoutProcessRequest.payload || {}).shipping_address
                             })
                         )
                     ),

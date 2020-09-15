@@ -21,17 +21,21 @@ router.get('/renderfile/:filename', (req, res, next) => {
   // res.sendFile(__dirname + './uploadfile/1595349658069.png')
 })
 router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
-  var origin = 'http://dev.plink.co.id'
-  // var origin = req.get('origin')
+  var marketPlinkHost = config.get('marketPlinkHost')
+  var referer = req.header('Referer')
+	console.log('referer==>', referer)
+  // var origin = 'http://dev.plink.co.id'
+  var origin = req.get('origin') || referer || ''
   // get toko id by origin url
   // var tokoId = '5f3373db203efa581d2354a2'
   // var tokoId = req.query.id
   console.log('origin=====>', origin)
   TokoTokoOnlineModel.findOne({ website: origin }, (err, doc) => {
-    if (err || !doc) return res.send('error')
+    if (!origin.includes(marketPlinkHost) && (err || !doc)) return res.send('error')
     console.log('doc====>', doc)
-    var tokoId = '' + doc._id
-    var backendBaseUrl = 'http://dev.plink.co.id'
+    var tokoId = '' + (doc || {})._id
+    if (origin.includes(marketPlinkHost)) tokoId = req.query.tokoid
+    var backendBaseUrl = config.get('backendBaseUrl')
     // res.sendFile(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
     res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')
     res.write('var tokoId="' + tokoId + '";var baseUrl="' + backendBaseUrl + '";')

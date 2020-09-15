@@ -198,8 +198,6 @@ const checkoutProcess = async (args, context) => {
     if (!args.full_name || args.full_name === '-' || args.full_name === 'undefined') throw new Error('Data Nama Customer masih kosong')
     if (!args.phone_number || args.phone_number === '-' || args.phone_number === 'undefined') throw new Error('Data Nomor Telepon masih kosong')
     if (!args.email || args.email === '-' || args.email === 'undefined') throw new Error('Data Email masih kosong')
-    if (!args.shipping_address || args.shipping_address === '-' || args.shipping_address === 'undefined') throw new Error('Data Alamat Pengiriman masih kosong')
-    if (!args.shipping_amount || args.shipping_amount === '0' || args.shipping_amount === 'undefined') throw new Error('Data Biaya Pengiriman masih kosong')
     if (_.isEmpty(args.cart_id) || args.cart_id === 'undefined') throw new Error('Keranjang belanja masih kosong')
 
     const { accesstoken } = context.req.headers
@@ -224,14 +222,23 @@ const checkoutProcess = async (args, context) => {
     }
 
     // get all cart
-    const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: tokoId, status: 'open' })
+    const allOpenCart = await TokoCartModel.find({ session_id: sessionId, toko_id: tokoId, status: 'open' }).populate({ path: 'product_id' })
     if (_.isEmpty(allOpenCart)) throw new Error('Checkout Failed. The cart is empty')
-    console.log('allOpenCart===>', allOpenCart)
+    // console.log('allOpenCart===>', allOpenCart)
+
+    let shippinAmount = parseInt(args.shipping_amount)
+    const isNeedShippingArr = allOpenCart.map(v => v.product_id.isneed_shipping) // args.total_amount
+    let isneedShipping = 'N'
+    if (isNeedShippingArr.includes('Y')) {
+      if (!args.shipping_address || args.shipping_address === '-' || args.shipping_address === 'undefined') throw new Error('Data Alamat Pengiriman masih kosong')
+      if (!args.shipping_amount || args.shipping_amount === '0' || args.shipping_amount === 'undefined') throw new Error('Data Biaya Pengiriman masih kosong')
+      isneedShipping = 'Y'
+    } else {
+      shippinAmount = 0
+    }
 
     const totalProductAmount = allOpenCart.map(v => v.amount).reduce((a, b) => a + b, 0) // args.total_amount
     console.log('totalProductAmount===>', totalProductAmount)
-
-    const shippinAmount = !_.isEmpty(args.shipping_amount) ? parseInt(args.shipping_amount) : 0
 
     const dataPo = {}
     dataPo.full_name = args.full_name
@@ -240,7 +247,9 @@ const checkoutProcess = async (args, context) => {
     dataPo.session_id = sessionId
     dataPo.device_id = args.device_id
     dataPo.shipping_address = args.shipping_address
+    dataPo.isneed_shipping = isneedShipping
     dataPo.shipping_city = args.shipping_city
+    dataPo.shipping_subcity = args.shipping_subcity
     dataPo.shipping_province = args.shipping_province
     dataPo.shipping_currier = args.shipping_currier
     dataPo.shipping_postal_code = args.shipping_postal_code
@@ -292,6 +301,9 @@ const checkoutProcess = async (args, context) => {
 }
 const paymentProcessSendOtp = async (args, context) => {
   try {
+    // toko po detail
+    const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
+    if (_.isEmpty(tokoPoDetail)) throw new Error('Data pembelian tidak ditemukan')
     const otp = generateRandomNumber(4)
     const paymentProcessSendOtpServiceResp = await paymentProcessSendOtpService({
       email: args.email,
@@ -311,6 +323,12 @@ const purchaseorderCheckStatusRequestOtp = async (args, context) => {
     // toko po detail
     const tokoPoDetail = await EntityModel.findOne({ session_id: args.trxid, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Transaksi tidak ditemukan.')
+    // toko online detail
+    const tokoDetail = await TokoTokoOnlineModel.findById(tokoPoDetail.toko_id)
+    if (_.isEmpty(tokoDetail)) throw new Error('Gagal Purchase. Data toko tidak ditemukan')
+    if (_.isEmpty(tokoDetail.plink_merchant_key_id)) throw new Error('Gagal Purchase. Plink Merchant Key Id masih kosong. Hubungi pemilik toko.')
+    if (_.isEmpty(tokoDetail.plink_merchant_id)) throw new Error('Gagal Purchase. Plink Merchant Id masih kosong. Hubungi pemilik toko.')
+
     const otp = generateRandomNumber(4)
     const purchaseorderCheckStatusRequestOtpResp = await purchaseorderCheckStatusSendOtp({
       email: args.email,

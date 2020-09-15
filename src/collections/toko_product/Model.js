@@ -6,6 +6,15 @@ const schema = new mongoose.Schema({
   name: {
     type: String
   },
+  isneed_shipping: {
+    type: String,
+    enum: ['Y', 'N'],
+    default: 'Y'
+  },
+  weight: {
+    type: Number,
+    default: 0
+  },
   content1: {
     type: String
   },

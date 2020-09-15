@@ -25,7 +25,11 @@ var _MaterialUI = MaterialUI,
     AddIcon = _MaterialUI.AddIcon,
     RemoveIcon = _MaterialUI.RemoveIcon,
     TextField = _MaterialUI.TextField,
-    Snackbar = _MaterialUI.Snackbar;
+    Snackbar = _MaterialUI.Snackbar,
+    CircularProgress = _MaterialUI.CircularProgress,
+    IconButton = _MaterialUI.IconButton,
+    SvgIcon = _MaterialUI.SvgIcon,
+    Badge = _MaterialUI.Badge;
 
 var e = React.createElement;
 
@@ -119,7 +123,7 @@ var useStyles = makeStyles(function (theme) {
         },
         spesifikasiContainer: {
             margin: '0 0 1.5rem',
-            padding: '3rem 2rem',
+            padding: '2rem 2rem',
             background: '#fff'
         },
         spesifikasiTitleContainer: {
@@ -154,8 +158,7 @@ function App() {
     var _React$useState = React.useState({
         error: null,
         detailData: null,
-        cartDetail: {},
-        isRequest: false
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productDetailRequest = _React$useState2[0],
@@ -225,7 +228,7 @@ function App() {
         setQty = _React$useState6[1];
 
     var doFetchData = React.useCallback(function () {
-        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          content1,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -238,8 +241,13 @@ function App() {
             // response.json()
             return response.data.getDetailTokoProductJoinCartByCode;
         }).then(function (data) {
-            setProductDetailRequest({ cartDetail: data.data_detail_in_cart, detailData: data.data_detail, isRequest: false, error: null });
-            setQty((data.data_detail_in_cart || {}).count || 0);
+            setProductDetailRequest({
+                cartDetail: data.data_detail_in_cart,
+                detailData: data.data_detail,
+                isRequest: false,
+                error: null
+            });
+            setQty((data.data_detail_in_cart || {}).count || 1);
         });
     }, []);
     var error = productDetailRequest.error,
@@ -251,13 +259,13 @@ function App() {
         doFetchData();
     }, [doFetchData]);
 
-    var handleDecreaseItem = function handleDecreaseItem(event, index) {
-        if (qty > 0) {
+    var handleDecreaseItem = function handleDecreaseItem() {
+        if (qty > 1) {
             setQty(qty - 1);
         }
     };
 
-    var handleIncreaseItem = function handleIncreaseItem(event, index) {
+    var handleIncreaseItem = function handleIncreaseItem() {
         setQty(qty + 1);
     };
 
@@ -285,12 +293,32 @@ function App() {
         setOpen(false);
     };
 
+    var _React$useState9 = React.useState(0),
+        _React$useState10 = _slicedToArray(_React$useState9, 2),
+        cart = _React$useState10[0],
+        setCart = _React$useState10[1];
+
+    var goToCart = function goToCart() {
+        window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
+    };
+
     return (
         // newest
         React.createElement(
             'div',
             null,
-            React.createElement(
+            productDetailRequest.isRequest ? React.createElement(
+                Grid,
+                {
+                    container: true,
+                    spacing: 0,
+                    direction: 'column',
+                    alignItems: 'center',
+                    justify: 'center',
+                    style: { minHeight: '100vh' }
+                },
+                React.createElement(CircularProgress, null)
+            ) : React.createElement(
                 Container,
                 null,
                 React.createElement(Snackbar, {
@@ -372,14 +400,10 @@ function App() {
                                 React.createElement(
                                     Grid,
                                     { item: true, style: { padding: 0, marginTop: 10 } },
+                                    React.createElement(Typography, { className: classes.spesifikasiTitle }),
                                     React.createElement(
                                         Typography,
-                                        { className: classes.spesifikasiTitle },
-                                        'Detail Produk'
-                                    ),
-                                    React.createElement(
-                                        Typography,
-                                        null,
+                                        { style: { marginBottom: 10 } },
                                         detailData.description
                                     )
                                 ),
@@ -411,12 +435,8 @@ function App() {
                                                 ),
                                                 React.createElement(TextField, {
                                                     id: 'outlined-size-small',
-                                                    defaultValue: '0',
                                                     value: qty,
                                                     variant: 'outlined',
-                                                    onChange: function onChange(e) {
-                                                        return setQty(e.target.value);
-                                                    },
                                                     type: 'number',
                                                     size: 'small'
                                                 }),
@@ -460,11 +480,7 @@ function App() {
                                         style: { marginRight: '1rem' } }) : React.createElement(
                                         Button,
                                         { variant: 'outlined', color: 'secondary',
-                                            className: classes.btnActionRed,
-                                            onClick: function onClick() {
-                                                return doAddToCart({ productId: detailData._id, isStay: true });
-                                            }
-                                        },
+                                            className: classes.btnActionRed },
                                         'Tambah ke keranjang'
                                     ),
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 50, width: 150 }) : React.createElement(
@@ -480,6 +496,21 @@ function App() {
                             )
                         )
                     )
+                ),
+                React.createElement(
+                    'div',
+                    { className: classes.spesifikasiContainer },
+                    React.createElement(
+                        Container,
+                        { className: classes.spesifikasiTitleContainer },
+                        React.createElement(
+                            Typography,
+                            { className: classes.spesifikasiTitle },
+                            'Deskripsi produk'
+                        )
+                    ),
+                    React.createElement('div', { className: classes.product_detail,
+                        dangerouslySetInnerHTML: { __html: decodeURIComponent(detailData.content1) } })
                 )
             )
         )

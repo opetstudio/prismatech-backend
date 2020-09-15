@@ -24,6 +24,9 @@ const fields = {
   _id: { type: GraphQLID },
   owner: { type: UserType },
   name: { type: GraphQLString },
+  province: { type: GraphQLString },
+  city: { type: GraphQLString },
+  subcity: { type: GraphQLString },
   slug: { type: GraphQLString },
   description: { type: GraphQLString },
   website: { type: GraphQLString },
@@ -48,7 +51,10 @@ module.exports = {
     youtube: { type: GraphQLString },
     plink_merchant_id: { type: GraphQLString },
     plink_merchant_key_id: { type: GraphQLString },
-    status: { type: GraphQLString }
+    status: { type: GraphQLString },
+    province: { type: GraphQLString },
+    city: { type: GraphQLString },
+    subcity: { type: GraphQLString }
   },
   createArgs: {
     _id: { type: GraphQLID },
@@ -61,7 +67,10 @@ module.exports = {
     youtube: { type: GraphQLString },
     plink_merchant_id: { type: GraphQLString },
     plink_merchant_key_id: { type: GraphQLString },
-    status: { type: GraphQLString }
+    status: { type: GraphQLString },
+    province: { type: GraphQLString },
+    city: { type: GraphQLString },
+    subcity: { type: GraphQLString }
   },
   fields: {
     ...fields,

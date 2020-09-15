@@ -37,7 +37,8 @@ var _MaterialUI = MaterialUI,
     Modal = _MaterialUI.Modal,
     List = _MaterialUI.List,
     Backdrop = _MaterialUI.Backdrop,
-    Fade = _MaterialUI.Fade;
+    Fade = _MaterialUI.Fade,
+    CircularProgress = _MaterialUI.CircularProgress;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
@@ -107,7 +108,7 @@ function App() {
         pageSize: 0,
         count: 0,
         reload: 0,
-        isRequest: false
+        isRequest: true
     }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         productCatalogRequest = _React$useState2[0],
@@ -184,7 +185,7 @@ function App() {
 
         //     // fetch product
         // Simple POST request with a JSON body using fetch
-        var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
+        var graphqlData = 'query{\n      getAllTokoCartsBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '", page_size: 10, page_index: 0){\n        error,\n        count,\n        page_count,\n        status,\n        is_need_shipping,\n        list_data{\n          _id,\n          product_id{\n            _id,\n            code,\n            price,\n            name,\n            description,\n            image_id{\n              _id,\n              filename,\n              file_type\n            }\n          },\n          toko_id{\n            name\n          },\n          count,\n          amount\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -200,6 +201,7 @@ function App() {
             return setProductCatalogRequest({
                 listData: data.list_data,
                 pageCount: data.page_count,
+                isNeedShipping: data.is_need_shipping,
                 count: data.count,
                 isRequest: false
             });
@@ -261,7 +263,7 @@ function App() {
     }, [doFetchData, pageIndex, pageSize, reload]);
 
     var doFetchDetailDataPo = React.useCallback(function () {
-        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount\n          }\n        }\n      }';
+        var graphqlData = 'query{\n      getDetailTokoPoBySessionId(session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n          error,\n          status,\n          data_detail{\n            _id,\n            email,\n            full_name,\n            invoice_code,\n            phone_number,\n            shipping_address,\n            total_amount,\n            total_product_amount,\n            shipping_amount,\n            shipping_province,\n            shipping_city,\n            shipping_subcity,\n            shipping_currier,\n            shipping_postal_code\n          }\n        }\n      }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -283,7 +285,12 @@ function App() {
                     email: (data.data_detail || {}).email,
                     phone_number: (data.data_detail || {}).phone_number,
                     shipping_address: (data.data_detail || {}).shipping_address,
-                    shipping_amount: (data.data_detail || {}).shipping_amount
+                    shipping_amount: (data.data_detail || {}).shipping_amount,
+                    shipping_province: (data.data_detail || {}).shipping_province,
+                    shipping_city: (data.data_detail || {}).shipping_city,
+                    shipping_subcity: (data.data_detail || {}).shipping_subcity,
+                    shipping_currier: (data.data_detail || {}).shipping_currier,
+                    shipping_postal_code: (data.data_detail || {}).shipping_postal_code
                 }
             });
         });
@@ -392,7 +399,18 @@ function App() {
         'div',
         null,
         React.createElement(CssBaseline, null),
-        React.createElement(
+        productCatalogRequest.isRequest ? React.createElement(
+            Grid,
+            {
+                container: true,
+                spacing: 0,
+                direction: 'column',
+                alignItems: 'center',
+                justify: 'center',
+                style: { minHeight: '100vh' }
+            },
+            React.createElement(CircularProgress, null)
+        ) : React.createElement(
             Grid,
             { container: true },
             React.createElement(
@@ -426,7 +444,7 @@ function App() {
                                     productId: productId
                                 });
                             }),
-                            React.createElement(
+                            productCatalogRequest.isNeedShipping == "Y" ? React.createElement(
                                 Grid,
                                 {
                                     container: true,
@@ -445,7 +463,7 @@ function App() {
                                         style: { marginRight: 16, marginTop: 16 } },
                                     convertRupiah(ongkir)
                                 )
-                            ),
+                            ) : [],
                             React.createElement(
                                 Grid,
                                 {
@@ -506,13 +524,42 @@ function App() {
                             renderTextField({
                                 name: 'email',
                                 label: 'Email *',
-                                option: 'area',
                                 value: (checkoutProcessRequest.payload || {}).email,
                                 defaultValue: ''
                             }),
+                            productCatalogRequest.isNeedShipping == "Y" ? renderTextField({
+                                name: 'shipping_province',
+                                label: 'Provinsi *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_province,
+                                defaultValue: ''
+                            }) : [],
+                            productCatalogRequest.isNeedShipping == "Y" ? renderTextField({
+                                name: 'shipping_city',
+                                label: 'Kota *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_city,
+                                defaultValue: ''
+                            }) : [],
+                            productCatalogRequest.isNeedShipping == "Y" ? renderTextField({
+                                name: 'shipping_subcity',
+                                label: 'Kecamatan *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_subcity,
+                                defaultValue: ''
+                            }) : [],
+                            productCatalogRequest.isNeedShipping == "Y" ? renderTextField({
+                                name: 'shipping_postal_code',
+                                label: 'Kode pos',
+                                value: (checkoutProcessRequest.payload || {}).shipping_postal_code,
+                                defaultValue: ''
+                            }) : [],
+                            productCatalogRequest.isNeedShipping == "Y" ? renderTextField({
+                                name: 'shipping_currier',
+                                label: 'Layanan kurir *',
+                                value: (checkoutProcessRequest.payload || {}).shipping_currier,
+                                defaultValue: ''
+                            }) : [],
                             renderTextField({
                                 name: 'shipping_address',
-                                label: 'Alamat Pengiriman',
+                                label: 'Alamat lengkap *',
                                 option: 'area',
                                 value: (checkoutProcessRequest.payload || {}).shipping_address,
                                 defaultValue: '-'
@@ -588,7 +635,8 @@ function App() {
                             { id: 'simple-modal-description' },
                             'Masukkan kode otp yang dikirimkan ke email anda'
                         ),
-                        React.createElement(TextField, { onChange: handleOtp, id: 'outlined-basic', label: 'OTP', variant: 'outlined', style: { maxWidth: 70 } }),
+                        React.createElement(TextField, { onChange: handleOtp, id: 'outlined-basic', label: 'OTP', variant: 'outlined',
+                            style: { maxWidth: 70 } }),
                         React.createElement(
                             Grid,
                             {

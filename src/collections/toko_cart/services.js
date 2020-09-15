@@ -64,11 +64,15 @@ const fetchAllDataBySessionId = async (args, context = {}) => {
       .skip(args.page_index * args.page_size)
       .limit(args.page_size)
       .populate({ path: 'product_id', populate: { path: 'image_id' } })
+      .populate({ path: 'toko_id' })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
+    const isNeedShippingArr = (result || []).map(v => v.product_id.isneed_shipping) // args.total_amount
+    let isneedShipping = 'N'
+    if (isNeedShippingArr.includes('Y')) isneedShipping = 'Y'
     const count = await EntityModel.countDocuments(filter)
     const pageCount = await Math.ceil(count / args.page_size)
-    return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
+    return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount, is_need_shipping: isneedShipping }
   } catch (err) {
     console.log('err=> ', err)
     return { status: 400, error: err.message }
@@ -296,9 +300,9 @@ const doDeleteData = async (args, context) => {
   session.startTransaction()
   const opts = { session }
   try {
-    // const { accesstoken } = context.req.headers
-    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
-    // const { user_id: userId } = bodyAt
+    const { accesstoken } = context.req.headers
+    const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    const { user_id: userId } = bodyAt
     console.log('delete invoked args=', args)
     const sessionId = context.req.sessionID
     // delete privilege

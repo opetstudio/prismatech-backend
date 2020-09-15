@@ -36,11 +36,19 @@ const schema = new mongoose.Schema({
   shipping_city: {
     type: String
   },
+  shipping_subcity: {
+    type: String
+  },
   shipping_currier: {
     type: String
   },
   shipping_postal_code: {
     type: String
+  },
+  isneed_shipping: {
+    type: String,
+    enum: ['Y', 'N'],
+    default: 'Y'
   },
   invoice_code: {
     type: String
