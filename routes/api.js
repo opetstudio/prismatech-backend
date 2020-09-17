@@ -84,6 +84,8 @@ router.get('/v1/fetchdata-subcity', async function (req, res, next) {
 router.post('/v1/fetchdata-cost', async function (req, res, next) {
   const bodyHit = {
     origin: req.body.origin,
+    originType: req.body.originType,
+    destinationType: req.body.destinationType,
     destination: req.body.destination,
     weight: req.body.weight,
     courier: req.body.courier
