@@ -32,7 +32,7 @@ router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
   console.log('origin=====>', origin)
   var arr = origin.split('/')
   var website = arr[0] + '//' + arr[2]
-  TokoTokoOnlineModel.findOne({ website: website }, (err, doc) => {
+  TokoTokoOnlineModel.findOne({ website: { $regex: '.*' + website + '.*' } }, (err, doc) => {
     if (!origin.includes(marketPlinkHost) && (err || !doc)) return res.send('error')
     console.log('doc====>', doc)
     var tokoId = '' + (doc || {})._id
