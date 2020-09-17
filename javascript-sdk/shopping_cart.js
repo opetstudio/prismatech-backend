@@ -153,7 +153,7 @@ function App() {
         subcityData = _React$useState26[0],
         setSubcityData = _React$useState26[1];
 
-    var _React$useState27 = React.useState(""),
+    var _React$useState27 = React.useState(null),
         _React$useState28 = _slicedToArray(_React$useState27, 2),
         kurir = _React$useState28[0],
         setKurir = _React$useState28[1];
@@ -275,7 +275,7 @@ function App() {
 
         var graphqlData = 'mutation\n            {\n              checkoutProcess(\n                    session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '",\n                    device_id: "xxxx",\n                    full_name: "' + payload.full_name + '",\n                    phone_number: "' + payload.phone_number + '",\n                    email: "' + payload.email + '",\n                    cart_id: ' + JSON.stringify(productCatalogRequest.listData.map(function (v) {
             return '' + v._id;
-        })) + ',\n                    toko_id: "' + TOKOONLINE_TOKOID + '",\n                    shipping_address: "' + payload.shipping_address + '",\n                    shipping_province: "' + provinsi.province + '",\n                    shipping_city: "' + kota.city_name + '",\n                    shipping_subcity: "' + subcity.subdistrict_name + '",\n                    shipping_currier: "' + (kurir == undefined ? "" : kurir.toUpperCase() + " - " + kurirservis.service) + '",\n                    shipping_postal_code: "' + payload.shipping_postal_code + '",\n                    shipping_amount: ' + ongkir + '\n                  )\n              {\n                status,\n                error,\n                detail_data\n                {\n                  _id\n                }\n              }\n            }';
+        })) + ',\n                    toko_id: "' + TOKOONLINE_TOKOID + '",\n                    shipping_address: "' + payload.shipping_address + '",\n                    shipping_province: "' + (provinsi == null ? "" : provinsi.province) + '",\n                    shipping_city: "' + (kota == null ? "" : kota.city_name) + '",\n                    shipping_subcity: "' + (subcity == null ? "" : subcity.subdistrict_name) + '",\n                    shipping_currier: "' + (kurir == undefined ? "" : kurir.toUpperCase() + " - " + kurirservis.service) + '",\n                    shipping_postal_code: "' + payload.shipping_postal_code + '",\n                    shipping_amount: ' + ongkir + '\n                  )\n              {\n                status,\n                error,\n                detail_data\n                {\n                  _id\n                }\n              }\n            }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -285,6 +285,7 @@ function App() {
         fetch(backendBaseUrl + '/graphql', requestOptions).then(function (response) {
             return response.json();
         }).then(function (response) {
+            console.log("response :" + JSON.stringify(response));
             if (response.errors) return alert(JSON.stringify(response.errors));
             return response.data.checkoutProcess;
         }).then(function (data) {
