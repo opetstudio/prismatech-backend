@@ -20,7 +20,7 @@ const authorizationFilter = async (resolve, parent, args, context, info) => {
     throw new Error('NOT_AUTHORIZED ' + info.fieldName)
   }
 
-  if (info.fieldName === 'createTokoTokoOnline') {
+  if (info.fieldName === 'createTokoTokoOnline' || info.fieldName === 'updateTokoTokoOnline') {
     // hanya user dengan yang memiliki privilege FIELD-TOKO-OWNER-EMAIL yang boleh submit field owner_email
     if (!_.isEmpty(args.owner_email) && !userPrivilegeName.includes('FIELD-TOKO-OWNER-EMAIL')) throw new Error('NOT_AUTHORIZED ' + info.fieldName)
   }
@@ -61,7 +61,8 @@ const authorizationFilterMiddleware = {
     deleteUserRole: authorizationFilter,
 
     // toko
-    createTokoTokoOnline: authorizationFilter
+    createTokoTokoOnline: authorizationFilter,
+    updateTokoTokoOnline: authorizationFilter
   },
   RootQueryType: {
 
