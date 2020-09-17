@@ -23,14 +23,16 @@ router.get('/renderfile/:filename', (req, res, next) => {
 router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
   var marketPlinkHost = config.get('marketPlinkHost')
   var referer = req.header('Referer')
-	console.log('referer==>', referer)
+  console.log('referer==>', referer)
   // var origin = 'http://dev.plink.co.id'
   var origin = req.get('origin') || referer || ''
   // get toko id by origin url
   // var tokoId = '5f3373db203efa581d2354a2'
   // var tokoId = req.query.id
   console.log('origin=====>', origin)
-  TokoTokoOnlineModel.findOne({ website: origin }, (err, doc) => {
+  var arr = origin.split('/')
+  var website = arr[0] + '//' + arr[2]
+  TokoTokoOnlineModel.findOne({ website: website }, (err, doc) => {
     if (!origin.includes(marketPlinkHost) && (err || !doc)) return res.send('error')
     console.log('doc====>', doc)
     var tokoId = '' + (doc || {})._id

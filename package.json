@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "localhostecomm": "NODE_ENV=productionecomm nodemon app.js",
+    "localhostecomm": "NODE_ENV=localhostecomm nodemon app.js",
     "prodecomm": "NODE_ENV=productionecomm node app.js",
     "devecomm": "NODE_ENV=developmentecomm node app.js",
     "devlms": "NODE_ENV=developmentlms node app.js",

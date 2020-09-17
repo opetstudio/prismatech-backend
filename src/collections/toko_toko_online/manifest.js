@@ -54,7 +54,8 @@ module.exports = {
     status: { type: GraphQLString },
     province: { type: GraphQLString },
     city: { type: GraphQLString },
-    subcity: { type: GraphQLString }
+    subcity: { type: GraphQLString },
+    owner_email: { type: GraphQLString }
   },
   createArgs: {
     _id: { type: GraphQLID },
@@ -70,7 +71,8 @@ module.exports = {
     status: { type: GraphQLString },
     province: { type: GraphQLString },
     city: { type: GraphQLString },
-    subcity: { type: GraphQLString }
+    subcity: { type: GraphQLString },
+    owner_email: { type: GraphQLString }
   },
   fields: {
     ...fields,

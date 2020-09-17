@@ -19,6 +19,12 @@ const authorizationFilter = async (resolve, parent, args, context, info) => {
     // not authorized
     throw new Error('NOT_AUTHORIZED ' + info.fieldName)
   }
+
+  if (info.fieldName === 'createTokoTokoOnline') {
+    // hanya user dengan yang memiliki privilege FIELD-TOKO-OWNER-EMAIL yang boleh submit field owner_email
+    if (!_.isEmpty(args.owner_email) && !userPrivilegeName.includes('FIELD-TOKO-OWNER-EMAIL')) throw new Error('NOT_AUTHORIZED ' + info.fieldName)
+  }
+
   // if (!args.access_token) return { status: 400, error: 'Token needed' }
   // const at = await jwt.verify(accesstoken, config.get('privateKeyMerchant'))
 
@@ -29,7 +35,6 @@ const authorizationFilter = async (resolve, parent, args, context, info) => {
 }
 const authorizationFilterMiddleware = {
   Mutation: {
-    
     // user
     // signUp: authorizationFilter,
     // signUpV2: authorizationFilter,
@@ -53,7 +58,10 @@ const authorizationFilterMiddleware = {
     // user role
     createUserRole: authorizationFilter,
     updateUserRole: authorizationFilter,
-    deleteUserRole: authorizationFilter
+    deleteUserRole: authorizationFilter,
+
+    // toko
+    createTokoTokoOnline: authorizationFilter
   },
   RootQueryType: {
 
@@ -78,7 +86,10 @@ const authorizationFilterMiddleware = {
     // user role
     getAllUserRoles: authorizationFilter,
     getDetailUserRole: authorizationFilter,
-    getDetailUserRoleByMyUserId: authorizationFilter
+    getDetailUserRoleByMyUserId: authorizationFilter,
+
+    // toko
+    // getAllTokoTokoOnlines: authorizationFilter
   }
 }
 module.exports = authorizationFilterMiddleware
