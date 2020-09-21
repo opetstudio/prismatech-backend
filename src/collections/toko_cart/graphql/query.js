@@ -51,7 +51,8 @@ const getAllDataBySessionId = {
     page_size: { type: GraphQLInt },
     page_index: { type: GraphQLInt },
     string_to_search: { type: GraphQLString },
-    session_id: { type: GraphQLString }
+    session_id: { type: GraphQLString },
+    status: { type: GraphQLString }
   },
   async resolve (parent, args, context) {
     return Services['fetchAll' + Manifest.entity + 's' + 'BySessionId'](args, context)

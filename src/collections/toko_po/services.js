@@ -79,6 +79,7 @@ const fetchAllData = async (args, context) => {
   }
 }
 const fetchAllDataBySessionId = async (args, context) => {
+  console.log('fetchAllDataBySessionId====>args=', args)
   try {
     const filter = {}
     const $and = []
