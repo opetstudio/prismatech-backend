@@ -45,7 +45,9 @@ const fetchAllDataBySessionId = async (args, context = {}) => {
     console.log('context.req.sessionID=====>', context.req.sessionID)
     const sessionId = args.session_id || context.req.cookies['connect.sid'] || path(['req', 'cookies', 'JSESSIONID'], context)
 
-    $and.push({ session_id: sessionId, status: 'open' })
+    if (args.status === '*') $and.push({ session_id: sessionId })
+    else $and.push({ session_id: sessionId, status: args.status || 'open' })
+
     if (!_.isEmpty($and)) filter.$and = $and
     // const { accesstoken } = context.req.headers
     // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))

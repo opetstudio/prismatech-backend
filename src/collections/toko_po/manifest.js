@@ -54,7 +54,8 @@ const fields = {
   shipping_amount: { type: GraphQLString },
   cart_id: { type: GraphQLList(TokoCartType) },
   toko_id: { type: TokoTokoOnlineType },
-  user_id: { type: UserType }
+  user_id: { type: UserType },
+  unique_code: { type: GraphQLInt }
 }
 module.exports = {
   entity: 'TokoPo',
