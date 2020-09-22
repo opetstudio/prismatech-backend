@@ -17,7 +17,7 @@ router.get('/', function (req, res, next) {
   res.render('backoffice/index', { title: 'Express' })
 })
 router.get('/renderfile/:filename', (req, res, next) => {
-  res.sendFile(pathmodule.join(__dirname + '/../uploadfile/' + req.params.filename))
+  res.sendFile(pathmodule.join(__dirname, '..', '..', 'uploadfile', req.params.filename))
   // res.sendFile(__dirname + './uploadfile/1595349658069.png')
 })
 router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
@@ -67,7 +67,7 @@ router.post('/uploadfile', (req, res, next) => {
       const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
       const { user_id: userId } = bodyAt
       const fileType = type.split('/').pop()
-      const newPath = `./uploadfile/${now}.${fileType}`
+      const newPath = pathmodule.join(__dirname, '..', '..', 'uploadfile', `${now}.${fileType}`)
       console.log('newPath===>', newPath)
       var source = fs.createReadStream(path)
       var dest = fs.createWriteStream(newPath)
