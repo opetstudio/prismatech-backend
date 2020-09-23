@@ -76,6 +76,9 @@ const fetchAllData = async (args, context) => {
 const getAllDataByTokoId = async (args, context) => {
   try {
     const filter = { toko_id: args.toko_id }
+    if (!_.isEmpty(args.category_id)) {
+      filter.category_id = args.category_id
+    }
     // const { accesstoken } = context.req.headers
     // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     // const { user_id: userId } = bodyAt

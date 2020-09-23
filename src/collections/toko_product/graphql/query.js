@@ -101,6 +101,7 @@ const getAllDataByTokoId = {
   }),
   args: {
     toko_id: { type: GraphQLString },
+    category_id: { type: GraphQLString },
     page_size: { type: GraphQLInt },
     page_index: { type: GraphQLInt },
     string_to_search: { type: GraphQLString }
