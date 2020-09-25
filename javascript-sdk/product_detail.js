@@ -380,7 +380,10 @@ function App() {
                                     (detailData.category_id || []).map(function (key) {
                                         // console.log(key.title)
                                         return React.createElement(Chip, { key: key._id, label: key.title,
-                                            className: classes.success_color });
+                                            className: classes.success_color,
+                                            onClick: function onClick() {
+                                                window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG + "#" + key._id;
+                                            } });
                                     })
                                 )
                             ),

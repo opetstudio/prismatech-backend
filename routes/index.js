@@ -30,13 +30,16 @@ router.get('/tokoonline/javascript-sdk/:module', (req, res, next) => {
   // var tokoId = '5f3373db203efa581d2354a2'
   // var tokoId = req.query.id
   console.log('origin=====>', origin)
+  console.log('tokoid=====>', req.query.tokoid)
   var arr = origin.split('/')
   var website = arr[0] + '//' + arr[2]
-  TokoTokoOnlineModel.findOne({ website: { $regex: '.*' + website + '.*' } }, (err, doc) => {
+  TokoTokoOnlineModel.findOne({ website: { $regex: '.*' + website + '.*' }, _id: req.query.tokoid }, (err, doc) => {
     if (!origin.includes(marketPlinkHost) && (err || !doc)) return res.send('error')
     console.log('doc====>', doc)
     var tokoId = '' + (doc || {})._id
+
     if (origin.includes(marketPlinkHost)) tokoId = req.query.tokoid
+
     var backendBaseUrl = config.get('backendBaseUrl')
     // res.sendFile(pathmodule.join(__dirname + '/../javascript-sdk/' + req.params.module))
     res.setHeader('Content-Type', 'text/javascript; charset=UTF-8')

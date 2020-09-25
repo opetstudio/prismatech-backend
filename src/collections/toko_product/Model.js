@@ -61,6 +61,7 @@ const schema = new mongoose.Schema({
   }
 }
 )
+schema.index({ code: 1, toko_id: 1 }, { unique: true })
 // schema.statics.validation = (args) => Joi.object({
 //   // user_id: Joi.string(),
 //   // amount: Joi.number().required().greater(0)

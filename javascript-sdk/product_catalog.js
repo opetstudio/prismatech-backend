@@ -43,7 +43,7 @@ var useStyles = makeStyles(function (theme) {
         },
         card: {
             height: '100%',
-            display: 'flex',
+            // display: 'flex',
             flexDirection: 'column'
         },
         cardMedia: {
@@ -60,6 +60,16 @@ var useStyles = makeStyles(function (theme) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
+        },
+        customHover: {
+            '&:hover': {
+                background: "#F6F6F6"
+            }
+        },
+        customButton: {
+            '&:hover': {
+                color: "#3F51B5"
+            }
         }
     };
 });
@@ -91,10 +101,32 @@ function App() {
         addToCartRequest = _React$useState4[0],
         setAddToCartRequest = _React$useState4[1];
 
-    var doFetchData = React.useCallback(function (page) {
+    console.log('category id===>', window.location.hash.substring(1));
+
+    var _React$useState5 = React.useState(window.location.hash.substring(1)),
+        _React$useState6 = _slicedToArray(_React$useState5, 2),
+        categoryId = _React$useState6[0],
+        setCategoryId = _React$useState6[1];
+
+    window.addEventListener('popstate', function () {
+        console.log('location changed!');
+        setCategoryId(window.location.hash.substring(1));
+    });
+
+    var doFetchData = React.useCallback(function (_ref) {
+        var page = _ref.page,
+            categoryId = _ref.categoryId;
+
+
+        // let categoryId = window.location.hash.substring(1);
+        var filterByCategory = '';
+        if (categoryId) {
+            filterByCategory = 'category_id: "' + categoryId + '",';
+        }
+
         //     // fetch product
         // Simple POST request with a JSON body using fetch
-        var graphqlData = 'query{\n      getAllTokoProductsByTokoId(toko_id: "' + TOKOONLINE_TOKOID + '" ,page_size: 10, page_index: ' + page + ', string_to_search: ""){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n      getAllTokoProductsByTokoId(\n        toko_id: "' + TOKOONLINE_TOKOID + '",\n        ' + filterByCategory + '\n        page_size: 9, \n        page_index: ' + page + ', \n        string_to_search: ""\n       ){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          category_id{\n            _id,\n            title,   \n          },\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -116,8 +148,8 @@ function App() {
         });
     }, []);
 
-    var doAddToCart = function doAddToCart(_ref) {
-        var productId = _ref.productId;
+    var doAddToCart = function doAddToCart(_ref2) {
+        var productId = _ref2.productId;
 
         var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
         var requestOptions = {
@@ -140,10 +172,10 @@ function App() {
         });
     };
 
-    var _React$useState5 = React.useState(false),
-        _React$useState6 = _slicedToArray(_React$useState5, 2),
-        open = _React$useState6[0],
-        setOpen = _React$useState6[1];
+    var _React$useState7 = React.useState(false),
+        _React$useState8 = _slicedToArray(_React$useState7, 2),
+        open = _React$useState8[0],
+        setOpen = _React$useState8[1];
 
     var handleToastOpen = function handleToastOpen() {
         setOpen(true);
@@ -164,14 +196,14 @@ function App() {
         pageIndex = productCatalogRequest.pageIndex,
         pageSize = productCatalogRequest.pageSize;
 
-    var _React$useState7 = React.useState(0),
-        _React$useState8 = _slicedToArray(_React$useState7, 2),
-        page = _React$useState8[0],
-        setPage = _React$useState8[1];
+    var _React$useState9 = React.useState(0),
+        _React$useState10 = _slicedToArray(_React$useState9, 2),
+        page = _React$useState10[0],
+        setPage = _React$useState10[1];
 
     React.useEffect(function () {
-        doFetchData(page);
-    }, [page]);
+        doFetchData({ page: page, categoryId: categoryId });
+    }, [page, categoryId]);
 
     var convertRupiah = function convertRupiah(param) {
         var reverse = param.toString().split('').reverse().join(''),
@@ -185,10 +217,10 @@ function App() {
         window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
     };
 
-    var _React$useState9 = React.useState(0),
-        _React$useState10 = _slicedToArray(_React$useState9, 2),
-        cart = _React$useState10[0],
-        setCart = _React$useState10[1];
+    var _React$useState11 = React.useState(0),
+        _React$useState12 = _slicedToArray(_React$useState11, 2),
+        cart = _React$useState12[0],
+        setCart = _React$useState12[1];
 
     var handlePage = function handlePage(param) {
         param ? setPage(page + 1) : page === 0 ? setPage(0) : setPage(page - 1);
@@ -249,7 +281,7 @@ function App() {
             }),
             React.createElement(
                 Grid,
-                { container: true, spacing: 4, style: { marginTop: 10 } },
+                { container: true, spacing: 2 },
                 (listData || []).map(function (v, i) {
                     return React.createElement(
                         Grid,
@@ -259,7 +291,7 @@ function App() {
                             { className: classes.card },
                             React.createElement(
                                 CardActionArea,
-                                { onClick: function onClick() {
+                                { className: classes.customHover, onClick: function onClick() {
                                         window.location.href = TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code;
                                     } },
                                 React.createElement(CardMedia, {
@@ -292,6 +324,7 @@ function App() {
                                             doAddToCart({ productId: '' + v._id });
                                         },
                                         size: 'small',
+                                        className: classes.customButton,
                                         color: 'primary' },
                                     'Add To Cart'
                                 )
