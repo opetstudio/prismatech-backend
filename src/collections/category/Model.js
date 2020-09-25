@@ -5,8 +5,7 @@ const Manifest = require('./manifest')
 
 const schema = new mongoose.Schema({
   title: {
-    type: String,
-    unique: true
+    type: String
   },
   parent_id: {
     type: mongoose.SchemaTypes.ObjectId,
@@ -38,5 +37,6 @@ const schema = new mongoose.Schema({
 //   // user_id: Joi.string(),
 //   // amount: Joi.number().required().greater(0)
 // }).validate(args)
+schema.index({ title: 1, toko_id: 1 }, { unique: true })
 
 module.exports = mongoose.model(Manifest.collection, schema)
