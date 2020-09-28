@@ -24,23 +24,24 @@ var _MaterialUI = MaterialUI,
     Paper = _MaterialUI.Paper,
     MenuItem = _MaterialUI.MenuItem,
     MenuList = _MaterialUI.MenuList,
-    Divider = _MaterialUI.Divider;
+    Divider = _MaterialUI.Divider,
+    sizing = _MaterialUI.sizing;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
 
 var useStyles = makeStyles(function (theme) {
     return {
-        sidebarAboutBox: {
+        mkPlinkCatgSidebarAboutBox: {
             backgroundColor: '#F6F6F6' },
-        sidebarSection: {
+        mkPlinkCatgSidebarSection: {
             marginTop: theme.spacing(3)
         },
-        cardGrid: {
+        mkPlinkCatgCardGrid: {
             paddingTop: theme.spacing(8),
             paddingBottom: theme.spacing(8)
         },
-        mainGrid: {
+        mkPlinkCatgMainGrid: {
             marginTop: theme.spacing(3)
         }
     };
@@ -113,19 +114,18 @@ function App() {
     return React.createElement(
         'div',
         null,
-        React.createElement(CssBaseline, null),
         React.createElement(
-            Container,
-            { className: classes.cardGrid, maxWidth: 'lg' },
+            'div',
+            { style: { padding: 16, position: 'fixed' } },
             React.createElement(
                 Grid,
-                { container: true, spacing: 2, className: classes.mainGrid },
+                { container: true, spacing: 2 },
                 React.createElement(
                     Grid,
                     { item: true, xs: 12, md: 12 },
                     React.createElement(
                         Paper,
-                        { className: classes.sidebarAboutBox },
+                        { style: { margin: 16, width: 200 } },
                         React.createElement(
                             MenuList,
                             null,
