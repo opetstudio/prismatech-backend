@@ -27,46 +27,43 @@ var backendBaseUrl = TOKOONLINE_BASEURL;
 
 var useStyles = makeStyles(function (theme) {
     return {
-        icon: {
+        mkPlinkCatIcon: {
             marginRight: theme.spacing(2)
         },
-        heroContent: {
+        mkPlinkCatHeroContent: {
             backgroundColor: theme.palette.background.paper,
             padding: theme.spacing(8, 0, 6)
         },
-        heroButtons: {
+        mkPlinkCatHeroButtons: {
             marginTop: theme.spacing(4)
         },
-        cardGrid: {
-            paddingTop: theme.spacing(8),
-            paddingBottom: theme.spacing(8)
+        mkPlinkCatCardGrid: {
+            padding: theme.spacing(8)
         },
-        card: {
+        mkPlinkCatCard: {
             height: '100%',
             // display: 'flex',
             flexDirection: 'column'
         },
-        cardMedia: {
+        mkPlinkCatCardMedia: {
             paddingTop: '56.25%' // 16:9
         },
-        cardContent: {
+        mkPlinkCatCardContent: {
             flexGrow: 1
         },
-        footer: {
-            backgroundColor: theme.palette.background.paper,
-            padding: theme.spacing(6)
+        mkPlinkCatFabCart: {
+            // display: 'flex',
+            // alignItems: 'center',
+            // justifyContent: 'center',
+            marginBottom: '0.5rem'
         },
-        fabCart: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-        },
-        customHover: {
+        mkPlinkCatCustomHover: {
             '&:hover': {
-                background: "#F6F6F6"
+                background: "#F6F6F6",
+                color: "#212121"
             }
         },
-        customButton: {
+        mkPlinkCatCustomButton: {
             '&:hover': {
                 color: "#3F51B5"
             }
@@ -229,7 +226,6 @@ function App() {
     return React.createElement(
         'div',
         null,
-        React.createElement(CssBaseline, null),
         productCatalogRequest.isRequest ? React.createElement(
             Grid,
             {
@@ -242,8 +238,8 @@ function App() {
             },
             React.createElement(CircularProgress, null)
         ) : React.createElement(
-            Container,
-            { className: classes.cardGrid, maxWidth: 'md' },
+            'div',
+            { className: classes.mkPlinkCatCardGrid },
             React.createElement(
                 Grid,
                 {
@@ -255,7 +251,7 @@ function App() {
                 React.createElement(
                     Badge,
                     { onClick: goToCart, badgeContent: cart, color: 'secondary',
-                        style: { position: 'fixed', zIndex: 2 } },
+                        style: { position: 'fixed', zIndex: 2, paddingBottom: 5 } },
                     React.createElement(
                         IconButton,
                         { edge: 'end', 'aria-label': 'delete',
@@ -288,20 +284,20 @@ function App() {
                         { item: true, key: i, xs: 12, sm: 6, md: 4 },
                         React.createElement(
                             Card,
-                            { className: classes.card },
+                            { className: classes.mkPlinkCatCard },
                             React.createElement(
                                 CardActionArea,
-                                { className: classes.customHover, onClick: function onClick() {
+                                { className: classes.mkPlinkCatCustomHover, onClick: function onClick() {
                                         window.location.href = TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code;
                                     } },
                                 React.createElement(CardMedia, {
-                                    className: classes.cardMedia,
+                                    className: classes.mkPlinkCatCardMedia,
                                     image: backendBaseUrl + '/renderfile/' + (v.image_id || {}).filename + '.' + (v.image_id || {}).file_type,
                                     title: v.name
                                 }),
                                 React.createElement(
                                     CardContent,
-                                    { className: classes.cardContent },
+                                    { className: classes.mkPlinkCatCardContent },
                                     React.createElement(
                                         Typography,
                                         { gutterBottom: true, variant: 'h6', noWrap: true },
@@ -324,7 +320,7 @@ function App() {
                                             doAddToCart({ productId: '' + v._id });
                                         },
                                         size: 'small',
-                                        className: classes.customButton,
+                                        className: classes.mkPlinkCatCustomButton,
                                         color: 'primary' },
                                     'Add To Cart'
                                 )

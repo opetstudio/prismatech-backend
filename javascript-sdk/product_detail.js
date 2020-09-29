@@ -228,7 +228,7 @@ function App() {
         setQty = _React$useState6[1];
 
     var doFetchData = React.useCallback(function () {
-        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + window.location.hash.substring(1) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          content1,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + decodeURIComponent(window.location.hash.substring(1)) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          content1,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
