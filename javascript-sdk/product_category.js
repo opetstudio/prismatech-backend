@@ -25,32 +25,91 @@ var _MaterialUI = MaterialUI,
     MenuItem = _MaterialUI.MenuItem,
     MenuList = _MaterialUI.MenuList,
     Divider = _MaterialUI.Divider,
-    sizing = _MaterialUI.sizing;
+    sizing = _MaterialUI.sizing,
+    Toolbar = _MaterialUI.Toolbar,
+    Link = _MaterialUI.Link,
+    Chip = _MaterialUI.Chip;
 
 
 var backendBaseUrl = TOKOONLINE_BASEURL;
 
 var useStyles = makeStyles(function (theme) {
     return {
-        mkPlinkCatgSidebarAboutBox: {
-            backgroundColor: '#F6F6F6' },
-        mkPlinkCatgSidebarSection: {
-            marginTop: theme.spacing(3)
+        // catalogue style
+        mkPlinkCatIcon: {
+            marginRight: theme.spacing(2)
         },
-        mkPlinkCatgCardGrid: {
-            paddingTop: theme.spacing(8),
-            paddingBottom: theme.spacing(8)
+        mkPlinkCatHeroContent: {
+            backgroundColor: theme.palette.background.paper,
+            padding: theme.spacing(8, 0, 6)
         },
-        mkPlinkCatgMainGrid: {
+        mkPlinkCatHeroButtons: {
+            marginTop: theme.spacing(4)
+        },
+        mkPlinkCatCardGrid: {
+            padding: theme.spacing(4)
+        },
+        mkPlinkCatCard: {
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+        },
+        mkPlinkCatCardMedia: {
+            paddingTop: '56.25%' // 16:9
+        },
+        mkPlinkCatCardContent: {
+            flexGrow: 1
+        },
+        mkPlinkCatFabCart: {
+            // display: 'flex',
+            // alignItems: 'center',
+            // justifyContent: 'center',
+            marginTop: '2rem',
+            marginBottom: '0.5rem'
+        },
+        mkPlinkCatCustomHover: {
+            '&:hover': {
+                background: "#F6F6F6",
+                color: "#212121"
+            }
+        },
+        mkPlinkCatCustomButton: {
+            '&:hover': {
+                color: "#3F51B5"
+            }
+        },
+        // category style
+        mkPlinkCatgToolbar: {
+            borderBottom: '1px solid ' + theme.palette.divider
+        },
+        mkPlinkCatgToolbarTitle: {
+            flex: 1
+        },
+        mkPlinkCatgToolbarSecondary: {
+            position: 'fixed',
+            width: '100%',
+            justifyContent: 'space-between',
+            overflowX: 'auto',
+            zIndex: 3,
+            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+        },
+        mkPlinkCatgToolbarLink: {
+            padding: theme.spacing(1),
+            flexShrink: 0
+        },
+        mkPlinkCatgToolbarPrimary: {
+            zIndex: 3
+        },
+        mkPlinkCatgToolbarPrimaryBox: {
+            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+        },
+        mkPlinkCatgToolbarPrimaryBoxGrid: {
             marginTop: theme.spacing(3)
         }
     };
 });
-
-var options = ['Baju', 'Celana', 'Aksesoris', 'Elektronik'];
-
-var options2 = ['Terbaru', 'Harga terendah', 'Harga tertinggi', 'Paling laku'];
-
+var tokoonline_category = parseInt(document.getElementById('tokoonline_category').dataset.catgtype);
+var chipStyle = ['default', 'primary', 'secondary'];
 // class App extends React.Component {
 function App() {
     var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
@@ -114,18 +173,36 @@ function App() {
     return React.createElement(
         'div',
         null,
-        React.createElement(
-            'div',
-            { style: { padding: 16, position: 'fixed' } },
+        React.createElement(CssBaseline, null),
+        tokoonline_category == 1 ? React.createElement(
+            Toolbar,
+            { component: 'nav', variant: 'dense', className: classes.mkPlinkCatgToolbarSecondary /*style={{position: 'fixed', zIndex:10, backgroundColor: '#fff'}}*/ },
+            categorys.map(function (option, index) {
+                return React.createElement(
+                    MenuItem,
+                    {
+                        key: option._id,
+                        selected: option._id === paramCatId,
+                        onClick: function onClick() {
+                            return handleMenuItemClick(option, index);
+                        },
+                        className: classes.mkPlinkCatgToolbarLink
+                    },
+                    option.title
+                );
+            })
+        ) : React.createElement(
+            Container,
+            { className: classes.mkPlinkCatgToolbarPrimary, maxWidth: 'lg' },
             React.createElement(
                 Grid,
-                { container: true, spacing: 2 },
+                { container: true, spacing: 2, className: classes.mkPlinkCatgToolbarPrimaryBoxGrid },
                 React.createElement(
                     Grid,
                     { item: true, xs: 12, md: 12 },
                     React.createElement(
                         Paper,
-                        { style: { margin: 16, width: 200 } },
+                        { className: classes.mkPlinkCatgToolbarPrimaryBox },
                         React.createElement(
                             MenuList,
                             null,
@@ -140,7 +217,7 @@ function App() {
                                     {
                                         key: option._id,
                                         selected: option._id === paramCatId,
-                                        onClick: function onClick() {
+                                        onClick: function onClick(event) {
                                             return handleMenuItemClick(option, index);
                                         }
                                     },
