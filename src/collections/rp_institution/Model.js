@@ -6,12 +6,12 @@ const Joi = require('@hapi/joi')
 const institutionMerchantSchema = new mongoose.Schema({
   merchant_id: {
     type: String,
-    ref: 'Merchant',
+    ref: 'rp_merchant',
     default: null
   },
   merchant_id_native: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref: 'Merchant',
+    ref: 'rp_merchant',
     default: null
   }
 })
@@ -125,4 +125,4 @@ institutionSchema.methods.comparedPassword = function (candidatePassword) {
   })
 }
 
-module.exports = mongoose.model('Rp_Institution', institutionSchema)
+module.exports = mongoose.model('rp_institution', institutionSchema)
