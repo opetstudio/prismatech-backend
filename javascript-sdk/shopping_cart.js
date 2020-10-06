@@ -822,15 +822,15 @@ function App() {
                                                 name: 'jne',
                                                 value: 'jne'
                                             },
-                                            'JNE'
+                                            'Jne'
                                         ),
                                         React.createElement(
                                             MenuItem,
                                             {
-                                                name: 'pos',
-                                                value: 'pos'
+                                                name: 'jnt',
+                                                value: 'jnt'
                                             },
-                                            'POS'
+                                            'Jnt'
                                         ),
                                         React.createElement(
                                             MenuItem,
@@ -838,7 +838,39 @@ function App() {
                                                 name: 'tiki',
                                                 value: 'tiki'
                                             },
-                                            'TIKI'
+                                            'Tiki'
+                                        ),
+                                        React.createElement(
+                                            MenuItem,
+                                            {
+                                                name: 'sicepat',
+                                                value: 'sicepat'
+                                            },
+                                            'Sicepat'
+                                        ),
+                                        React.createElement(
+                                            MenuItem,
+                                            {
+                                                name: 'wahana',
+                                                value: 'wahana'
+                                            },
+                                            'Wahana'
+                                        ),
+                                        React.createElement(
+                                            MenuItem,
+                                            {
+                                                name: 'ninja',
+                                                value: 'ninja'
+                                            },
+                                            'Ninja'
+                                        ),
+                                        React.createElement(
+                                            MenuItem,
+                                            {
+                                                name: 'pos',
+                                                value: 'pos'
+                                            },
+                                            'Pos'
                                         )
                                     ),
                                     React.createElement(
