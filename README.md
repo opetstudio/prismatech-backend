@@ -1,3 +1,10 @@
+## install
+
+```bash
+    mkdir ../uploadfile
+    npm install
+```
+
 ## Start Production (untuk server production)
 ```bash
 export PRIVATE_KEY=xxx
