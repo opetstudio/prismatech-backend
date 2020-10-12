@@ -93,8 +93,7 @@ var useStyles = makeStyles(function (theme) {
         },
         addToCartContainer: {
             background: '#F7F9F9',
-            // margin: '1rem 0',
-            padding: '1rem'
+            padding: '0.5rem'
         },
         priceContainer: {
             marginTop: 10,
@@ -151,6 +150,8 @@ var useStyles = makeStyles(function (theme) {
 });
 
 function App() {
+    var _React$createElement, _React$createElement2;
+
     var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
     if (!tokoonlinesessionid) localStorage.setItem(TOKOONLINE_TOKOID, '' + new Date().getTime());
     var classes = useStyles();
@@ -415,10 +416,13 @@ function App() {
                                     null,
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 100 }) : React.createElement(
                                         Grid,
-                                        { container: true, className: classes.addToCartContainer },
+                                        { container: true, className: classes.addToCartContainer,
+                                            direction: 'row',
+                                            justify: 'space-around',
+                                            alignItems: 'center' },
                                         React.createElement(
                                             Grid,
-                                            { item: true, xs: 6, sm: 6, md: 6 },
+                                            (_React$createElement = { item: true }, _defineProperty(_React$createElement, 'item', true), _defineProperty(_React$createElement, 'xs', 4), _defineProperty(_React$createElement, 'sm', 4), _React$createElement),
                                             React.createElement(
                                                 Typography,
                                                 { color: 'textSecondary' },
@@ -427,25 +431,23 @@ function App() {
                                         ),
                                         React.createElement(
                                             Grid,
-                                            { item: true, xs: 6, sm: 6, md: 6 },
+                                            (_React$createElement2 = { item: true }, _defineProperty(_React$createElement2, 'item', true), _defineProperty(_React$createElement2, 'xs', 8), _defineProperty(_React$createElement2, 'sm', 8), _React$createElement2),
                                             React.createElement(
                                                 ButtonGroup,
-                                                { disableElevation: true, variant: 'contained' },
+                                                { 'aria-label': 'outlined primary button group' },
                                                 React.createElement(
                                                     Button,
-                                                    { size: 'small', onClick: handleDecreaseItem },
+                                                    { onClick: handleDecreaseItem },
                                                     '-'
                                                 ),
-                                                React.createElement(TextField, {
-                                                    id: 'outlined-size-small',
-                                                    value: qty,
-                                                    variant: 'outlined',
-                                                    type: 'number',
-                                                    size: 'small'
-                                                }),
                                                 React.createElement(
                                                     Button,
-                                                    { size: 'small', onClick: handleIncreaseItem },
+                                                    null,
+                                                    qty
+                                                ),
+                                                React.createElement(
+                                                    Button,
+                                                    { onClick: handleIncreaseItem },
                                                     '+'
                                                 )
                                             )
