@@ -198,7 +198,7 @@ const checkoutProcess = async (args, context) => {
     // validasi
     if (!args.full_name || args.full_name === '-' || args.full_name === 'undefined') throw new Error('Data Nama Customer masih kosong')
     if (!args.phone_number || args.phone_number === '-' || args.phone_number === 'undefined') throw new Error('Data Nomor Telepon masih kosong')
-    if (!args.email || args.email === '-' || args.email === 'undefined') throw new Error('Data Email masih kosong')
+    // if (!args.email || args.email === '-' || args.email === 'undefined') throw new Error('Data Email masih kosong')
     if (_.isEmpty(args.cart_id) || args.cart_id === 'undefined') throw new Error('Keranjang belanja masih kosong')
 
     const { accesstoken } = context.req.headers
@@ -305,12 +305,14 @@ const paymentProcessSendOtp = async (args, context) => {
     // toko po detail
     const tokoPoDetail = await EntityModel.findOne({ session_id: args.session_id, email: args.email }).populate({ path: 'cart_id', populate: { path: 'product_id' } })
     if (_.isEmpty(tokoPoDetail)) throw new Error('Data pembelian tidak ditemukan')
-    const otp = generateRandomNumber(4)
+    // const otp = generateRandomNumber(4)
     const paymentProcessSendOtpServiceResp = await paymentProcessSendOtpService({
       email: args.email,
-      emailBody: `Tolong dicatat Nomor transaksi anda: ${args.session_id}. Lalu gunakan otp berikut, untuk melakukan validasi email.
-      otp: ${otp}`,
-      otpString: otp
+      emailBody: `Tolong dicatat Nomor transaksi anda: ${args.session_id}.`,
+      // emailBody: `Tolong dicatat Nomor transaksi anda: ${args.session_id}. Lalu gunakan otp berikut, untuk melakukan validasi email.
+      // otp: ${otp}`,
+      otpString: 'xxx'
+      // otpString: otp
     })
     if (paymentProcessSendOtpServiceResp.status !== 200) throw new Error('Gagal kirim otp')
     return { status: 200, success: 'Berhasil kirim otp', otpRefNum: paymentProcessSendOtpServiceResp.otpRefNum }
@@ -394,17 +396,17 @@ const paymentProcess = async (args, context) => {
     const formatedDateTime = `${nowDateTime.getFullYear()}-${('' + nowDateTime.getMonth()).padStart(2, '0')}-${('' + nowDateTime.getDate()).padStart(2, '0')} ${('' + nowDateTime.getHours()).padStart(2, '0')}:${('' + nowDateTime.getMinutes()).padStart(2, '0')}:${('' + nowDateTime.getSeconds()).padStart(2, '0')} ${tz}`
 
     // validasi otp
-    try {
-      const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
-      console.log('paymentProcessValidateOtpServiceResp===>', paymentProcessValidateOtpServiceResp)
-      if (paymentProcessValidateOtpServiceResp.status !== 200) {
-        const er = paymentProcessValidateOtpServiceResp.error
-        throw new Error(er)
-      }
-    } catch (e) {
-      console.log('e===>', e)
-      throw new Error('Gagal validasi otp')
-    }
+    // try {
+    //   const paymentProcessValidateOtpServiceResp = await paymentProcessValidateOtpService(args.otp, tokoPoDetail.email, args.otpRefNum)
+    //   console.log('paymentProcessValidateOtpServiceResp===>', paymentProcessValidateOtpServiceResp)
+    //   if (paymentProcessValidateOtpServiceResp.status !== 200) {
+    //     const er = paymentProcessValidateOtpServiceResp.error
+    //     throw new Error(er)
+    //   }
+    // } catch (e) {
+    //   console.log('e===>', e)
+    //   throw new Error('Gagal validasi otp')
+    // }
 
     var bodyHit = {
       transmission_date_time: formatedDateTime,
