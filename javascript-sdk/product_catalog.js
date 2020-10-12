@@ -53,10 +53,6 @@ var useStyles = makeStyles(function (theme) {
             flexGrow: 1
         },
         mkPlinkCatFabCart: {
-            // display: 'flex',
-            // alignItems: 'center',
-            // justifyContent: 'center',
-            marginTop: '2rem',
             marginBottom: '0.5rem'
         },
         mkPlinkCatCustomHover: {
@@ -78,12 +74,9 @@ var useStyles = makeStyles(function (theme) {
             flex: 1
         },
         mkPlinkCatgToolbarSecondary: {
-            position: 'fixed',
-            width: '100%',
             justifyContent: 'space-between',
             overflowX: 'auto',
-            zIndex: 3,
-            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+            zIndex: 3
         },
         mkPlinkCatgToolbarLink: {
             padding: theme.spacing(1),
@@ -97,6 +90,9 @@ var useStyles = makeStyles(function (theme) {
         },
         mkPlinkCatgToolbarPrimaryBoxGrid: {
             marginTop: theme.spacing(3)
+        },
+        chip: {
+            margin: theme.spacing(0.5)
         }
     };
 });
@@ -271,7 +267,7 @@ function App() {
             React.createElement(CircularProgress, null)
         ) : React.createElement(
             Container,
-            { className: classes.mkPlinkCatCardGrid, maxWidth: 'lg', style: { marginTop: tokoonline_category_style == 1 ? 42 : 0 } },
+            { className: classes.mkPlinkCatCardGrid, maxWidth: 'lg' },
             React.createElement(
                 Grid,
                 {
@@ -283,8 +279,7 @@ function App() {
                 },
                 React.createElement(
                     Badge,
-                    { onClick: goToCart, badgeContent: 0, color: 'secondary',
-                        style: { position: 'fixed', zIndex: 4, paddingBottom: 5 } },
+                    { onClick: goToCart, badgeContent: 0, color: 'secondary' },
                     React.createElement(
                         IconButton,
                         { edge: 'end', 'aria-label': 'delete',

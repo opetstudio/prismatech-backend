@@ -61,10 +61,6 @@ var useStyles = makeStyles(function (theme) {
             flexGrow: 1
         },
         mkPlinkCatFabCart: {
-            // display: 'flex',
-            // alignItems: 'center',
-            // justifyContent: 'center',
-            marginTop: '2rem',
             marginBottom: '0.5rem'
         },
         mkPlinkCatCustomHover: {
@@ -86,12 +82,9 @@ var useStyles = makeStyles(function (theme) {
             flex: 1
         },
         mkPlinkCatgToolbarSecondary: {
-            position: 'fixed',
-            width: '100%',
             justifyContent: 'space-between',
             overflowX: 'auto',
-            zIndex: 3,
-            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+            zIndex: 3
         },
         mkPlinkCatgToolbarLink: {
             padding: theme.spacing(1),
@@ -105,6 +98,9 @@ var useStyles = makeStyles(function (theme) {
         },
         mkPlinkCatgToolbarPrimaryBoxGrid: {
             marginTop: theme.spacing(3)
+        },
+        chip: {
+            margin: theme.spacing(0.5)
         }
     };
 });
@@ -178,18 +174,17 @@ function App() {
             Toolbar,
             { component: 'nav', variant: 'dense', className: classes.mkPlinkCatgToolbarSecondary /*style={{position: 'fixed', zIndex:10, backgroundColor: '#fff'}}*/ },
             categorys.map(function (option, index) {
-                return React.createElement(
-                    MenuItem,
-                    {
-                        key: option._id,
-                        selected: option._id === paramCatId,
-                        onClick: function onClick() {
-                            return handleMenuItemClick(option, index);
-                        },
-                        className: classes.mkPlinkCatgToolbarLink
+                return React.createElement(Chip, {
+                    variant: 'outlined',
+                    key: option._id,
+                    clickable: true,
+                    color: option._id === paramCatId ? "primary" : "default",
+                    label: option.title,
+                    onClick: function onClick() {
+                        return handleMenuItemClick(option, index);
                     },
-                    option.title
-                );
+                    className: classes.chip
+                });
             })
         ) : React.createElement(
             Container,
