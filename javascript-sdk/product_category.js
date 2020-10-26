@@ -125,7 +125,7 @@ function App() {
     var handleMenuItemClick = function handleMenuItemClick(event, index) {
         setSelectedIndex(index);
         setAnchorEl(null);
-        window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG + "#" + event._id;
+        if (event._id == 'all_categorys') window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG;else window.location.href = TOKOONLINE_PAGE_PRODUCT_CATALOG + "#" + event._id;
     };
 
     var _React$useState5 = React.useState(0),
@@ -140,7 +140,7 @@ function App() {
 
     var paramCatId = window.location.hash.substring(1);
 
-    var _React$useState7 = React.useState([]),
+    var _React$useState7 = React.useState([{ _id: "all_categorys", title: "Semua" }]),
         _React$useState8 = _slicedToArray(_React$useState7, 2),
         categorys = _React$useState8[0],
         setCategorys = _React$useState8[1];
@@ -162,7 +162,8 @@ function App() {
             // response.json()
             return response.data.getAllCategorysByTokoId;
         }).then(function (data) {
-            return setCategorys(data.list_data);
+            var x = categorys.concat(data.list_data);
+            return setCategorys(x);
         });
     }, []);
 
