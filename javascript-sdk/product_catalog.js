@@ -96,7 +96,7 @@ var useStyles = makeStyles(function (theme) {
         }
     };
 });
-var tokoonline_category_style = parseInt(document.getElementById('tokoonline_category').dataset.catgtype);
+// const tokoonline_category_style = parseInt(document.getElementById('tokoonline_category').dataset.catgtype);
 var fabPosition = document.getElementById('tokoonline_content').dataset.fabposition;
 // class App extends React.Component {
 function App() {
