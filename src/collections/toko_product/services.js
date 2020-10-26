@@ -270,6 +270,12 @@ const doCreateData = async (args, context) => {
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
     const tagIdList = []
+
+    // butuh ongkir?
+    const isneedShipping = args.isneed_shipping
+    const weight = args.weight
+    if (isneedShipping === 'Y' && (_.isEmpty(weight) || parseInt(weight) === 0)) throw new Error('Produk ini butuh ongkos kirim. Berat produk masih kosong.')
+
     if (!_.isEmpty(args.tag_id)) {
       const needToCreateTag = []
       args.tag_id.forEach(v => {
