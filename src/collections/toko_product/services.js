@@ -269,9 +269,13 @@ const fetchDetailData = async (args, context) => {
       .populate({ path: 'toko_id' })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
+
+    if (_.isEmpty(result)) throw new Error('Data tidak ditemukan')
+
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllMyEligibleToko = async ({ userId }) => {
@@ -521,7 +525,8 @@ const doUpdateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const doDeleteData = async (args, context) => {
