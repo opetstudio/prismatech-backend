@@ -509,8 +509,9 @@ function App() {
                             'Deskripsi produk'
                         )
                     ),
+                    
                     React.createElement('div', { className: classes.product_detail,
-                        dangerouslySetInnerHTML: { __html: decodeURIComponent(detailData.content1) } })
+                        dangerouslySetInnerHTML: { __html: detailData.content1 } })
                 )
             )
         )

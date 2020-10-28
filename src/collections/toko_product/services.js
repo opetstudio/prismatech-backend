@@ -294,23 +294,56 @@ const doCreateData = async (args, context) => {
     }
 
     // check authorization
-    let isEligible = false
+    // let isEligible = true
+    // let $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // if (myOwnListToko) {
+    //   myOwnListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v._id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+
+
+    const filter = {}
+    let isEligible = true
+    let $or = []
+    // check authorization
+    // daftar toko yang anggota team nya termasuk user_id saya, dan toko yang owner nya adalah user_id saya
     const myListToko = await TokoTeamModel.find({ user_id: userId })
     if (myListToko) {
       console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
-        if (isEligible) return true
+      $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+      $or.push({ owner: userId })
+    }
+    // daftar toko yang created_by nya adalah user_id saya
+    $or.push({ created_by: userId })
+    filter.$and = []
+    filter.$and.push({
+      $or: $or
+    })
+    const myOwnListToko = await TokoTokoOnlineModel.find(filter)
+    if (_.isEmpty(myOwnListToko)) isEligible = false
+    else {
+      const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
+      args.toko_id || [].forEach(v => {
+        if (!myOwnListTokoId.includes('' + v)) isEligible = false
+        if (!isEligible) return true
       })
     }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
-    if (myOwnListToko) {
-      myOwnListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v._id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
+    // console.log('myOwnListToko=====>', myOwnListToko)
+    // console.log('filter $or=====>', $or)
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+
     // if (!_.isEmpty($or)) {
     //   filter.$and.push({
     //     $or: $or
