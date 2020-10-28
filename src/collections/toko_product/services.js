@@ -218,7 +218,6 @@ const fetchDetailData = async (args, context) => {
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
 
-    const filter = {}
     // filter.$and = []
     // filter.$and.push({ _id: args.id })
     // check authorization
@@ -245,6 +244,7 @@ const fetchDetailData = async (args, context) => {
     //   })
     // }
     // if (!isEligible) return { status: 200, success: 'Successfully get Data', data_detail: {} }
+    const filter = {}
     filter.$and = []
     const $or = []
     const myOwnListToko = await getAllMyEligibleToko({ userId })
@@ -462,28 +462,49 @@ const doUpdateData = async (args, context) => {
         console.log('args.tag_id => ', args.tag_id)
       }
     }
+
+    // get product detail
+    const filter = {}
+    filter.$and = []
+    const $or = []
+    const myEligibleToko = await getAllMyEligibleToko({ userId })
+    if (myEligibleToko) {
+      myEligibleToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+    }
+    $or.push({ created_by: userId })
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    filter.$and.push({ _id: args.id })
+
+    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
+    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
+
     if (_.isEmpty(args.toko_id)) {
-      const productDetail = await EntityModel.findOne({ _id: args._id }).populate({ path: 'toko_id' })
       args.toko_id = productDetail.toko_id.map(v => '' + (v || {})._id)
     }
     // check authorization
     let isEligible = false
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
-    if (myOwnListToko) {
-      console.log('myOwnListToko=>', myOwnListToko)
-      myOwnListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v._id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    
+    console.log('myEligibleToko=>', myEligibleToko)
+    myEligibleToko.forEach(v => {
+      if ((args.toko_id || []).includes('' + v._id)) isEligible = true
+      if (isEligible) return true
+    })
+    
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
     const data = args
@@ -513,7 +534,28 @@ const doDeleteData = async (args, context) => {
     const { user_id: userId } = bodyAt
     console.log('delete invoked args=', args)
 
-    const dataDetail = await EntityModel.findById(args._id).session(session)
+    // get product detail
+    const filter = {}
+    filter.$and = []
+    const $or = []
+    const myEligibleToko = await getAllMyEligibleToko({ userId })
+    if (myEligibleToko) {
+      myEligibleToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+    }
+    $or.push({ created_by: userId })
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    filter.$and.push({ _id: args.id })
+
+    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' }).session(session)
+    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk hapus produk ini.')
+
+    // const dataDetail = await EntityModel.findById(args._id).session(session)
 
     // check authorization
     // let isEligible = false
@@ -530,7 +572,7 @@ const doDeleteData = async (args, context) => {
     // }
     // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
-    await dataDetail.deleteOne()
+    await productDetail.deleteOne()
     await session.commitTransaction()
     session.endSession()
     return { status: 200, success: 'Successfully delete Data', detail_data: {} }
