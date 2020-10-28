@@ -334,8 +334,9 @@ const doCreateData = async (args, context) => {
     const myOwnListToko = await TokoTokoOnlineModel.find(filter)
     if (_.isEmpty(myOwnListToko)) isEligible = false
     else {
-      myOwnListToko.forEach(v => {
-        if (!(args.toko_id || []).includes('' + v._id)) isEligible = false
+      const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
+      args.toko_id || [].forEach(v => {
+        if (!myOwnListTokoId.includes('' + v)) isEligible = false
         if (!isEligible) return true
       })
     }
