@@ -327,16 +327,10 @@ const doCreateData = async (args, context) => {
     }
     // daftar toko yang created_by nya adalah user_id saya
     $or.push({ created_by: userId })
-    if (!_.isEmpty($or)) {
-      filter.$and = []
-      filter.$and.push({
-        $or: $or
-      })
-    } else {
-      isEligible = false
-    }
-
-    if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+    filter.$and = []
+    filter.$and.push({
+      $or: $or
+    })
     const myOwnListToko = await TokoTokoOnlineModel.find(filter)
     if (_.isEmpty(myOwnListToko)) isEligible = false
     else {
@@ -345,6 +339,8 @@ const doCreateData = async (args, context) => {
         if (!isEligible) return true
       })
     }
+    console.log('myOwnListToko=====>', myOwnListToko)
+    console.log('filter $or=====>', $or)
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
     // if (!_.isEmpty($or)) {
