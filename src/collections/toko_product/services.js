@@ -26,9 +26,6 @@ const fetchAllData = async (args, context) => {
       $or.push({ description: { $regex: args.string_to_search, $options: 'i' } })
       // filter.$and.push()
     }
-
-    
-
     // check authorization
     // let isEligible = false
     // const $or = []
@@ -72,7 +69,8 @@ const fetchAllData = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllDataByTokoId = async (args, context) => {
@@ -106,7 +104,8 @@ const getAllDataByTokoId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllDataByTokoSlug = async (args, context) => {
@@ -141,7 +140,8 @@ const getAllDataByTokoSlug = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllDataByCategoryId = async (args, context) => {
@@ -175,7 +175,8 @@ const getAllDataByCategoryId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getDetailDataByCode = async (args, context) => {
@@ -417,7 +418,8 @@ const doCreateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const doUpdateData = async (args, context) => {
@@ -585,7 +587,8 @@ const doDeleteData = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 
