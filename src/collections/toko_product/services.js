@@ -16,44 +16,46 @@ const fetchAllData = async (args, context) => {
   try {
     const filter = {}
     filter.$and = []
+    const $or = []
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     if (!_.isEmpty(args.string_to_search)) {
-      filter.$and.push({
-        $or: [
-          { title: { $regex: args.string_to_search, $options: 'i' } },
-          { code: { $regex: args.string_to_search, $options: 'i' } },
-          { description: { $regex: args.string_to_search, $options: 'i' } }
-        ]
-      })
+      $or.push({ title: { $regex: args.string_to_search, $options: 'i' } })
+      $or.push({ code: { $regex: args.string_to_search, $options: 'i' } })
+      $or.push({ description: { $regex: args.string_to_search, $options: 'i' } })
+      // filter.$and.push()
     }
 
+    
+
     // check authorization
-    let isEligible = false
-    const $or = []
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        $or.push({ toko_id: '' + v.toko_id })
-      })
-      isEligible = true
-    }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // let isEligible = false
+    // const $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     $or.push({ toko_id: '' + v.toko_id })
+    //   })
+    //   isEligible = true
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    const myOwnListToko = await getAllMyEligibleToko({ userId })
     if (myOwnListToko) {
       myOwnListToko.forEach(v => {
         $or.push({ toko_id: '' + v._id })
       })
-      isEligible = true
+      // isEligible = true
     }
+    $or.push({ created_by: userId })
     if (!_.isEmpty($or)) {
       filter.$and.push({
         $or: $or
       })
     }
-    if (_.isEmpty(filter.$and)) isEligible = false
-    if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
+    // if (_.isEmpty(filter.$and)) isEligible = false
+    // if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
 
     const result = await EntityModel.find(filter)
       .sort({ updated_at: 'desc' })
@@ -217,34 +219,50 @@ const fetchDetailData = async (args, context) => {
     const { user_id: userId } = bodyAt
 
     const filter = {}
-    filter.$and = []
-    filter.$and.push({ _id: args.id })
+    // filter.$and = []
+    // filter.$and.push({ _id: args.id })
     // check authorization
-    let isEligible = false
+    // let isEligible = false
+    // const $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     $or.push({ toko_id: '' + v.toko_id })
+    //   })
+    //   isEligible = true
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // if (myOwnListToko) {
+    //   myOwnListToko.forEach(v => {
+    //     $or.push({ toko_id: '' + v._id })
+    //   })
+    //   isEligible = true
+    // }
+    // if (!_.isEmpty($or)) {
+    //   filter.$and.push({
+    //     $or: $or
+    //   })
+    // }
+    // if (!isEligible) return { status: 200, success: 'Successfully get Data', data_detail: {} }
+    filter.$and = []
     const $or = []
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        $or.push({ toko_id: '' + v.toko_id })
-      })
-      isEligible = true
-    }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    const myOwnListToko = await getAllMyEligibleToko({ userId })
     if (myOwnListToko) {
       myOwnListToko.forEach(v => {
         $or.push({ toko_id: '' + v._id })
       })
-      isEligible = true
     }
+    $or.push({ created_by: userId })
     if (!_.isEmpty($or)) {
       filter.$and.push({
         $or: $or
       })
     }
-    if (!isEligible) return { status: 200, success: 'Successfully get Data', data_detail: {} }
+    filter.$and.push({ _id: args.id })
 
-    const result = await EntityModel.findOne({ _id: args.id })
+    const result = await EntityModel.findOne(filter)
+    // const result = await EntityModel.findOne({ _id: args.id })
       .populate({ path: 'image_id' })
       .populate({ path: 'category_id' })
       .populate({ path: 'tag_id' })
@@ -255,6 +273,33 @@ const fetchDetailData = async (args, context) => {
   } catch (err) {
     return { status: 400, error: err.message }
   }
+}
+const getAllMyEligibleToko = async ({ userId }) => {
+  const filter = {}
+  // let isEligible = true
+  let $or = []
+  const myListToko = await TokoTeamModel.find({ user_id: userId })
+  if (myListToko) {
+    console.log('myListToko=>', myListToko)
+    $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+    $or.push({ owner: userId })
+  }
+  // daftar toko yang created_by nya adalah user_id saya
+  $or.push({ created_by: userId })
+  filter.$and = []
+  filter.$and.push({
+    $or: $or
+  })
+  const myOwnListToko = await TokoTokoOnlineModel.find(filter)
+  // if (_.isEmpty(myOwnListToko)) isEligible = false
+  // else {
+  //   const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
+  //   args.toko_id || [].forEach(v => {
+  //     if (!myOwnListTokoId.includes('' + v)) isEligible = false
+  //     if (!isEligible) return true
+  //   })
+  // }
+  return myOwnListToko
 }
 const doCreateData = async (args, context) => {
   const session = await EntityModel.db.startSession()
@@ -314,24 +359,25 @@ const doCreateData = async (args, context) => {
     // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
 
-    const filter = {}
+    // const filter = {}
     let isEligible = true
-    let $or = []
-    // check authorization
-    // daftar toko yang anggota team nya termasuk user_id saya, dan toko yang owner nya adalah user_id saya
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
-      $or.push({ owner: userId })
-    }
-    // daftar toko yang created_by nya adalah user_id saya
-    $or.push({ created_by: userId })
-    filter.$and = []
-    filter.$and.push({
-      $or: $or
-    })
-    const myOwnListToko = await TokoTokoOnlineModel.find(filter)
+    // let $or = []
+    // // check authorization
+    // // daftar toko yang anggota team nya termasuk user_id saya, dan toko yang owner nya adalah user_id saya
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+    //   $or.push({ owner: userId })
+    // }
+    // // daftar toko yang created_by nya adalah user_id saya
+    // $or.push({ created_by: userId })
+    // filter.$and = []
+    // filter.$and.push({
+    //   $or: $or
+    // })
+    const myOwnListToko = await getAllMyEligibleToko({ userId })
+    // const myOwnListToko = await TokoTokoOnlineModel.find(filter)
     if (_.isEmpty(myOwnListToko)) isEligible = false
     else {
       const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
