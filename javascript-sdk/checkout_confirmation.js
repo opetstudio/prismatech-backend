@@ -454,7 +454,8 @@ function App() {
                                 },
                                 React.createElement(
                                     Typography,
-                                    { variant: 'caption', style: { marginLeft: 16, marginTop: 16 } },
+                                    { variant: 'caption',
+                                        style: { marginLeft: 16, marginTop: 16 } },
                                     'Ongkir'
                                 ),
                                 React.createElement(
