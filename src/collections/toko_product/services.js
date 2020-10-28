@@ -340,8 +340,8 @@ const doCreateData = async (args, context) => {
         if (!isEligible) return true
       })
     }
-    console.log('myOwnListToko=====>', myOwnListToko)
-    console.log('filter $or=====>', $or)
+    // console.log('myOwnListToko=====>', myOwnListToko)
+    // console.log('filter $or=====>', $or)
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
     // if (!_.isEmpty($or)) {
