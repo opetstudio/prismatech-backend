@@ -27,6 +27,7 @@ var backendBaseUrl = TOKOONLINE_BASEURL;
 
 var useStyles = makeStyles(function (theme) {
     return {
+        // catalogue style
         mkPlinkCatIcon: {
             marginRight: theme.spacing(2)
         },
@@ -38,11 +39,11 @@ var useStyles = makeStyles(function (theme) {
             marginTop: theme.spacing(4)
         },
         mkPlinkCatCardGrid: {
-            padding: theme.spacing(8)
+            padding: theme.spacing(4)
         },
         mkPlinkCatCard: {
             height: '100%',
-            // display: 'flex',
+            display: 'flex',
             flexDirection: 'column'
         },
         mkPlinkCatCardMedia: {
@@ -52,9 +53,6 @@ var useStyles = makeStyles(function (theme) {
             flexGrow: 1
         },
         mkPlinkCatFabCart: {
-            // display: 'flex',
-            // alignItems: 'center',
-            // justifyContent: 'center',
             marginBottom: '0.5rem'
         },
         mkPlinkCatCustomHover: {
@@ -67,10 +65,39 @@ var useStyles = makeStyles(function (theme) {
             '&:hover': {
                 color: "#3F51B5"
             }
+        },
+        // category style
+        mkPlinkCatgToolbar: {
+            borderBottom: '1px solid ' + theme.palette.divider
+        },
+        mkPlinkCatgToolbarTitle: {
+            flex: 1
+        },
+        mkPlinkCatgToolbarSecondary: {
+            justifyContent: 'space-between',
+            overflowX: 'auto',
+            zIndex: 3
+        },
+        mkPlinkCatgToolbarLink: {
+            padding: theme.spacing(1),
+            flexShrink: 0
+        },
+        mkPlinkCatgToolbarPrimary: {
+            zIndex: 3
+        },
+        mkPlinkCatgToolbarPrimaryBox: {
+            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+        },
+        mkPlinkCatgToolbarPrimaryBoxGrid: {
+            marginTop: theme.spacing(3)
+        },
+        chip: {
+            margin: theme.spacing(0.5)
         }
     };
 });
-
+// const tokoonline_category_style = parseInt(document.getElementById('tokoonline_category').dataset.catgtype);
+var fabPosition = document.getElementById('tokoonline_content').dataset.fabposition;
 // class App extends React.Component {
 function App() {
     var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
@@ -226,6 +253,7 @@ function App() {
     return React.createElement(
         'div',
         null,
+        React.createElement(CssBaseline, null),
         productCatalogRequest.isRequest ? React.createElement(
             Grid,
             {
@@ -238,20 +266,20 @@ function App() {
             },
             React.createElement(CircularProgress, null)
         ) : React.createElement(
-            'div',
-            { className: classes.mkPlinkCatCardGrid },
+            Container,
+            { className: classes.mkPlinkCatCardGrid, maxWidth: 'lg' },
             React.createElement(
                 Grid,
                 {
                     container: true,
                     direction: 'row',
-                    justify: 'flex-end',
-                    alignItems: 'flex-end'
+                    justify: fabPosition == 'left' ? "flex-start" : 'flex-end',
+                    alignItems: 'flex-end',
+                    className: classes.mkPlinkCatFabCart
                 },
                 React.createElement(
                     Badge,
-                    { onClick: goToCart, badgeContent: cart, color: 'secondary',
-                        style: { position: 'fixed', zIndex: 2, paddingBottom: 5 } },
+                    { onClick: goToCart, badgeContent: 0, color: 'secondary' },
                     React.createElement(
                         IconButton,
                         { edge: 'end', 'aria-label': 'delete',
@@ -281,7 +309,7 @@ function App() {
                 (listData || []).map(function (v, i) {
                     return React.createElement(
                         Grid,
-                        { item: true, key: i, xs: 12, sm: 6, md: 4 },
+                        { item: true, key: i, xs: 6, sm: 6, md: 6, lg: 4 },
                         React.createElement(
                             Card,
                             { className: classes.mkPlinkCatCard },

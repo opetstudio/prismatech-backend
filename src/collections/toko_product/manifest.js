@@ -35,7 +35,10 @@ const fields = {
   category_id: { type: GraphQLList(CategoryType) },
   toko_id: { type: GraphQLList(TokoTokoOnlineType) },
   tag_id: { type: GraphQLList(TagType) },
-  status: { type: GraphQLString }
+  status: { type: GraphQLString },
+  instock_label: { type: GraphQLString },
+  preorder_policy: { type: GraphQLString },
+  stock_amount: { type: GraphQLString }
 }
 module.exports = {
   entity: 'TokoProduct',
@@ -53,7 +56,10 @@ module.exports = {
     category_id: { type: GraphQLList(GraphQLString) },
     status: { type: GraphQLString },
     isneed_shipping: { type: GraphQLString },
-    weight: { type: GraphQLString }
+    weight: { type: GraphQLString },
+    instock_label: { type: GraphQLString },
+    preorder_policy: { type: GraphQLString },
+    stock_amount: { type: GraphQLString }
   },
   createArgs: {
     name: { type: GraphQLString },
@@ -66,6 +72,9 @@ module.exports = {
     tag_id: { type: GraphQLList(GraphQLString) },
     image_id: { type: GraphQLString },
     status: { type: GraphQLString },
+    instock_label: { type: GraphQLString },
+    preorder_policy: { type: GraphQLString },
+    stock_amount: { type: GraphQLString },
     isneed_shipping: { type: GraphQLString },
     weight: { type: GraphQLString }
   },
