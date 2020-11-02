@@ -16,44 +16,43 @@ const fetchAllData = async (args, context) => {
   try {
     const filter = {}
     filter.$and = []
+    const $or = []
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     if (!_.isEmpty(args.string_to_search)) {
-      filter.$and.push({
-        $or: [
-          { title: { $regex: args.string_to_search, $options: 'i' } },
-          { code: { $regex: args.string_to_search, $options: 'i' } },
-          { description: { $regex: args.string_to_search, $options: 'i' } }
-        ]
-      })
+      $or.push({ title: { $regex: args.string_to_search, $options: 'i' } })
+      $or.push({ code: { $regex: args.string_to_search, $options: 'i' } })
+      $or.push({ description: { $regex: args.string_to_search, $options: 'i' } })
+      // filter.$and.push()
     }
-
     // check authorization
-    let isEligible = false
-    const $or = []
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        $or.push({ toko_id: '' + v.toko_id })
-      })
-      isEligible = true
-    }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // let isEligible = false
+    // const $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     $or.push({ toko_id: '' + v.toko_id })
+    //   })
+    //   isEligible = true
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    const myOwnListToko = await getAllMyEligibleToko({ userId })
     if (myOwnListToko) {
       myOwnListToko.forEach(v => {
         $or.push({ toko_id: '' + v._id })
       })
-      isEligible = true
+      // isEligible = true
     }
+    $or.push({ created_by: userId })
     if (!_.isEmpty($or)) {
       filter.$and.push({
         $or: $or
       })
     }
-    if (_.isEmpty(filter.$and)) isEligible = false
-    if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
+    // if (_.isEmpty(filter.$and)) isEligible = false
+    // if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
 
     const result = await EntityModel.find(filter)
       .sort({ updated_at: 'desc' })
@@ -70,7 +69,8 @@ const fetchAllData = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllDataByTokoId = async (args, context) => {
@@ -107,7 +107,8 @@ const getAllDataByTokoId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllDataByTokoSlug = async (args, context) => {
@@ -142,7 +143,8 @@ const getAllDataByTokoSlug = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getAllDataByCategoryId = async (args, context) => {
@@ -176,7 +178,8 @@ const getAllDataByCategoryId = async (args, context) => {
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
     console.log('err=> ', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const getDetailDataByCode = async (args, context) => {
@@ -219,45 +222,92 @@ const fetchDetailData = async (args, context) => {
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
 
+    // filter.$and = []
+    // filter.$and.push({ _id: args.id })
+    // check authorization
+    // let isEligible = false
+    // const $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     $or.push({ toko_id: '' + v.toko_id })
+    //   })
+    //   isEligible = true
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // if (myOwnListToko) {
+    //   myOwnListToko.forEach(v => {
+    //     $or.push({ toko_id: '' + v._id })
+    //   })
+    //   isEligible = true
+    // }
+    // if (!_.isEmpty($or)) {
+    //   filter.$and.push({
+    //     $or: $or
+    //   })
+    // }
+    // if (!isEligible) return { status: 200, success: 'Successfully get Data', data_detail: {} }
     const filter = {}
     filter.$and = []
-    filter.$and.push({ _id: args.id })
-    // check authorization
-    let isEligible = false
     const $or = []
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        $or.push({ toko_id: '' + v.toko_id })
-      })
-      isEligible = true
-    }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    const myOwnListToko = await getAllMyEligibleToko({ userId })
     if (myOwnListToko) {
       myOwnListToko.forEach(v => {
         $or.push({ toko_id: '' + v._id })
       })
-      isEligible = true
     }
+    $or.push({ created_by: userId })
     if (!_.isEmpty($or)) {
       filter.$and.push({
         $or: $or
       })
     }
-    if (!isEligible) return { status: 200, success: 'Successfully get Data', data_detail: {} }
+    filter.$and.push({ _id: args.id })
 
-    const result = await EntityModel.findOne({ _id: args.id })
+    const result = await EntityModel.findOne(filter)
+    // const result = await EntityModel.findOne({ _id: args.id })
       .populate({ path: 'image_id' })
       .populate({ path: 'category_id' })
       .populate({ path: 'tag_id' })
       .populate({ path: 'toko_id' })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
+
+    if (_.isEmpty(result)) throw new Error('Data tidak ditemukan')
+
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
+}
+const getAllMyEligibleToko = async ({ userId }) => {
+  const filter = {}
+  // let isEligible = true
+  let $or = []
+  const myListToko = await TokoTeamModel.find({ user_id: userId })
+  if (myListToko) {
+    console.log('myListToko=>', myListToko)
+    $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+    $or.push({ owner: userId })
+  }
+  // daftar toko yang created_by nya adalah user_id saya
+  $or.push({ created_by: userId })
+  filter.$and = []
+  filter.$and.push({
+    $or: $or
+  })
+  const myOwnListToko = await TokoTokoOnlineModel.find(filter)
+  // if (_.isEmpty(myOwnListToko)) isEligible = false
+  // else {
+  //   const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
+  //   args.toko_id || [].forEach(v => {
+  //     if (!myOwnListTokoId.includes('' + v)) isEligible = false
+  //     if (!isEligible) return true
+  //   })
+  // }
+  return myOwnListToko
 }
 const doCreateData = async (args, context) => {
   const session = await EntityModel.db.startSession()
@@ -303,23 +353,57 @@ const doCreateData = async (args, context) => {
     }
 
     // check authorization
-    let isEligible = false
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
-        if (isEligible) return true
+    // let isEligible = true
+    // let $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // if (myOwnListToko) {
+    //   myOwnListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v._id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+
+
+    // const filter = {}
+    let isEligible = true
+    // let $or = []
+    // // check authorization
+    // // daftar toko yang anggota team nya termasuk user_id saya, dan toko yang owner nya adalah user_id saya
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+    //   $or.push({ owner: userId })
+    // }
+    // // daftar toko yang created_by nya adalah user_id saya
+    // $or.push({ created_by: userId })
+    // filter.$and = []
+    // filter.$and.push({
+    //   $or: $or
+    // })
+    const myOwnListToko = await getAllMyEligibleToko({ userId })
+    // const myOwnListToko = await TokoTokoOnlineModel.find(filter)
+    if (_.isEmpty(myOwnListToko)) isEligible = false
+    else {
+      const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
+      args.toko_id || [].forEach(v => {
+        if (!myOwnListTokoId.includes('' + v)) isEligible = false
+        if (!isEligible) return true
       })
     }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
-    if (myOwnListToko) {
-      myOwnListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v._id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
+    // console.log('myOwnListToko=====>', myOwnListToko)
+    // console.log('filter $or=====>', $or)
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+
     // if (!_.isEmpty($or)) {
     //   filter.$and.push({
     //     $or: $or
@@ -343,7 +427,8 @@ const doCreateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const doUpdateData = async (args, context) => {
@@ -391,41 +476,72 @@ const doUpdateData = async (args, context) => {
         console.log('args.tag_id => ', args.tag_id)
       }
     }
-    // EntityModel.s
 
-    // const err = doc.validateSync();
-    const productDetail = await EntityModel.findOne({ _id: args._id }).populate({ path: 'toko_id' })
-    // productDetail.schema.path('weight').validate((value) => {
-    //   if (productDetail.isneed_shipping === 'Y' && value <= 0) return false
-    //   else return true
-    // }, 'Berat `{VALUE}` not valid', 'Invalid weight')
-    // productDetail.set('weight', args.weight)
-    // const err = productDetail.validateSync()
-
-    if (_.isEmpty(productDetail)) {
-      throw new Error('Data tidak ditemukan')
+    // get product detail
+    const filter = {}
+    filter.$and = []
+    const $or = []
+    const myEligibleToko = await getAllMyEligibleToko({ userId })
+    if (myEligibleToko) {
+      myEligibleToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
     }
+    $or.push({ created_by: userId })
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    filter.$and.push({ _id: args.id })
+
+    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
+    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
+
+
+    // get product detail
+    const filter = {}
+    filter.$and = []
+    const $or = []
+    const myEligibleToko = await getAllMyEligibleToko({ userId })
+    if (myEligibleToko) {
+      myEligibleToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+    }
+    $or.push({ created_by: userId })
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    filter.$and.push({ _id: args.id })
+
+    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
+    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
+
+=======
     if (_.isEmpty(args.toko_id)) {
       args.toko_id = productDetail.toko_id.map(v => '' + (v || {})._id)
     }
     // check authorization
     let isEligible = false
-    const myListToko = await TokoTeamModel.find({ user_id: userId })
-    if (myListToko) {
-      console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
-    if (myOwnListToko) {
-      console.log('myOwnListToko=>', myOwnListToko)
-      myOwnListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v._id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    
+    console.log('myEligibleToko=>', myEligibleToko)
+    myEligibleToko.forEach(v => {
+      if ((args.toko_id || []).includes('' + v._id)) isEligible = true
+      if (isEligible) return true
+    })
+    
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
     // const err = productDetail.validateSync()
@@ -459,7 +575,8 @@ const doUpdateData = async (args, context) => {
     console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 const doDeleteData = async (args, context) => {
@@ -472,7 +589,28 @@ const doDeleteData = async (args, context) => {
     const { user_id: userId } = bodyAt
     console.log('delete invoked args=', args)
 
-    const dataDetail = await EntityModel.findById(args._id).session(session)
+    // get product detail
+    const filter = {}
+    filter.$and = []
+    const $or = []
+    const myEligibleToko = await getAllMyEligibleToko({ userId })
+    if (myEligibleToko) {
+      myEligibleToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+    }
+    $or.push({ created_by: userId })
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    filter.$and.push({ _id: args.id })
+
+    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' }).session(session)
+    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk hapus produk ini.')
+
+    // const dataDetail = await EntityModel.findById(args._id).session(session)
 
     // check authorization
     // let isEligible = false
@@ -489,7 +627,7 @@ const doDeleteData = async (args, context) => {
     // }
     // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
-    await dataDetail.deleteOne()
+    await productDetail.deleteOne()
     await session.commitTransaction()
     session.endSession()
     return { status: 200, success: 'Successfully delete Data', detail_data: {} }
@@ -497,7 +635,8 @@ const doDeleteData = async (args, context) => {
     await session.abortTransaction()
     session.endSession()
     console.log('errorrr====>', err)
-    return { status: 400, error: err.message }
+    // return { status: 400, error: err.message }
+    throw new Error(err.message)
   }
 }
 
