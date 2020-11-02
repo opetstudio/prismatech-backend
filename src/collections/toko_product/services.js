@@ -76,6 +76,9 @@ const fetchAllData = async (args, context) => {
 const getAllDataByTokoId = async (args, context) => {
   try {
     const filter = { toko_id: args.toko_id }
+    if (!_.isEmpty(args.category_id)) {
+      filter.category_id = args.category_id
+    }
     // const { accesstoken } = context.req.headers
     // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     // const { user_id: userId } = bodyAt
@@ -317,6 +320,12 @@ const doCreateData = async (args, context) => {
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
     const tagIdList = []
+
+    // butuh ongkir?
+    const isneedShipping = args.isneed_shipping
+    const weight = args.weight
+    if (isneedShipping === 'Y' && (_.isEmpty(weight) || parseInt(weight) === 0)) throw new Error('Produk ini butuh ongkos kirim. Berat produk masih kosong.')
+
     if (!_.isEmpty(args.tag_id)) {
       const needToCreateTag = []
       args.tag_id.forEach(v => {
@@ -432,7 +441,6 @@ const doUpdateData = async (args, context) => {
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
-    // const dataDetail = await EntityModel.findById(args._id)
     if (!_.isEmpty(args.tag_id)) {
       // const listNewTag = ((args.tag_id).map(v => {
       //   if (!mongoose.Types.ObjectId.isValid(v)) return v
@@ -490,6 +498,29 @@ const doUpdateData = async (args, context) => {
     const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
     if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
 
+
+    // get product detail
+    const filter = {}
+    filter.$and = []
+    const $or = []
+    const myEligibleToko = await getAllMyEligibleToko({ userId })
+    if (myEligibleToko) {
+      myEligibleToko.forEach(v => {
+        $or.push({ toko_id: '' + v._id })
+      })
+    }
+    $or.push({ created_by: userId })
+    if (!_.isEmpty($or)) {
+      filter.$and.push({
+        $or: $or
+      })
+    }
+    filter.$and.push({ _id: args.id })
+
+    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
+    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
+
+=======
     if (_.isEmpty(args.toko_id)) {
       args.toko_id = productDetail.toko_id.map(v => '' + (v || {})._id)
     }
@@ -513,16 +544,33 @@ const doUpdateData = async (args, context) => {
     
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
-    const data = args
+    // const err = productDetail.validateSync()
+    // console.log('err======>', err)
+    // const dataDetail = await EntityModel.findById(args._id)
+    // butuh ongkir?
+    const isneedShipping = args.isneed_shipping || productDetail.isneed_shipping
+    const weight = args.weight || productDetail.weight
+    // console.log('isneedShipping===>', isneedShipping)
+    // console.log('weight===>', weight)
+    // if (isneedShipping === 'Y' && _.isEmpty(weight)) throw new Error('Produk ini butuh ongkos kirim. Berat produk masih kosong.')
+    if (isneedShipping === 'Y' && weight <= 0) throw new Error('Produk ini butuh ongkos kirim. Berat produk harus lebih dari 0.')
+
+    // const data = args
+    Object.assign(productDetail, args)
     // data.created_by = userDetail._id
-    data.updated_by = userDetail._id
+    productDetail.updated_by = userDetail._id
     // data.created_at = now
-    data.updated_at = now
+    productDetail.updated_at = now
     // data.category_id = flatten([...dataDetail.category_id, ...args.category_id])
-    console.log('update=> ', data)
+    console.log('update=> ', productDetail)
+    // const newData = await EntityModel.findOneAndUpdate({ _id: args._id }, productDetail).session(session)
+    // .populate({ path: 'created_by' }).populate({ path: 'updated_by' })
+    const saveResp = await productDetail.save(session)
+    // console.log('newData=======>', productDetail)
+    // console.log('saveResp=======>', saveResp)
     await session.commitTransaction()
     session.endSession()
-    return { status: 200, success: 'Successfully save Data', detail_data: await EntityModel.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
+    return { status: 200, success: 'Successfully save Data', detail_data: productDetail }
   } catch (err) {
     console.log('errorrr====>', err)
     await session.abortTransaction()
