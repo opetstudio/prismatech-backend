@@ -25,6 +25,7 @@ const fetchAllData = async (args, context) => {
     // check authorization
     let isEligible = false
     const $or = []
+    $or.push({ created_by: userId })
     const myListToko = await TokoTeamModel.find({ user_id: userId })
     if (myListToko) {
       console.log('myListToko=>', myListToko)
@@ -45,6 +46,7 @@ const fetchAllData = async (args, context) => {
         $or: $or
       })
     }
+    console.log('fetchAllData filter: ', filter)
     if (_.isEmpty(filter.$and)) isEligible = false
     if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
 

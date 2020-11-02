@@ -41,6 +41,22 @@ const schema = new mongoose.Schema({
     enum: ['active', 'inactive'],
     default: 'active'
   },
+  use_stock: {
+    type: Boolean,
+    default: true
+  },
+  instock_label: {
+    type: String,
+    default: 'Stock Tersedia'
+  },
+  preorder_policy: {
+    type: String,
+    enum: ['preorder', 'unavailable']
+  },
+  stock_amount: {
+    type: Number,
+    default: 0
+  },
   created_at: {
     type: Number,
     default: new Date().now
@@ -61,6 +77,7 @@ const schema = new mongoose.Schema({
   }
 }
 )
+schema.index({ code: 1, toko_id: 1 }, { unique: true })
 // schema.statics.validation = (args) => Joi.object({
 //   // user_id: Joi.string(),
 //   // amount: Joi.number().required().greater(0)

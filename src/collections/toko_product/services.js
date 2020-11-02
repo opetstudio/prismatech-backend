@@ -270,6 +270,12 @@ const doCreateData = async (args, context) => {
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
     const tagIdList = []
+
+    // butuh ongkir?
+    const isneedShipping = args.isneed_shipping
+    const weight = args.weight
+    if (isneedShipping === 'Y' && (_.isEmpty(weight) || parseInt(weight) === 0)) throw new Error('Produk ini butuh ongkos kirim. Berat produk masih kosong.')
+
     if (!_.isEmpty(args.tag_id)) {
       const needToCreateTag = []
       args.tag_id.forEach(v => {
@@ -297,23 +303,56 @@ const doCreateData = async (args, context) => {
     }
 
     // check authorization
-    let isEligible = false
+    // let isEligible = true
+    // let $or = []
+    // const myListToko = await TokoTeamModel.find({ user_id: userId })
+    // if (myListToko) {
+    //   console.log('myListToko=>', myListToko)
+    //   myListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
+    // if (myOwnListToko) {
+    //   myOwnListToko.forEach(v => {
+    //     if ((args.toko_id || []).includes('' + v._id)) isEligible = true
+    //     if (isEligible) return true
+    //   })
+    // }
+    // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+
+
+    const filter = {}
+    let isEligible = true
+    let $or = []
+    // check authorization
+    // daftar toko yang anggota team nya termasuk user_id saya, dan toko yang owner nya adalah user_id saya
     const myListToko = await TokoTeamModel.find({ user_id: userId })
     if (myListToko) {
       console.log('myListToko=>', myListToko)
-      myListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v.toko_id)) isEligible = true
-        if (isEligible) return true
+      $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+      $or.push({ owner: userId })
+    }
+    // daftar toko yang created_by nya adalah user_id saya
+    $or.push({ created_by: userId })
+    filter.$and = []
+    filter.$and.push({
+      $or: $or
+    })
+    const myOwnListToko = await TokoTokoOnlineModel.find(filter)
+    if (_.isEmpty(myOwnListToko)) isEligible = false
+    else {
+      const myOwnListTokoId = myOwnListToko.map(v => '' + v._id)
+      args.toko_id || [].forEach(v => {
+        if (!myOwnListTokoId.includes('' + v)) isEligible = false
+        if (!isEligible) return true
       })
     }
-    const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
-    if (myOwnListToko) {
-      myOwnListToko.forEach(v => {
-        if ((args.toko_id || []).includes('' + v._id)) isEligible = true
-        if (isEligible) return true
-      })
-    }
+    // console.log('myOwnListToko=====>', myOwnListToko)
+    // console.log('filter $or=====>', $or)
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
+
     // if (!_.isEmpty($or)) {
     //   filter.$and.push({
     //     $or: $or
@@ -350,7 +389,6 @@ const doUpdateData = async (args, context) => {
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
-    // const dataDetail = await EntityModel.findById(args._id)
     if (!_.isEmpty(args.tag_id)) {
       // const listNewTag = ((args.tag_id).map(v => {
       //   if (!mongoose.Types.ObjectId.isValid(v)) return v
@@ -386,8 +424,21 @@ const doUpdateData = async (args, context) => {
         console.log('args.tag_id => ', args.tag_id)
       }
     }
+    // EntityModel.s
+
+    // const err = doc.validateSync();
+    const productDetail = await EntityModel.findOne({ _id: args._id }).populate({ path: 'toko_id' })
+    // productDetail.schema.path('weight').validate((value) => {
+    //   if (productDetail.isneed_shipping === 'Y' && value <= 0) return false
+    //   else return true
+    // }, 'Berat `{VALUE}` not valid', 'Invalid weight')
+    // productDetail.set('weight', args.weight)
+    // const err = productDetail.validateSync()
+
+    if (_.isEmpty(productDetail)) {
+      throw new Error('Data tidak ditemukan')
+    }
     if (_.isEmpty(args.toko_id)) {
-      const productDetail = await EntityModel.findOne({ _id: args._id }).populate({ path: 'toko_id' })
       args.toko_id = productDetail.toko_id.map(v => '' + (v || {})._id)
     }
     // check authorization
@@ -410,16 +461,33 @@ const doUpdateData = async (args, context) => {
     }
     if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
-    const data = args
+    // const err = productDetail.validateSync()
+    // console.log('err======>', err)
+    // const dataDetail = await EntityModel.findById(args._id)
+    // butuh ongkir?
+    const isneedShipping = args.isneed_shipping || productDetail.isneed_shipping
+    const weight = args.weight || productDetail.weight
+    // console.log('isneedShipping===>', isneedShipping)
+    // console.log('weight===>', weight)
+    // if (isneedShipping === 'Y' && _.isEmpty(weight)) throw new Error('Produk ini butuh ongkos kirim. Berat produk masih kosong.')
+    if (isneedShipping === 'Y' && weight <= 0) throw new Error('Produk ini butuh ongkos kirim. Berat produk harus lebih dari 0.')
+
+    // const data = args
+    Object.assign(productDetail, args)
     // data.created_by = userDetail._id
-    data.updated_by = userDetail._id
+    productDetail.updated_by = userDetail._id
     // data.created_at = now
-    data.updated_at = now
+    productDetail.updated_at = now
     // data.category_id = flatten([...dataDetail.category_id, ...args.category_id])
-    console.log('update=> ', data)
+    console.log('update=> ', productDetail)
+    // const newData = await EntityModel.findOneAndUpdate({ _id: args._id }, productDetail).session(session)
+    // .populate({ path: 'created_by' }).populate({ path: 'updated_by' })
+    const saveResp = await productDetail.save(session)
+    // console.log('newData=======>', productDetail)
+    // console.log('saveResp=======>', saveResp)
     await session.commitTransaction()
     session.endSession()
-    return { status: 200, success: 'Successfully save Data', detail_data: await EntityModel.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
+    return { status: 200, success: 'Successfully save Data', detail_data: productDetail }
   } catch (err) {
     console.log('errorrr====>', err)
     await session.abortTransaction()
