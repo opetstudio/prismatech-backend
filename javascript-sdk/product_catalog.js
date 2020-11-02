@@ -27,43 +27,77 @@ var backendBaseUrl = TOKOONLINE_BASEURL;
 
 var useStyles = makeStyles(function (theme) {
     return {
-        icon: {
+        // catalogue style
+        mkPlinkCatIcon: {
             marginRight: theme.spacing(2)
         },
-        heroContent: {
+        mkPlinkCatHeroContent: {
             backgroundColor: theme.palette.background.paper,
             padding: theme.spacing(8, 0, 6)
         },
-        heroButtons: {
+        mkPlinkCatHeroButtons: {
             marginTop: theme.spacing(4)
         },
-        cardGrid: {
-            paddingTop: theme.spacing(8),
-            paddingBottom: theme.spacing(8)
+        mkPlinkCatCardGrid: {
+            padding: theme.spacing(4)
         },
-        card: {
+        mkPlinkCatCard: {
             height: '100%',
             display: 'flex',
             flexDirection: 'column'
         },
-        cardMedia: {
+        mkPlinkCatCardMedia: {
             paddingTop: '56.25%' // 16:9
         },
-        cardContent: {
+        mkPlinkCatCardContent: {
             flexGrow: 1
         },
-        footer: {
-            backgroundColor: theme.palette.background.paper,
-            padding: theme.spacing(6)
+        mkPlinkCatFabCart: {
+            marginBottom: '0.5rem'
         },
-        fabCart: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+        mkPlinkCatCustomHover: {
+            '&:hover': {
+                background: "#F6F6F6",
+                color: "#212121"
+            }
+        },
+        mkPlinkCatCustomButton: {
+            '&:hover': {
+                color: "#3F51B5"
+            }
+        },
+        // category style
+        mkPlinkCatgToolbar: {
+            borderBottom: '1px solid ' + theme.palette.divider
+        },
+        mkPlinkCatgToolbarTitle: {
+            flex: 1
+        },
+        mkPlinkCatgToolbarSecondary: {
+            justifyContent: 'space-between',
+            overflowX: 'auto',
+            zIndex: 3
+        },
+        mkPlinkCatgToolbarLink: {
+            padding: theme.spacing(1),
+            flexShrink: 0
+        },
+        mkPlinkCatgToolbarPrimary: {
+            zIndex: 3
+        },
+        mkPlinkCatgToolbarPrimaryBox: {
+            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+        },
+        mkPlinkCatgToolbarPrimaryBoxGrid: {
+            marginTop: theme.spacing(3)
+        },
+        chip: {
+            margin: theme.spacing(0.5)
         }
     };
 });
-
+// const tokoonline_category_style = parseInt(document.getElementById('tokoonline_category').dataset.catgtype);
+var fabPosition = document.getElementById('tokoonline_content').dataset.fabposition;
 // class App extends React.Component {
 function App() {
     var tokoonlinesessionid = localStorage.getItem(TOKOONLINE_TOKOID);
@@ -91,10 +125,32 @@ function App() {
         addToCartRequest = _React$useState4[0],
         setAddToCartRequest = _React$useState4[1];
 
-    var doFetchData = React.useCallback(function (page) {
+    console.log('category id===>', window.location.hash.substring(1));
+
+    var _React$useState5 = React.useState(window.location.hash.substring(1)),
+        _React$useState6 = _slicedToArray(_React$useState5, 2),
+        categoryId = _React$useState6[0],
+        setCategoryId = _React$useState6[1];
+
+    window.addEventListener('popstate', function () {
+        console.log('location changed!');
+        setCategoryId(window.location.hash.substring(1));
+    });
+
+    var doFetchData = React.useCallback(function (_ref) {
+        var page = _ref.page,
+            categoryId = _ref.categoryId;
+
+
+        // let categoryId = window.location.hash.substring(1);
+        var filterByCategory = '';
+        if (categoryId) {
+            filterByCategory = 'category_id: "' + categoryId + '",';
+        }
+
         //     // fetch product
         // Simple POST request with a JSON body using fetch
-        var graphqlData = 'query{\n      getAllTokoProductsByTokoId(toko_id: "' + TOKOONLINE_TOKOID + '" ,page_size: 10, page_index: ' + page + ', string_to_search: ""){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n      getAllTokoProductsByTokoId(\n        toko_id: "' + TOKOONLINE_TOKOID + '",\n        ' + filterByCategory + '\n        page_size: 9, \n        page_index: ' + page + ', \n        string_to_search: ""\n       ){\n        error,\n        count,\n        page_count,\n        status,\n        list_data{\n          _id,\n          name,\n          price,\n          code,\n          description,\n          category_id{\n            _id,\n            title,   \n          },\n          image_id{\n            _id,\n            filename,\n            file_type\n          }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -116,8 +172,8 @@ function App() {
         });
     }, []);
 
-    var doAddToCart = function doAddToCart(_ref) {
-        var productId = _ref.productId;
+    var doAddToCart = function doAddToCart(_ref2) {
+        var productId = _ref2.productId;
 
         var graphqlData = 'mutation{addToCart( toko_id: "' + TOKOONLINE_TOKOID + '", device_id: "xxxx", product_id: "' + productId + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){status,error,detail_data{_id,product_id{_id,name,\n                          code,\n                          price,\n                          description,\n                          image_id{\n                            _id,\n                            filename,\n                            file_type\n                          }\n                        }\n                        count,\n                        device_id,\n                        session_id,\n                        toko_id{\n                          slug\n                        }\n                      }\n                    }\n                    }';
         var requestOptions = {
@@ -140,10 +196,10 @@ function App() {
         });
     };
 
-    var _React$useState5 = React.useState(false),
-        _React$useState6 = _slicedToArray(_React$useState5, 2),
-        open = _React$useState6[0],
-        setOpen = _React$useState6[1];
+    var _React$useState7 = React.useState(false),
+        _React$useState8 = _slicedToArray(_React$useState7, 2),
+        open = _React$useState8[0],
+        setOpen = _React$useState8[1];
 
     var handleToastOpen = function handleToastOpen() {
         setOpen(true);
@@ -164,14 +220,14 @@ function App() {
         pageIndex = productCatalogRequest.pageIndex,
         pageSize = productCatalogRequest.pageSize;
 
-    var _React$useState7 = React.useState(0),
-        _React$useState8 = _slicedToArray(_React$useState7, 2),
-        page = _React$useState8[0],
-        setPage = _React$useState8[1];
+    var _React$useState9 = React.useState(0),
+        _React$useState10 = _slicedToArray(_React$useState9, 2),
+        page = _React$useState10[0],
+        setPage = _React$useState10[1];
 
     React.useEffect(function () {
-        doFetchData(page);
-    }, [page]);
+        doFetchData({ page: page, categoryId: categoryId });
+    }, [page, categoryId]);
 
     var convertRupiah = function convertRupiah(param) {
         var reverse = param.toString().split('').reverse().join(''),
@@ -185,10 +241,10 @@ function App() {
         window.location.href = TOKOONLINE_PAGE_SHOPPING_CART;
     };
 
-    var _React$useState9 = React.useState(0),
-        _React$useState10 = _slicedToArray(_React$useState9, 2),
-        cart = _React$useState10[0],
-        setCart = _React$useState10[1];
+    var _React$useState11 = React.useState(0),
+        _React$useState12 = _slicedToArray(_React$useState11, 2),
+        cart = _React$useState12[0],
+        setCart = _React$useState12[1];
 
     var handlePage = function handlePage(param) {
         param ? setPage(page + 1) : page === 0 ? setPage(0) : setPage(page - 1);
@@ -211,19 +267,19 @@ function App() {
             React.createElement(CircularProgress, null)
         ) : React.createElement(
             Container,
-            { className: classes.cardGrid, maxWidth: 'md' },
+            { className: classes.mkPlinkCatCardGrid, maxWidth: 'lg' },
             React.createElement(
                 Grid,
                 {
                     container: true,
                     direction: 'row',
-                    justify: 'flex-end',
-                    alignItems: 'flex-end'
+                    justify: fabPosition == 'left' ? "flex-start" : 'flex-end',
+                    alignItems: 'flex-end',
+                    className: classes.mkPlinkCatFabCart
                 },
                 React.createElement(
                     Badge,
-                    { onClick: goToCart, badgeContent: cart, color: 'secondary',
-                        style: { position: 'fixed', zIndex: 2 } },
+                    { onClick: goToCart, badgeContent: 0, color: 'secondary' },
                     React.createElement(
                         IconButton,
                         { edge: 'end', 'aria-label': 'delete',
@@ -249,27 +305,27 @@ function App() {
             }),
             React.createElement(
                 Grid,
-                { container: true, spacing: 4, style: { marginTop: 10 } },
+                { container: true, spacing: 2 },
                 (listData || []).map(function (v, i) {
                     return React.createElement(
                         Grid,
-                        { item: true, key: i, xs: 12, sm: 6, md: 4 },
+                        { item: true, key: i, xs: 6, sm: 6, md: 6, lg: 4 },
                         React.createElement(
                             Card,
-                            { className: classes.card },
+                            { className: classes.mkPlinkCatCard },
                             React.createElement(
                                 CardActionArea,
-                                { onClick: function onClick() {
+                                { className: classes.mkPlinkCatCustomHover, onClick: function onClick() {
                                         window.location.href = TOKOONLINE_PAGE_PRODUCT_DETAIL + '#' + v.code;
                                     } },
                                 React.createElement(CardMedia, {
-                                    className: classes.cardMedia,
+                                    className: classes.mkPlinkCatCardMedia,
                                     image: backendBaseUrl + '/renderfile/' + (v.image_id || {}).filename + '.' + (v.image_id || {}).file_type,
                                     title: v.name
                                 }),
                                 React.createElement(
                                     CardContent,
-                                    { className: classes.cardContent },
+                                    { className: classes.mkPlinkCatCardContent },
                                     React.createElement(
                                         Typography,
                                         { gutterBottom: true, variant: 'h6', noWrap: true },
@@ -292,6 +348,7 @@ function App() {
                                             doAddToCart({ productId: '' + v._id });
                                         },
                                         size: 'small',
+                                        className: classes.mkPlinkCatCustomButton,
                                         color: 'primary' },
                                     'Add To Cart'
                                 )
