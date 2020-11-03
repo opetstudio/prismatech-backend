@@ -51,9 +51,23 @@ const schema = new mongoose.Schema({
   },
   preorder_policy: {
     type: String,
-    enum: ['preorder', 'unavailable']
+    enum: ['preorder', 'unavailable'],
+    default: 'unavailable'
+  },
+  product_availability: {
+    type: String,
+    enum: ['always_ready', 'use_stock'],
+    default: 'always_ready'
   },
   stock_amount: {
+    type: Number,
+    default: 0
+  },
+  estimated_delivery_time_instock: {
+    type: Number,
+    default: 0
+  },
+  estimated_delivery_time_preorder: {
     type: Number,
     default: 0
   },

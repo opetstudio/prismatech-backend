@@ -389,7 +389,33 @@ const paymentProcess = async (args, context) => {
     if (_.isEmpty(tokoDetail.plink_merchant_key_id)) throw new Error('Gagal Purchase. Plink Merchant Key Id masih kosong. Hubungi pemilik toko.')
     if (_.isEmpty(tokoDetail.plink_merchant_id)) throw new Error('Gagal Purchase. Plink Merchant Id masih kosong. Hubungi pemilik toko.')
 
-    const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
+    const productsInCart = []
+    tokoPoDetail.cart_id.forEach(async (v, k) => {
+      productsInCart.push({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' })
+      if (v.product_id.product_availability === 'use_stock') {
+        if (v.product_id.preorder_policy === 'preorder') {
+          if (v.product_id.stock_amount <= 0) {
+            // throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
+          } else {
+            // update stock
+            const productDetail = await TokoProductModel.findById(v.product_id._id)
+            productDetail.stock_amount = productDetail.stock_amount - 1
+            await productDetail.save({ session: session })
+          }
+        } else {
+          if (v.product_id.stock_amount <= 0) {
+            throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
+          } else {
+            // update stock
+            const productDetail = await TokoProductModel.findById(v.product_id._id)
+            productDetail.stock_amount = productDetail.stock_amount - 1
+            await productDetail.save({ session: session })
+          }
+        }
+      }
+    })
+
+    // const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
 
     const nowDateTime = new Date()
     const tz = new Date().toString().match(/([-\+][0-9]+)\s/)[1]
