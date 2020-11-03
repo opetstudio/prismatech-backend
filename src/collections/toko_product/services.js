@@ -498,29 +498,6 @@ const doUpdateData = async (args, context) => {
     const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
     if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
 
-
-    // get product detail
-    const filter = {}
-    filter.$and = []
-    const $or = []
-    const myEligibleToko = await getAllMyEligibleToko({ userId })
-    if (myEligibleToko) {
-      myEligibleToko.forEach(v => {
-        $or.push({ toko_id: '' + v._id })
-      })
-    }
-    $or.push({ created_by: userId })
-    if (!_.isEmpty($or)) {
-      filter.$and.push({
-        $or: $or
-      })
-    }
-    filter.$and.push({ _id: args.id })
-
-    const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
-    if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
-
-=======
     if (_.isEmpty(args.toko_id)) {
       args.toko_id = productDetail.toko_id.map(v => '' + (v || {})._id)
     }
