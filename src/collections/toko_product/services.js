@@ -493,7 +493,7 @@ const doUpdateData = async (args, context) => {
         $or: $or
       })
     }
-    filter.$and.push({ _id: args.id })
+    filter.$and.push({ _id: args._id })
 
     const productDetail = await EntityModel.findOne(filter).populate({ path: 'toko_id' })
     if (_.isEmpty(productDetail)) throw new Error('Anda tidak berhak untuk merubah data pada produk ini.')
