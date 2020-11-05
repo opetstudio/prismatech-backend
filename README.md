@@ -27,7 +27,7 @@ export PRIVATE_KEY=xxx
 export PRIVATE_KEY_MERCHANT=yyy
 export HMAC=prismalink2020
 export SERIAL_NUMBER=12345
-npm run localhostcomm
+npm run start:ecomm-localhost
 ```
 
 untuk credential file, hubungi admin.
