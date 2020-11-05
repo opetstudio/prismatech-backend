@@ -47,7 +47,7 @@ var useStyles = makeStyles(function (theme) {
             marginTop: theme.spacing(4)
         },
         mkPlinkCatCardGrid: {
-            padding: theme.spacing(4)
+            // padding: theme.spacing(4)
         },
         mkPlinkCatCard: {
             height: '100%',
@@ -94,10 +94,11 @@ var useStyles = makeStyles(function (theme) {
             zIndex: 3
         },
         mkPlinkCatgToolbarPrimaryBox: {
-            backgroundColor: theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
+            // backgroundColor:
+            //     theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800]
         },
         mkPlinkCatgToolbarPrimaryBoxGrid: {
-            marginTop: theme.spacing(3)
+            // marginTop: theme.spacing(3),
         },
         chip: {
             margin: theme.spacing(0.5)
@@ -140,7 +141,7 @@ function App() {
 
     var paramCatId = window.location.hash.substring(1);
 
-    var _React$useState7 = React.useState([{ _id: "all_categorys", title: "Semua" }]),
+    var _React$useState7 = React.useState([{ _id: "all_categorys", title: "All Product" }]),
         _React$useState8 = _slicedToArray(_React$useState7, 2),
         categorys = _React$useState8[0],
         setCategorys = _React$useState8[1];
@@ -197,30 +198,26 @@ function App() {
                     Grid,
                     { item: true, xs: 12, md: 12 },
                     React.createElement(
-                        Paper,
-                        { className: classes.mkPlinkCatgToolbarPrimaryBox },
-                        React.createElement(
-                            MenuList,
-                            null,
-                            React.createElement(
-                                Typography,
-                                { variant: 'h6', gutterBottom: true, style: { marginLeft: 14 } },
-                                'Kategori'
-                            ),
-                            categorys.map(function (option, index) {
-                                return React.createElement(
-                                    MenuItem,
-                                    {
-                                        key: option._id,
-                                        selected: option._id === paramCatId,
-                                        onClick: function onClick(event) {
-                                            return handleMenuItemClick(option, index);
-                                        }
-                                    },
-                                    option.title
-                                );
-                            })
-                        )
+                        'h1',
+                        { style: { color: '#4B8BE2' } },
+                        'Category'
+                    ),
+                    React.createElement(
+                        MenuList,
+                        null,
+                        categorys.map(function (option, index) {
+                            return React.createElement(
+                                MenuItem,
+                                {
+                                    key: option._id,
+                                    selected: option._id === paramCatId,
+                                    onClick: function onClick(event) {
+                                        return handleMenuItemClick(option, index);
+                                    }
+                                },
+                                option.title
+                            );
+                        })
                     )
                 )
             )

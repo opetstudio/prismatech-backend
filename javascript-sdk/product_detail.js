@@ -229,7 +229,7 @@ function App() {
         setQty = _React$useState6[1];
 
     var doFetchData = React.useCallback(function () {
-        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + decodeURIComponent(window.location.hash.substring(1)) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          content1,\n          description,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
+        var graphqlData = 'query{\n        getDetailTokoProductJoinCartByCode(code: "' + decodeURIComponent(window.location.hash.substring(1)) + '", session_id: "' + localStorage.getItem(TOKOONLINE_TOKOID) + '"){\n        error,\n        status,\n        data_detail_in_cart{\n            count\n        },\n        data_detail{\n          _id,\n          name,\n          price,\n          code,\n          content1,\n          description,\n          instock_label,\n          preorder_policy,\n          stock_amount,\n          image_id{\n            _id,\n            filename,\n            file_type\n          },\n            category_id{\n                _id,\n                title\n            }\n        }\n      }\n    }';
         var requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -371,7 +371,7 @@ function App() {
                                     { item: true },
                                     isRequest ? React.createElement(Skeleton, { animation: 'wave', height: 60, width: '5rem' }) :
                                     // check if stock exist next
-                                    React.createElement(Chip, { label: 'Ada Stok' })
+                                    React.createElement(Chip, { label: detailData.stock_amount > 0 ? detailData.instock_label : detailData.preorder_policy })
                                 ),
                                 React.createElement(
                                     Grid,
@@ -404,11 +404,15 @@ function App() {
                                 React.createElement(
                                     Grid,
                                     { item: true, style: { padding: 0, marginTop: 10 } },
-                                    React.createElement(Typography, { className: classes.spesifikasiTitle }),
                                     React.createElement(
                                         Typography,
                                         { style: { marginBottom: 10 } },
                                         detailData.description
+                                    ),
+                                    React.createElement(
+                                        Typography,
+                                        { color: 'textSecondary', style: { marginBottom: 10 } },
+                                        "stock tersisa " + detailData.stock_amount + ", beli segera!"
                                     )
                                 ),
                                 React.createElement(
@@ -514,7 +518,6 @@ function App() {
                             'Deskripsi produk'
                         )
                     ),
-                    
                     React.createElement('div', { className: classes.product_detail,
                         dangerouslySetInnerHTML: { __html: detailData.content1 } })
                 )

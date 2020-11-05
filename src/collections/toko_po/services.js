@@ -227,6 +227,18 @@ const checkoutProcess = async (args, context) => {
     if (_.isEmpty(allOpenCart)) throw new Error('Checkout Failed. The cart is empty')
     // console.log('allOpenCart===>', allOpenCart)
 
+    let validateStockErrorMessage = ''
+    let stockValidationResp = {}
+    await allOpenCart.forEach(async (v, k) => {
+      try {
+        stockValidationResp = stockValidation({ product: v.product_id })
+        if (!_.isEmpty(stockValidationResp.stockValidationErrorMessage)) throw new Error(stockValidationResp.stockValidationErrorMessage)
+      } catch (err) {
+        validateStockErrorMessage = err.message
+      }
+    })
+    if (!_.isEmpty(validateStockErrorMessage)) throw new Error(validateStockErrorMessage)
+
     let shippinAmount = parseInt(args.shipping_amount)
     const isNeedShippingArr = allOpenCart.map(v => v.product_id.isneed_shipping) // args.total_amount
     let isneedShipping = 'N'
@@ -294,7 +306,7 @@ const checkoutProcess = async (args, context) => {
     session.endSession()
     return { status: 200, success: 'Successfully save Data', detail_data: upsertResponse }
   } catch (err) {
-    console.log('errorrr====>', err)
+    console.log('errorrrsss====>', err)
     await session.abortTransaction()
     session.endSession()
     return { status: 400, error: err.message }
@@ -363,6 +375,37 @@ const purchaseorderCheckStatus = async (args, context) => {
     // throw new Error('Gagal kirim email untuk validasi alamat email.')
   }
 }
+const stockValidation = ({ product }) => {
+  let stockValidationErrorMessage = ''
+  let isNeedUpdateStock = false
+  if (product.product_availability === 'use_stock') {
+    if (product.preorder_policy === 'preorder') {
+      if (product.stock_amount <= 0) {
+        // throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
+        // validateSuccess = true
+      } else {
+        // update stock
+        // const productDetail = await TokoProductModel.findById(v.product_id._id)
+        // productDetail.stock_amount = productDetail.stock_amount - 1
+        // await productDetail.save({ session: session })
+        isNeedUpdateStock = true
+      }
+    } else {
+      if (product.stock_amount <= 0) {
+        // validateSuccess = false
+        stockValidationErrorMessage = 'Gagal Purchase. ' + product.name + ' telah habis stok'
+        // throw new Error('Gagal Purchase. ' + product.name + ' telah habis stok')
+      } else {
+        // update stock
+        // const productDetail = await TokoProductModel.findById(v.product_id._id)
+        // productDetail.stock_amount = productDetail.stock_amount - 1
+        // await productDetail.save({ session: session })
+        isNeedUpdateStock = true
+      }
+    }
+  }
+  return { stockValidationErrorMessage: stockValidationErrorMessage, isNeedUpdateStock: isNeedUpdateStock }
+}
 const paymentProcess = async (args, context) => {
   const session = await EntityModel.db.startSession()
   session.startTransaction()
@@ -389,7 +432,55 @@ const paymentProcess = async (args, context) => {
     if (_.isEmpty(tokoDetail.plink_merchant_key_id)) throw new Error('Gagal Purchase. Plink Merchant Key Id masih kosong. Hubungi pemilik toko.')
     if (_.isEmpty(tokoDetail.plink_merchant_id)) throw new Error('Gagal Purchase. Plink Merchant Id masih kosong. Hubungi pemilik toko.')
 
-    const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
+    const productsInCart = []
+    let validateStockErrorMessage = ''
+    let stockValidationResp = {}
+    await tokoPoDetail.cart_id.forEach(async (v, k) => {
+      try {
+        productsInCart.push({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' })
+        stockValidationResp = stockValidation({ product: v.product_id })
+        console.log('stockValidationResp===>', stockValidationResp)
+        if (!_.isEmpty(stockValidationResp.stockValidationErrorMessage)) throw new Error(stockValidationResp.stockValidationErrorMessage)
+        if (stockValidationResp.isNeedUpdateStock) {
+          // update stock
+          const productDetail = await TokoProductModel.findById(v.product_id._id)
+          productDetail.stock_amount = productDetail.stock_amount - 1
+          console.log('berhasil update stock menjadi ' + productDetail.stock_amount + ' untuk product name ' + v.product_id.name)
+          await productDetail.save({ session: session })
+        }
+        // if (v.product_id.product_availability === 'use_stock') {
+        //   if (v.product_id.preorder_policy === 'preorder') {
+        //     if (v.product_id.stock_amount <= 0) {
+        //       // throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
+        //     } else {
+        //       // update stock
+        //       const productDetail = await TokoProductModel.findById(v.product_id._id)
+        //       productDetail.stock_amount = productDetail.stock_amount - 1
+        //       await productDetail.save({ session: session })
+        //     }
+        //   } else {
+        //     if (v.product_id.stock_amount <= 0) {
+        //       throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
+        //     } else {
+        //       // update stock
+        //       const productDetail = await TokoProductModel.findById(v.product_id._id)
+        //       productDetail.stock_amount = productDetail.stock_amount - 1
+        //       await productDetail.save({ session: session })
+        //     }
+        //   }
+        // }
+      } catch (err) {
+        validateStockErrorMessage = err.message
+      }
+    })
+    if (!_.isEmpty(validateStockErrorMessage)) throw new Error(validateStockErrorMessage.stockValidationErrorMessage)
+    // if (!_.isEmpty(validateStockErrorMessage)) throw new Error(validateStockErrorMessage)
+
+    // console.log('gotcha===>', gotcha)
+
+    console.log('productsInCart===>', productsInCart)
+
+    // const productsInCart = tokoPoDetail.cart_id.map(v => ({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' }))
 
     const nowDateTime = new Date()
     const tz = new Date().toString().match(/([-\+][0-9]+)\s/)[1]

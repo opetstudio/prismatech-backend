@@ -28,6 +28,10 @@ const accessTokenValidateMiddleware = {
     // createCourse: accessTokenValidate
   },
   RootQueryType: {
+    MerchantInfo: accessTokenValidate,
+    showRelatedInstitution: accessTokenValidate,
+    MerchantTransactionHistory: accessTokenValidate,
+    merchantDashboard: accessTokenValidate
     // getAllCourses: accessTokenValidate
   }
 }

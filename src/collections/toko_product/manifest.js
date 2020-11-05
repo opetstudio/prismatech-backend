@@ -38,7 +38,10 @@ const fields = {
   status: { type: GraphQLString },
   instock_label: { type: GraphQLString },
   preorder_policy: { type: GraphQLString },
-  stock_amount: { type: GraphQLString }
+  product_availability: { type: GraphQLString },
+  stock_amount: { type: GraphQLString },
+  estimated_delivery_time_instock: { type: GraphQLString },
+  estimated_delivery_time_preorder: { type: GraphQLString }
 }
 module.exports = {
   entity: 'TokoProduct',
@@ -59,7 +62,10 @@ module.exports = {
     weight: { type: GraphQLString },
     instock_label: { type: GraphQLString },
     preorder_policy: { type: GraphQLString },
-    stock_amount: { type: GraphQLString }
+    product_availability: { type: GraphQLString },
+    stock_amount: { type: GraphQLString },
+    estimated_delivery_time_instock: { type: GraphQLString },
+    estimated_delivery_time_preorder: { type: GraphQLString }
   },
   createArgs: {
     name: { type: GraphQLString },
@@ -74,9 +80,12 @@ module.exports = {
     status: { type: GraphQLString },
     instock_label: { type: GraphQLString },
     preorder_policy: { type: GraphQLString },
+    product_availability: { type: GraphQLString },
     stock_amount: { type: GraphQLString },
     isneed_shipping: { type: GraphQLString },
-    weight: { type: GraphQLString }
+    weight: { type: GraphQLString },
+    estimated_delivery_time_instock: { type: GraphQLString },
+    estimated_delivery_time_preorder: { type: GraphQLString }
   },
   fields: {
     ...fields,
