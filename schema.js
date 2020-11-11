@@ -91,6 +91,9 @@ const { getAllLmsSubjectUnits, getDetailLmsSubjectUnit } = require('./src/collec
 const { getAllTokoProducts, getDetailTokoProduct, getDetailTokoProductByCode, getDetailTokoProductJoinCartByCode, getAllTokoProductsByTokoId, getAllTokoProductsByCategoryId } = require('./src/collections/toko_product/graphql/query')
 const { createTokoProduct, deleteTokoProduct, updateTokoProduct } = require('./src/collections/toko_product/graphql/mutation')
 
+// toko product variation
+const { getAllTokoProductVariations } = require('./src/collections/toko_product_variation/graphql/query')
+
 // tag
 const { getAllTags, getDetailTag } = require('./src/collections/tag/graphql/query')
 const { createTag, deleteTag, updateTag } = require('./src/collections/tag/graphql/mutation')
@@ -207,6 +210,8 @@ const RootQuery = new GraphQLObjectType({
     getDetailTokoProduct,
     getDetailTokoProductByCode,
     getDetailTokoProductJoinCartByCode,
+    // toko product variation
+    getAllTokoProductVariations,
     // tag
     getAllTags,
     getDetailTag,
