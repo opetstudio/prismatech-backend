@@ -12,20 +12,19 @@ const TagModel = require('../tag/Model')
 const TokoTeamModel = require('../toko_team/Model')
 const TokoCartModel = require('../toko_cart/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
-const TokoProductVariationModel = require('../toko_product_variation/Model')
-const TokoInventoryModel = require('../toko_inventory/Model')
 const fetchAllData = async (args, context) => {
   try {
     const filter = {}
     filter.$and = []
     const $or = []
-    const { accesstoken } = context.req.headers
-    const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
-    const { user_id: userId } = bodyAt
+    // const { accesstoken } = context.req.headers
+    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    // const { user_id: userId } = bodyAt
+    const userId = '5f1a62a4956eed0a46eda17d'
     if (!_.isEmpty(args.string_to_search)) {
-      $or.push({ title: { $regex: args.string_to_search, $options: 'i' } })
-      $or.push({ code: { $regex: args.string_to_search, $options: 'i' } })
-      $or.push({ description: { $regex: args.string_to_search, $options: 'i' } })
+      // $or.push({ title: { $regex: args.string_to_search, $options: 'i' } })
+      // $or.push({ code: { $regex: args.string_to_search, $options: 'i' } })
+      // $or.push({ description: { $regex: args.string_to_search, $options: 'i' } })
       // filter.$and.push()
     }
     // check authorization
@@ -41,9 +40,10 @@ const fetchAllData = async (args, context) => {
     // }
     // const myOwnListToko = await TokoTokoOnlineModel.find({ owner: userId })
     const myOwnListToko = await getAllMyEligibleToko({ userId })
+    console.log('myOwnListToko====>', myOwnListToko)
     if (myOwnListToko) {
       myOwnListToko.forEach(v => {
-        $or.push({ toko_id: '' + v._id })
+        $or.push({ 'product_id.toko_id': '' + v._id })
       })
       // isEligible = true
     }
@@ -56,14 +56,16 @@ const fetchAllData = async (args, context) => {
     // if (_.isEmpty(filter.$and)) isEligible = false
     // if (!isEligible) return { status: 200, success: 'Successfully get all Data', list_data: [], count: 0, page_count: 0 }
 
+    console.log('fetchAllData filter or====>', $or)
+    console.log('fetchAllData filter filter.$and====>', filter.$and)
+
+    filter.$and.push({ product_availability: 'use_stock' })
     const result = await EntityModel.find(filter)
       .sort({ updated_at: 'desc' })
       .skip(args.page_index * args.page_size)
       .limit(args.page_size)
-      .populate({ path: 'image_id' })
-      .populate({ path: 'category_id' })
-      .populate({ path: 'tag_id' })
-      .populate({ path: 'toko_id' })
+      .populate({ path: 'product_id', populate: { path: 'image_id' } })
+      .populate({ path: 'inventories', populate: [{ path: 'created_by' }, { path: 'updated_by' }] })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
     const count = await EntityModel.countDocuments(filter)
@@ -269,10 +271,8 @@ const fetchDetailData = async (args, context) => {
 
     const result = await EntityModel.findOne(filter)
     // const result = await EntityModel.findOne({ _id: args.id })
-      .populate({ path: 'image_id' })
-      .populate({ path: 'category_id' })
-      .populate({ path: 'tag_id' })
-      .populate({ path: 'toko_id' })
+      .populate({ path: 'product_id', populate: { path: 'image_id' } })
+      .populate({ path: 'inventories', populate: [{ path: 'created_by' }, { path: 'updated_by' }] })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
 
@@ -290,8 +290,9 @@ const getAllMyEligibleToko = async ({ userId }) => {
   let $or = []
   const myListToko = await TokoTeamModel.find({ user_id: userId })
   if (myListToko) {
-    console.log('myListToko=>', myListToko)
+    // console.log('myListToko=>', myListToko)
     $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
+    // console.log('$or====>', $or)
     $or.push({ owner: userId })
   }
   // daftar toko yang created_by nya adalah user_id saya
@@ -421,54 +422,6 @@ const doCreateData = async (args, context) => {
     data.tag_id = tagIdList
     const createResponse = (await EntityModel.create([data], opts))[0]
     console.log('createResponse====>', createResponse)
-    const productDetail = createResponse
-
-    // cek kalau pake stock atau tidak
-    if (productDetail.product_availability === 'use_stock') {
-      // upsert product variation
-      const productVariationData = {
-        product_id: '' + productDetail._id,
-        price: productDetail.price,
-        product_availability: productDetail.product_availability,
-        sku: '',
-        weight: productDetail.weight,
-        created_by: userDetail._id,
-        updated_by: userDetail._id,
-        created_at: now,
-        updated_at: now
-      }
-      const tokoProductVariation = await TokoProductVariationModel.findOneAndUpdate({ product_id: productDetail._id }, productVariationData, {
-        new: true,
-        upsert: true // Make this update into an upsert
-      }).session(session)
-      console.log('tokoProductVariation=======>', tokoProductVariation)
-      // upsert inventory
-      const inventoryData = {
-        quantity: productDetail.stock_amount,
-        product_variation: tokoProductVariation._id,
-        created_by: userDetail._id,
-        updated_by: userDetail._id,
-        created_at: now,
-        updated_at: now
-      }
-      const tokoInventory = await TokoInventoryModel.findOneAndUpdate({ product_variation: tokoProductVariation._id }, inventoryData, {
-        new: true,
-        upsert: true // Make this update into an upsert
-      }).session(session)
-      console.log('tokoInventory=======>', tokoInventory)
-
-      if (tokoProductVariation.inventories === undefined) tokoProductVariation.inventories = []
-      if (tokoProductVariation.inventories.indexOf(tokoInventory._id) === -1) {
-        tokoProductVariation.inventories.push(tokoInventory._id)
-        await tokoProductVariation.save(session)
-      }
-      // const tokoProductVariationWithInventories = await TokoProductVariationModel.findOne({ product_id: productDetail._id, inventories: tokoInventory._id })
-      // if (_.isEmpty(tokoProductVariationWithInventories)) {
-      //   if (tokoProductVariationWithInventories.hasOwnProperty('inventories')) tokoProductVariationWithInventories.inventories.push(tokoInventory._id)
-      //   await tokoProductVariationWithInventories.save(session)
-      // }
-    }
-
     await session.commitTransaction()
     session.endSession()
     return { status: 200, success: 'Successfully save Data', detail_data: createResponse }
@@ -592,47 +545,6 @@ const doUpdateData = async (args, context) => {
     // const newData = await EntityModel.findOneAndUpdate({ _id: args._id }, productDetail).session(session)
     // .populate({ path: 'created_by' }).populate({ path: 'updated_by' })
     const saveResp = await productDetail.save(session)
-
-    // cek kalau pake stock atau tidak
-    if (productDetail.product_availability === 'use_stock') {
-      // upsert product variation
-      const productVariationData = {
-        product_id: '' + productDetail._id,
-        price: productDetail.price,
-        product_availability: productDetail.product_availability,
-        sku: '',
-        weight: productDetail.weight,
-        created_by: userDetail._id,
-        updated_by: userDetail._id,
-        created_at: now,
-        updated_at: now
-      }
-      const tokoProductVariation = await TokoProductVariationModel.findOneAndUpdate({ product_id: productDetail._id }, productVariationData, {
-        new: true,
-        upsert: true // Make this update into an upsert
-      }).session(session)
-      console.log('tokoProductVariation=======>', tokoProductVariation)
-      // upsert inventory
-      const inventoryData = {
-        quantity: productDetail.stock_amount,
-        product_variation: tokoProductVariation._id,
-        created_by: userDetail._id,
-        updated_by: userDetail._id,
-        created_at: now,
-        updated_at: now
-      }
-      const tokoInventory = await TokoInventoryModel.findOneAndUpdate({ product_variation: tokoProductVariation._id }, inventoryData, {
-        new: true,
-        upsert: true // Make this update into an upsert
-      }).session(session)
-      console.log('tokoInventory=======>', tokoInventory)
-      if (tokoProductVariation.inventories === undefined) tokoProductVariation.inventories = []
-      if (tokoProductVariation.inventories.indexOf(tokoInventory._id) === -1) {
-        tokoProductVariation.inventories.push(tokoInventory._id)
-        await tokoProductVariation.save(session)
-      }
-    }
-
     // console.log('newData=======>', productDetail)
     // console.log('saveResp=======>', saveResp)
     await session.commitTransaction()
@@ -695,11 +607,6 @@ const doDeleteData = async (args, context) => {
     // if (!isEligible) throw new Error('Data toko masih salah. Periksa kembali toko yang anda pilih.')
 
     await productDetail.deleteOne()
-    // delete varian
-    await TokoProductVariationModel.deleteMany({ product_id: '' + productDetail._id }).session(session)
-    // delete inventory
-    await TokoInventoryModel.deleteMany({ 'product_variation.product_id': '' + productDetail._id }).session(session)
-
     await session.commitTransaction()
     session.endSession()
     return { status: 200, success: 'Successfully delete Data', detail_data: {} }

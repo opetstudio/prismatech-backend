@@ -92,7 +92,7 @@ const { getAllTokoProducts, getDetailTokoProduct, getDetailTokoProductByCode, ge
 const { createTokoProduct, deleteTokoProduct, updateTokoProduct } = require('./src/collections/toko_product/graphql/mutation')
 
 // toko product variation
-const { getAllTokoProductVariations } = require('./src/collections/toko_product_variation/graphql/query')
+const { getAllTokoProductVariations, getDetailTokoProductVariation } = require('./src/collections/toko_product_variation/graphql/query')
 
 // tag
 const { getAllTags, getDetailTag } = require('./src/collections/tag/graphql/query')
@@ -212,6 +212,7 @@ const RootQuery = new GraphQLObjectType({
     getDetailTokoProductJoinCartByCode,
     // toko product variation
     getAllTokoProductVariations,
+    getDetailTokoProductVariation,
     // tag
     getAllTags,
     getDetailTag,
