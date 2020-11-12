@@ -93,6 +93,11 @@ const doUpdateData = async (args, context) => {
     const saveResp = await tokoInventoryDetail.save(session)
     // console.log('newData=======>', productDetail)
     // console.log('saveResp=======>', saveResp)
+
+    // update stock di table product
+    productDetail.stock_amount = args.quantity
+    await productDetail.save(session)
+
     await session.commitTransaction()
     session.endSession()
     return { status: 200, success: 'Successfully save Data', detail_data: tokoInventoryDetail }
