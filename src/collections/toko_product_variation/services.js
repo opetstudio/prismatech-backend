@@ -17,10 +17,10 @@ const fetchAllData = async (args, context) => {
     const filter = {}
     filter.$and = []
     const $or = []
-    // const { accesstoken } = context.req.headers
-    // const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
-    // const { user_id: userId } = bodyAt
-    const userId = '5f1a62a4956eed0a46eda17d'
+    const { accesstoken } = context.req.headers
+    const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
+    const { user_id: userId } = bodyAt
+    // const userId = '5f1a62a4956eed0a46eda17d'
     if (!_.isEmpty(args.string_to_search)) {
       // $or.push({ title: { $regex: args.string_to_search, $options: 'i' } })
       // $or.push({ code: { $regex: args.string_to_search, $options: 'i' } })

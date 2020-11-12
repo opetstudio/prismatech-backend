@@ -94,6 +94,9 @@ const { createTokoProduct, deleteTokoProduct, updateTokoProduct } = require('./s
 // toko product variation
 const { getAllTokoProductVariations, getDetailTokoProductVariation } = require('./src/collections/toko_product_variation/graphql/query')
 
+// toko inventory
+const { updateTokoInventory } = require('./src/collections/toko_inventory/graphql/mutation')
+
 // tag
 const { getAllTags, getDetailTag } = require('./src/collections/tag/graphql/query')
 const { createTag, deleteTag, updateTag } = require('./src/collections/tag/graphql/mutation')
@@ -380,7 +383,9 @@ const Mutation = new GraphQLObjectType({
     checkoutProcess,
     paymentProcess,
     paymentProcessSendOtp,
-    purchaseorderCheckStatusRequestOtp
+    purchaseorderCheckStatusRequestOtp,
+    // toko inventory
+    updateTokoInventory
   }
 })
 
