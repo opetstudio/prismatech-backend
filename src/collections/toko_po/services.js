@@ -13,6 +13,8 @@ const TokoProductModel = require('../toko_product/Model')
 const TokoTeamModel = require('../toko_team/Model')
 const TokoCartModel = require('../toko_cart/Model')
 const TokoTokoOnlineModel = require('../toko_toko_online/Model')
+const TokoProductVariationModel = require('../toko_product_variation/Model')
+const TokoInventoryModel = require('../toko_inventory/Model')
 const { PostCode } = require('../../utils/services')
 const { paymentProcessSendOtpService, paymentProcessValidateOtpService, purchaseorderCheckStatusSendOtp, purchaseorderCheckStatusValidateOtp } = require('../rp_otp/services')
 const { generateRandomNumber } = require('../../utils/services/supportServices')
@@ -375,12 +377,12 @@ const purchaseorderCheckStatus = async (args, context) => {
     // throw new Error('Gagal kirim email untuk validasi alamat email.')
   }
 }
-const stockValidation = ({ product }) => {
+const stockValidation = ({ product, qty }) => {
   let stockValidationErrorMessage = ''
   let isNeedUpdateStock = false
   if (product.product_availability === 'use_stock') {
     if (product.preorder_policy === 'preorder') {
-      if (product.stock_amount <= 0) {
+      if (product.stock_amount <= qty) {
         // throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
         // validateSuccess = true
       } else {
@@ -391,9 +393,9 @@ const stockValidation = ({ product }) => {
         isNeedUpdateStock = true
       }
     } else {
-      if (product.stock_amount <= 0) {
+      if (product.stock_amount <= qty) {
         // validateSuccess = false
-        stockValidationErrorMessage = 'Gagal Purchase. ' + product.name + ' telah habis stok'
+        stockValidationErrorMessage = 'Gagal Purchase. Stok tidak cukup.'
         // throw new Error('Gagal Purchase. ' + product.name + ' telah habis stok')
       } else {
         // update stock
@@ -438,37 +440,39 @@ const paymentProcess = async (args, context) => {
     await tokoPoDetail.cart_id.forEach(async (v, k) => {
       try {
         productsInCart.push({ item_code: v.product_id.code, item_title: v.product_id.name, quantity: v.count, total: '' + v.amount, currency: 'IDR' })
-        stockValidationResp = stockValidation({ product: v.product_id })
+        stockValidationResp = stockValidation({ product: v.product_id, qty: v.count })
         console.log('stockValidationResp===>', stockValidationResp)
         if (!_.isEmpty(stockValidationResp.stockValidationErrorMessage)) throw new Error(stockValidationResp.stockValidationErrorMessage)
         if (stockValidationResp.isNeedUpdateStock) {
           // update stock
           const productDetail = await TokoProductModel.findById(v.product_id._id)
-          productDetail.stock_amount = productDetail.stock_amount - 1
+          productDetail.stock_amount = productDetail.stock_amount - v.count
           console.log('berhasil update stock menjadi ' + productDetail.stock_amount + ' untuk product name ' + v.product_id.name)
           await productDetail.save({ session: session })
+
+          // update inventory
+          const tokoProductVariationDetail = await TokoProductVariationModel.findOne({ product_id: v.product_id._id })
+          if (_.isEmpty(tokoProductVariationDetail)) throw new Error('Data inventory belum ada')
+
+          let qty = v.count
+
+          tokoProductVariationDetail.inventories.forEach(async (v, k) => {
+            if (qty === 0) return
+            const tokoInventoryDetail = await TokoInventoryModel.findById(v)
+            if (tokoInventoryDetail.quantity <= 0) return
+            if (tokoInventoryDetail.quantity >= qty) {
+              tokoInventoryDetail.quantity = tokoInventoryDetail.quantity - qty
+              qty = 0
+            } else {
+              qty = qty - tokoInventoryDetail.quantity
+              tokoInventoryDetail.quantity = 0
+            }
+            await tokoInventoryDetail.save({ session: session })
+            console.log('berhasil update inventory id=' + tokoInventoryDetail._id + ' sebanyak ' + tokoInventoryDetail.quantity)
+          })
+
+          if (qty > 0) throw new Error('Stok barang tidak cukup')
         }
-        // if (v.product_id.product_availability === 'use_stock') {
-        //   if (v.product_id.preorder_policy === 'preorder') {
-        //     if (v.product_id.stock_amount <= 0) {
-        //       // throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
-        //     } else {
-        //       // update stock
-        //       const productDetail = await TokoProductModel.findById(v.product_id._id)
-        //       productDetail.stock_amount = productDetail.stock_amount - 1
-        //       await productDetail.save({ session: session })
-        //     }
-        //   } else {
-        //     if (v.product_id.stock_amount <= 0) {
-        //       throw new Error('Gagal Purchase. ' + v.product_id.name + ' telah habis stok')
-        //     } else {
-        //       // update stock
-        //       const productDetail = await TokoProductModel.findById(v.product_id._id)
-        //       productDetail.stock_amount = productDetail.stock_amount - 1
-        //       await productDetail.save({ session: session })
-        //     }
-        //   }
-        // }
       } catch (err) {
         validateStockErrorMessage = err.message
       }
