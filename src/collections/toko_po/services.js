@@ -31,13 +31,23 @@ const fetchAllData = async (args, context) => {
       filter.$and.push({
         $or: [
           { full_name: { $regex: args.string_to_search, $options: 'i' } },
-          { email: { $regex: args.string_to_search, $options: 'i' } },
-          { action: { $regex: args.string_to_search, $options: 'i' } },
-          { session_id: { $regex: args.string_to_search, $options: 'i' } },
-          { phone_number: { $regex: args.string_to_search, $options: 'i' } }
+          { invoice_code: { $regex: args.string_to_search, $options: 'i' } },
+          { session_id: { $regex: args.string_to_search, $options: 'i' } }
+          // { email: { $regex: args.string_to_search, $options: 'i' } },
+          // { action: { $regex: args.string_to_search, $options: 'i' } },
+          // { session_id: { $regex: args.string_to_search, $options: 'i' } },
+          // { phone_number: { $regex: args.string_to_search, $options: 'i' } }
         ]
       })
     }
+    if (!_.isEmpty(args.start_date)) {
+      filter.$and.push({ updated_at: { $gte: parseInt(args.start_date) } })
+    }
+    if (!_.isEmpty(args.end_date)) {
+      filter.$and.push({ updated_at: { $lte: parseInt(args.end_date) } })
+    }
+
+    console.log('filter untuk fetch data order:', filter.$and)
 
     // check authorization
     let isEligible = false
