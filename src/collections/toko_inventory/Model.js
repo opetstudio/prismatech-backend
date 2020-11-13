@@ -16,6 +16,11 @@ const schema = new mongoose.Schema({
     ref: 'toko_product_variation',
     default: null
   },
+  product_id: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: 'toko_product',
+    default: null
+  },
   created_at: {
     type: Number,
     default: new Date().now

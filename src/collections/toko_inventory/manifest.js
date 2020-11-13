@@ -39,7 +39,8 @@ const fields = {
         weight: { type: GraphQLString }
       })
     })
-  }
+  },
+  product_id: { type: TokoProductType }
   // product_variation: {
   //   _id: { type: GraphQLID },
   //   product_id: { type: TokoProductType },
