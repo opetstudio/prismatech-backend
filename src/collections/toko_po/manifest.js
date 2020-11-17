@@ -55,7 +55,8 @@ const fields = {
   cart_id: { type: GraphQLList(TokoCartType) },
   toko_id: { type: TokoTokoOnlineType },
   user_id: { type: UserType },
-  unique_code: { type: GraphQLInt }
+  unique_code: { type: GraphQLInt },
+  payment_date: { type: GraphQLLong }
 }
 module.exports = {
   entity: 'TokoPo',
@@ -88,7 +89,8 @@ module.exports = {
       type: GraphQLString
     },
     shipping_amount: { type: GraphQLInt },
-    unique_code: { type: GraphQLInt }
+    unique_code: { type: GraphQLInt },
+    payment_date: { type: GraphQLLong }
   },
   createArgs: {
     device_id: { type: GraphQLString },
@@ -116,7 +118,8 @@ module.exports = {
     shipping_postal_code: {
       type: GraphQLString
     },
-    shipping_amount: { type: GraphQLInt }
+    shipping_amount: { type: GraphQLInt },
+    payment_date: { type: GraphQLLong }
   },
   fields: {
     ...fields,

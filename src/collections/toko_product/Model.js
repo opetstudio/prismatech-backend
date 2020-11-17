@@ -71,6 +71,16 @@ const schema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  estimated_delivery_unit_time_instock: {
+    type: String,
+    enum: ['hour', 'day', 'week', 'month'],
+    default: 'hour'
+  },
+  estimated_delivery_unit_time_preorder: {
+    type: String,
+    enum: ['hour', 'day', 'week', 'month'],
+    default: 'hour'
+  },
   created_at: {
     type: Number,
     default: new Date().now

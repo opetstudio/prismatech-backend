@@ -80,6 +80,19 @@ const schema = new mongoose.Schema({
     type: Number,
     default: new Date().now
   },
+  payment_date: {
+    type: Number,
+    default: new Date().now
+  },
+  payment_status: {
+    type: String
+  },
+  payment_refno: {
+    type: String
+  },
+  payment_method: {
+    type: String
+  },
   updated_at: {
     type: Number,
     default: new Date().now

@@ -29,7 +29,9 @@ const getAllData = {
   args: {
     page_size: { type: GraphQLInt },
     page_index: { type: GraphQLInt },
-    string_to_search: { type: GraphQLString }
+    string_to_search: { type: GraphQLString },
+    start_date: { type: GraphQLString },
+    end_date: { type: GraphQLString }
   },
   async resolve (parent, args, context) {
     return Services['fetchAll' + Manifest.entity + 's'](args, context)
