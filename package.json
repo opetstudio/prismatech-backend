@@ -1,7 +1,10 @@
 {
-  "name": "tokoonline-backend-njs",
-  "version": "0.0.0",
-  "private": true,
+  "name": "prismatech-backend",
+  "version": "1.0.0",
+  "description": "service backend for prismatech",
+  "author": "opetstudio@gmail.com",
+  "license": "ISC",
+  "main": "index.js",
   "scripts": {
     "start:ecomm-localhost": "NODE_ENV=localhostecomm nodemon app.js",
     "start:ecomm-development": "NODE_ENV=developmentecomm nodemon app.js",
@@ -62,5 +65,16 @@
   "devDependencies": {
     "nodemon": "^2.0.4",
     "standard": "^14.3.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opetstudio/prismatech-backend.git"
+  },
+  "keywords": [
+    "prismatech"
+  ],
+  "bugs": {
+    "url": "https://github.com/opetstudio/prismatech-backend/issues"
+  },
+  "homepage": "https://github.com/opetstudio/prismatech-backend#readme"
 }

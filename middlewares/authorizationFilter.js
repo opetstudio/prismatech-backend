@@ -61,8 +61,8 @@ const authorizationFilterMiddleware = {
     deleteUserRole: authorizationFilter,
 
     // toko
-    createTokoTokoOnline: authorizationFilter,
-    updateTokoTokoOnline: authorizationFilter
+    // createTokoTokoOnline: authorizationFilter,
+    // updateTokoTokoOnline: authorizationFilter
   },
   RootQueryType: {
 

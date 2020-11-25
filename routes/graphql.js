@@ -15,16 +15,21 @@ const contentUrlDecode = require('../middlewares/contentUrlDecode')
 
 // const meeting = require('../src/socket/meeting')
 
-module.exports = function (io) {
+module.exports = function ({ io, externalQuery, externalMutation }) {
   // meeting(io)
 
   const Router = express.Router()
+  const sc = schema({ externalQuery, externalMutation })
 
-  applyMiddleware(schema, authorizationMiddlewares, authMiddleware, accessTokenValidateMiddleware, privilegeValidateMiddleware, contentUrlDecode)
+  const mw = [
+    authorizationMiddlewares, authMiddleware, accessTokenValidateMiddleware, privilegeValidateMiddleware, contentUrlDecode
+  ]
+
+  applyMiddleware(sc, ...mw)
 
   return Router.all('/', (req, res) => {
     return graphqlHTTP({
-      schema,
+      schema: sc,
       graphiql: config.get('isGraphiqlActive'),
       context: { req, res }
     })(req, res)

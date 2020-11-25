@@ -87,164 +87,108 @@ const { getAllLmsSubjectUnits, getDetailLmsSubjectUnit } = require('./src/collec
 // const { tablepaginationFetchData } = require('./src/services/graphql/query')
 
 // ECOMMERCE
-// toko product
-const { getAllTokoProducts, getDetailTokoProduct, getDetailTokoProductByCode, getDetailTokoProductJoinCartByCode, getAllTokoProductsByTokoId, getAllTokoProductsByCategoryId } = require('./src/collections/toko_product/graphql/query')
-const { createTokoProduct, deleteTokoProduct, updateTokoProduct } = require('./src/collections/toko_product/graphql/mutation')
-
-// toko product variation
-const { getAllTokoProductVariations, getDetailTokoProductVariation } = require('./src/collections/toko_product_variation/graphql/query')
-
-// toko inventory
-const { updateTokoInventory } = require('./src/collections/toko_inventory/graphql/mutation')
 
 // tag
 const { getAllTags, getDetailTag } = require('./src/collections/tag/graphql/query')
 const { createTag, deleteTag, updateTag } = require('./src/collections/tag/graphql/mutation')
-
-// category
-const { getAllCategorys, getDetailCategory, getAllCategorysByTokoId } = require('./src/collections/category/graphql/query')
-const { createCategory, deleteCategory, updateCategory } = require('./src/collections/category/graphql/mutation')
-
-// toko toko online
-const { getAllTokoTokoOnlines, getDetailTokoTokoOnline } = require('./src/collections/toko_toko_online/graphql/query')
-const { createTokoTokoOnline, deleteTokoTokoOnline, updateTokoTokoOnline } = require('./src/collections/toko_toko_online/graphql/mutation')
-
-// toko team
-const { getAllTokoTeams, getDetailTokoTeam, getAllTokoTeamsByTokoId } = require('./src/collections/toko_team/graphql/query')
-const { createTokoTeam, deleteTokoTeam, updateTokoTeam } = require('./src/collections/toko_team/graphql/mutation')
-
-// toko cart
-const { getAllTokoCarts, getAllTokoCartsBySessionId, getDetailTokoCart } = require('./src/collections/toko_cart/graphql/query')
-const { createTokoCart, deleteTokoCart, updateTokoCart, addToCart, removeFromCart } = require('./src/collections/toko_cart/graphql/mutation')
-
-// toko po
-const { getDetailTokoPoBySessionId, getAllTokoPos, getDetailTokoPo, purchaseorderCheckStatus } = require('./src/collections/toko_po/graphql/query')
-const { checkoutProcess, paymentProcess, paymentProcessSendOtp, purchaseorderCheckStatusRequestOtp } = require('./src/collections/toko_po/graphql/mutation')
 
 const {
   GraphQLObjectType,
   GraphQLSchema
 } = graphql
 
-const RootQuery = new GraphQLObjectType({
-  name: 'RootQueryType',
-  fields: {
-    // LMS
-    // enrollment
-    getAllEnrollmentUserByCourseId,
-    getAllEnrollmentUserByFilter,
-    // teacher
-    getTeacherById,
-    getAllTeachers,
+const RootQuery = ({ externalQuery }) => {
+  return new GraphQLObjectType({
+    name: 'RootQueryType',
+    fields: {
+      // LMS
+      // enrollment
+      getAllEnrollmentUserByCourseId,
+      getAllEnrollmentUserByFilter,
+      // teacher
+      getTeacherById,
+      getAllTeachers,
 
-    // course
-    getCourseById,
-    getAllCourses,
-    getDetailCourse,
-    getAllPublishedCourses,
-    getDetailPublishedCourse,
+      // course
+      getCourseById,
+      getAllCourses,
+      getDetailCourse,
+      getAllPublishedCourses,
+      getDetailPublishedCourse,
 
-    // subject
-    getAllSubjects,
-    getDetailSubject,
+      // subject
+      getAllSubjects,
+      getDetailSubject,
 
-    // subject unit
-    getAllLmsSubjectUnits,
-    getDetailLmsSubjectUnit,
+      // subject unit
+      getAllLmsSubjectUnits,
+      getDetailLmsSubjectUnit,
 
-    // lms grading
-    getAllLmsGradings,
-    getDetailLmsGrading,
-    getAllGradingsByCourseId,
+      // lms grading
+      getAllLmsGradings,
+      getDetailLmsGrading,
+      getAllGradingsByCourseId,
 
-    // RAYAPAY
-    // emoney
-    allTransaction,
+      // RAYAPAY
+      // emoney
+      allTransaction,
 
-    // merchant
-    AllMerchant,
-    MerchantInfo,
-    loginMerchant,
-    MerchantTransactionHistory,
-    merchantDashboard,
-    showRelatedInstitution,
+      // merchant
+      AllMerchant,
+      MerchantInfo,
+      loginMerchant,
+      MerchantTransactionHistory,
+      merchantDashboard,
+      showRelatedInstitution,
 
-    // institution
-    AllInstitution,
-    loginInstitution,
-    InstitutionInfo,
+      // institution
+      AllInstitution,
+      loginInstitution,
+      InstitutionInfo,
 
-    // qr
-    showQR,
+      // qr
+      showQR,
 
-    // settlement
-    getAllSettlement,
-    getSettlements,
+      // settlement
+      getAllSettlement,
+      getSettlements,
 
-    // services
-    transactionHistory,
+      // services
+      transactionHistory,
 
-    // user
-    login,
-    getProfile,
-    allUser,
-    getAllUsers,
-    getDetailUser,
+      // user
+      login,
+      getProfile,
+      allUser,
+      getAllUsers,
+      getDetailUser,
 
-    // role
-    getAllRoles,
-    getDetailRole,
+      // role
+      getAllRoles,
+      getDetailRole,
 
-    // role privilege
-    getAllRoleprivilegesByRoleId,
-    getDetailRoleprivilege,
+      // role privilege
+      getAllRoleprivilegesByRoleId,
+      getDetailRoleprivilege,
 
-    // privilege
-    getAllPrivileges,
-    getDetailPrivilege,
+      // privilege
+      getAllPrivileges,
+      getDetailPrivilege,
 
-    // user role
-    getAllUserRoles,
-    getDetailUserRole,
-    getDetailUserRoleByMyUserId,
+      // user role
+      getAllUserRoles,
+      getDetailUserRole,
+      getDetailUserRoleByMyUserId,
+      // tag
+      getAllTags,
+      getDetailTag,
 
-    // toko product
-    getAllTokoProducts,
-    getDetailTokoProduct,
-    getDetailTokoProductByCode,
-    getDetailTokoProductJoinCartByCode,
-    // toko product variation
-    getAllTokoProductVariations,
-    getDetailTokoProductVariation,
-    // tag
-    getAllTags,
-    getDetailTag,
-    // category
-    getAllCategorys,
-    getDetailCategory,
-    getAllCategorysByTokoId,
-    // toko toko online
-    getAllTokoTokoOnlines,
-    getDetailTokoTokoOnline,
-    getAllTokoProductsByTokoId,
-    getAllTokoProductsByCategoryId,
-    // toko toko online
-    getAllTokoTeams,
-    getDetailTokoTeam,
-    getAllTokoTeamsByTokoId,
-    // toko cart
-    getAllTokoCarts,
-    getDetailTokoCart,
-    getAllTokoCartsBySessionId,
-    // toko po
-    getDetailTokoPoBySessionId,
-    getAllTokoPos,
-    getDetailTokoPo,
-    purchaseorderCheckStatus
-  }
-})
+      ...externalQuery
+    }
+  })
+}
 
-const Mutation = new GraphQLObjectType({
+const Mutation = ({ externalMutation }) => new GraphQLObjectType({
   name: 'Mutation',
   fields: {
 
@@ -352,44 +296,16 @@ const Mutation = new GraphQLObjectType({
     updateUserRole,
     deleteUserRole,
 
-    // toko product
-    createTokoProduct,
-    deleteTokoProduct,
-    updateTokoProduct,
-
     // tag
     createTag,
     deleteTag,
     updateTag,
-    // category
-    createCategory,
-    deleteCategory,
-    updateCategory,
-    // toko toko online
-    createTokoTokoOnline,
-    deleteTokoTokoOnline,
-    updateTokoTokoOnline,
-    // toko team
-    createTokoTeam,
-    deleteTokoTeam,
-    updateTokoTeam,
-    // toko cart
-    createTokoCart,
-    deleteTokoCart,
-    updateTokoCart,
-    addToCart,
-    removeFromCart,
-    // toko po
-    checkoutProcess,
-    paymentProcess,
-    paymentProcessSendOtp,
-    purchaseorderCheckStatusRequestOtp,
-    // toko inventory
-    updateTokoInventory
+
+    ...externalMutation
   }
 })
 
-module.exports = new GraphQLSchema({
-  query: RootQuery,
-  mutation: Mutation
+module.exports = ({ externalQuery, externalMutation }) => new GraphQLSchema({
+  query: RootQuery({ externalQuery }),
+  mutation: Mutation({ externalMutation })
 })
