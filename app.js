@@ -70,11 +70,10 @@ function run ({ dirname, routes, graphql: { query: externalQuery, mutation: exte
   // app.use(corsAccess())
 
   // app.use('/users', usersRouter)
+  app.use(graphqlRoutePath, graphqlRouter)
   routes.forEach((v, i) => {
     app.use(v.path, v.route)
   })
-  app.use(graphqlRoutePath, graphqlRouter)
-  // app.use('/', indexRouter)
 
   // catch 404 and forward to error handler
   app.use(function (req, res, next) {
