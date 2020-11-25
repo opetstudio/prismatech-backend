@@ -9,7 +9,7 @@ const corsAccess = require('./middlewares/corsAccess')
 // const config = require('config')
 var session = require('express-session')
 
-function run ({ dirname, routes, graphql: { query: externalQuery, mutation: externalMutation }, config }) {
+function run ({ dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config }) {
   var app = express()
   app.io = require('socket.io')()
 
@@ -21,9 +21,9 @@ function run ({ dirname, routes, graphql: { query: externalQuery, mutation: exte
     .then((res) => console.log('Connected to MongoDB... ', config.get('mongoUrl')))
     .catch((err) => console.log('Cannot connect to MongoDB...', err))
 
-  var apiRouter = routes.apiRouter
+  // var apiRouter = routes.apiRouter
   // var apiRouter = require('./routes/api')
-  var indexRouter = routes.indexRouter
+  // var indexRouter = routes.indexRouter
   // var usersRouter = require('./routes/users')
   // var adminRouter = require('./routes/admin')
   const graphqlRouter = require('./routes/graphql')({ io: app.io, externalQuery, externalMutation })
@@ -70,9 +70,11 @@ function run ({ dirname, routes, graphql: { query: externalQuery, mutation: exte
   // app.use(corsAccess())
 
   // app.use('/users', usersRouter)
-  app.use('/api', apiRouter)
-  app.use('/graphql', graphqlRouter)
-  app.use('/', indexRouter)
+  routes.forEach((v, i) => {
+    app.use(v.path, v.route)
+  })
+  app.use(graphqlRoutePath, graphqlRouter)
+  // app.use('/', indexRouter)
 
   // catch 404 and forward to error handler
   app.use(function (req, res, next) {
