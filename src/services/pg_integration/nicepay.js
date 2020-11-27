@@ -25,7 +25,7 @@ const registration = async ({ pgBaseUrl, payload: { userId } }) => {
     billingNm: 'Nofrets Poai',
     billingPhone: '085342805673',
     billingEmail: 'nofrets.poai@gmail.com',
-    dbProcessUrl: 'http://1fa308ac8a4c.ngrok.io/core/api/v1/callback-nicepay', // *
+    dbProcessUrl: 'http://341e64e9b2d7.ngrok.io/core/api/v1/callback-nicepay', // *
     bankCd: 'BMRI',
     vacctValidDt: 20201201,
     vacctValidTm: 135959,
