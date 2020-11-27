@@ -71,6 +71,7 @@ function run ({ dirname, routes, graphql: { query: externalQuery, mutation: exte
 
   // app.use('/users', usersRouter)
   app.use(graphqlRoutePath, graphqlRouter)
+  app.use('/core/api', require('./routes/api'))
   routes.forEach((v, i) => {
     app.use(v.path, v.route)
   })
