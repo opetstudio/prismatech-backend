@@ -9,7 +9,7 @@ const corsAccess = require('./middlewares/corsAccess')
 // const config = require('config')
 var session = require('express-session')
 
-function run ({ dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config }) {
+function run ({ dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort }) {
   var app = express()
   app.io = require('socket.io')()
 
@@ -28,7 +28,7 @@ function run ({ dirname, routes, graphql: { query: externalQuery, mutation: exte
   // var adminRouter = require('./routes/admin')
   const graphqlRouter = require('./routes/graphql')({ io: app.io, externalQuery, externalMutation })
 
-  const port = process.env.PORT || 3000
+  const port = process.env.PORT || applicationPort || 3000
 
   server.listen(port, () => {
     console.log(`Running on localhost ${port}`)
