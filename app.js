@@ -51,6 +51,7 @@ function run ({ sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, gra
   // view engine setup
   app.set('views', path.join(dirname || __dirname, 'views'))
   app.use(express.static(path.join(dirname || __dirname, 'public')))
+  app.use(express.static(path.join(dirname || __dirname, 'template')))
 
   // app.set('view engine', 'pug')
   // app.set('views', path.join(__dirname, 'views'))
