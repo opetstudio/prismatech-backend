@@ -25,6 +25,7 @@ const generateRandomNumber = (length) => {
 }
 
 const sendMailVerification = async (model) => {
+  console.log('model===>', model)
   var mailOptions
 
   var smtpConfig = {
@@ -36,6 +37,8 @@ const sendMailVerification = async (model) => {
       pass: config.get('devAuth')
     }
   }
+
+  console.log('smtpConfig===>', smtpConfig)
 
   const transporter = nodemailer.createTransport(smtpConfig)
   // const transporter = nodemailer.createTransport({
