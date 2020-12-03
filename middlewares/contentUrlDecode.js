@@ -32,8 +32,8 @@ const contentUrlDecode = {
     updateSubject: mw,
     createCourse: mw,
     updateCourse: mw,
-    // createTokoProduct: mw,
-    // updateTokoProduct: mw
+    createTokoProduct: mw,
+    updateTokoProduct: mw
   }
 }
 module.exports = contentUrlDecode
