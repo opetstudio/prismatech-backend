@@ -13,8 +13,8 @@ const corsAccess = require('./middlewares/corsAccess')
 // const config = require('config')
 var session = require('express-session')
 
-function run ({ sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
-  
+function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
+  console.log('run prismatech backend')
 
   // var mainapp = connect()
 
@@ -67,8 +67,8 @@ function run ({ sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, gra
   // API APPLICATION
   var apiApp = express()
   const graphqlRouter = require('./routes/graphql')({ io: app.io, externalQuery, externalMutation })
-  apiApp.use(graphqlRoutePath, graphqlRouter)
-  apiApp.use('/core/api', require('./routes/api'))
+  app.use(graphqlRoutePath, graphqlRouter)
+  app.use('/core/api', require('./routes/api'))
 
   // app.use(corsAccess())
 
@@ -89,9 +89,9 @@ function run ({ sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, gra
 
   apiApp.use(function (req, res, next) {
     // var username = req.vhost[0] // username is the "*"
-    console.log('apiApp v.path=====>')
-    console.log('apiApp req.url=====>' + req.url)
-    console.log('apiApp req.originalUrl=====>' + req.originalUrl)
+    // console.log('apiApp v.path=====>')
+    // console.log('apiApp req.url=====>' + req.url)
+    // console.log('apiApp req.originalUrl=====>' + req.originalUrl)
     // pretend request was for /{username}/* for file serving
     // req.originalUrl = req.url
     // req.url = '/api' + req.url
@@ -100,52 +100,55 @@ function run ({ sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, gra
 
   // INDEX APPLICATION
   var indexApp = express()
-  indexApp.engine('html', require('ejs').renderFile)
-  indexApp.set('view engine', 'html')
+  app.engine('html', require('ejs').renderFile)
+  app.set('view engine', 'html')
   // app.use('/users', usersRouter)
-  // routes.forEach((v, i) => {
-  //   adminApp.use(v.path, v.route)
-  // })
 
-  for (let i = 0; i < routes.length; i++) {
-    const v = routes[i]
-    if (v.appType === 'sdk') {
-      sdkApp.use(function (req, res, next) {
-        var username = req.vhost[0] // username is the "*"
-        console.log('sdkApp=====>', username)
-        // pretend request was for /{username}/* for file serving
-        req.originalUrl = req.url
-        req.url = v.path + req.url
-        next()
-      })
-      sdkApp.use(v.path, v.route)
-    }
-    if (v.appType === 'api') {
-      apiApp.use(v.path, v.route)
-    }
-    if (v.appType === 'admin') {
-      adminApp.use(function (req, res, next) {
-        var username = req.vhost[0] // username is the "*"
-        console.log('adminApp=====>', username)
-        // pretend request was for /{username}/* for file serving
-        req.originalUrl = req.url
-        req.url = v.path + req.url
-        next()
-      })
-      adminApp.use(v.path, v.route)
-    }
-    if (v.appType === 'index') {
-      indexApp.use(function (req, res, next) {
-        var username = req.vhost[0] // username is the "*"
-        console.log('indexApp=====>', username)
-        // pretend request was for /{username}/* for file serving
-        // req.originalUrl = req.url
-        // req.url = v.path + req.url
-        next()
-      })
-      indexApp.use(v.path, v.route)
-    }
-  }
+  app.use(middleware)
+  routes.forEach((v, i) => {
+    console.log('urutan route ' + v.path)
+    app.use(v.path, v.route)
+  })
+
+  // for (let i = 0; i < routes.length; i++) {
+  //   const v = routes[i]
+  //   if (v.appType === 'sdk') {
+  //     sdkApp.use(function (req, res, next) {
+  //       var username = req.vhost[0] // username is the "*"
+  //       console.log('sdkApp=====>', username)
+  //       // pretend request was for /{username}/* for file serving
+  //       req.originalUrl = req.url
+  //       req.url = v.path + req.url
+  //       next()
+  //     })
+  //     sdkApp.use(v.path, v.route)
+  //   }
+  //   if (v.appType === 'api') {
+  //     apiApp.use(v.path, v.route)
+  //   }
+  //   if (v.appType === 'admin') {
+  //     adminApp.use(function (req, res, next) {
+  //       var username = req.vhost[0] // username is the "*"
+  //       console.log('adminApp=====>', username)
+  //       // pretend request was for /{username}/* for file serving
+  //       req.originalUrl = req.url
+  //       req.url = v.path + req.url
+  //       next()
+  //     })
+  //     adminApp.use(v.path, v.route)
+  //   }
+  //   if (v.appType === 'index') {
+  //     indexApp.use(function (req, res, next) {
+  //       var username = req.vhost[0] // username is the "*"
+  //       console.log('indexApp=====>', username)
+  //       // pretend request was for /{username}/* for file serving
+  //       // req.originalUrl = req.url
+  //       // req.url = v.path + req.url
+  //       next()
+  //     })
+  //     indexApp.use(v.path, v.route)
+  //   }
+  // }
 
   // catch 404 and forward to error handler
   // app.use(function (req, res, next) {
@@ -163,11 +166,12 @@ function run ({ sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, gra
   //   res.render('error')
   // })
   // app.use(vhost('siapdev.opetstudio.com', mainapp))
-  app.use(vhost(sdkSubdomain + '.' + hostname, sdkApp))
-  app.use(vhost(apiSubdomain + '.' + hostname, apiApp))
-  app.use(vhost(adminSubdomain + '.' + hostname, adminApp))
-  app.use(vhost(hostname, indexApp))
-  app.use(vhost('*.' + hostname, indexApp))
+  // app.use(vhost(sdkSubdomain + '.' + hostname, sdkApp))
+  // app.use(vhost(apiSubdomain + '.' + hostname, apiApp))
+  // app.use(vhost(adminSubdomain + '.' + hostname, adminApp))
+  // app.use(vhost(hostname, indexApp))
+  // app.use(vhost('*.' + hostname, indexApp))
+  // app.use(vhost('store.rayapaydev.id', indexApp))
   // app.use(vhost('user.tokoinstandev.com', userapp))
   // app.use(vhost('api.tokoinstandev.com', userapp))
   // app.use(vhost('*.tokoinstandev.com', userapp))
