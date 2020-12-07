@@ -13,7 +13,8 @@ module.exports.model = {
   file: require('./src/collections/file/Model')
 }
 module.exports.services = {
-  rp_otp: require('./src/collections/rp_otp/services')
+  rp_otp: require('./src/collections/rp_otp/services'),
+  supportServices: require('./src/utils/services/supportServices')
 }
 module.exports.graphql = {
   query: {

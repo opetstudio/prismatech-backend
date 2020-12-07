@@ -23,6 +23,35 @@ const generateRandomNumber = (length) => {
     charset: 'numeric'
   })
 }
+const sendEmail = async (model) => {
+  console.log('model===>', model)
+  var mailOptions
+
+  var smtpConfig = {
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
+    auth: {
+      user: config.get('devEmail'),
+      pass: config.get('devAuth')
+    }
+  }
+  console.log('smtpConfig===>', smtpConfig)
+  const transporter = nodemailer.createTransport(smtpConfig)
+
+  if (!model.from || !model.to || !model.emailSubject || !model.emailBody) throw new Error('invalid email parameter')
+  mailOptions = {
+    from: model.from,
+    to: model.to,
+    subject: model.emailSubject,
+    text: model.emailBody
+  }
+  try {
+    await transporter.sendMail(mailOptions)
+  } catch (err) {
+    throw new Error(err)
+  }
+}
 
 const sendMailVerification = async (model) => {
   console.log('model===>', model)
@@ -116,6 +145,20 @@ const sendMailVerification = async (model) => {
           otp: ${model.otp}`
     }
   }
+  if (model.type === 'general') {
+    // type: 'paymentProcessSendOtp',
+    //   email,
+    //   otp: otpString || generateRandomNumber(4),
+    //   emailBody,
+    //   emailSubject
+    if (!model.from || !model.email || !model.emailSubject || !model.emailBody) throw new Error('invalid email parameter')
+    mailOptions = {
+      from: model.from,
+      to: model.email,
+      subject: model.emailSubject,
+      text: model.emailBody
+    }
+  }
 
   if (model.type === 'merchantSignup') {
     mailOptions = {
@@ -173,3 +216,4 @@ module.exports.generateID = generateID
 module.exports.getUnixTime = getUnixTime
 module.exports.isEqual = isEqual
 module.exports.Response = Response
+module.exports.sendEmail = sendEmail
