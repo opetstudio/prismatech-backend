@@ -55,6 +55,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
       ttl: 14 * 24 * 60 * 60 // = 14 days. Default
     })
   }
+  console.log('env======>', app.get('env'))
   if (app.get('env') === 'production') {
     app.set('trust proxy', 1) // trust first proxy
     sess.cookie.secure = true // serve secure cookies
@@ -65,6 +66,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   app.set('views', path.join(dirname || __dirname, 'views'))
   app.use(express.static(path.join(dirname || __dirname, 'public')))
   app.use(express.static(path.join(dirname || __dirname, 'template')))
+  // app.enable('trust proxy')
 
   // app.set('view engine', 'pug')
   // app.set('views', path.join(__dirname, 'views'))
