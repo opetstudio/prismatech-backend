@@ -12,6 +12,8 @@ const cors = require('cors')
 const corsAccess = require('./middlewares/corsAccess')
 // const config = require('config')
 var session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
+
 
 function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
   console.log('run prismatech backend')
@@ -22,7 +24,8 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   
 
   console.log('trying to connect to db... ', config.get('mongoUrl'))
-  mongoose.connect(config.get('mongoUrl'), { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false })
+  const mongoOptions = { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }
+  mongoose.connect(config.get('mongoUrl'), mongoOptions)
     .then((res) => console.log('Connected to MongoDB... ', config.get('mongoUrl')))
     .catch((err) => console.log('Cannot connect to MongoDB...', err))
 
@@ -41,12 +44,22 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   app.io.attach(server)
   var sess = {
     secret: 'keyboard cat',
-    cookie: {}
+    cookie: {
+      secure: false,
+      maxAge: 1000 * 60 * 60 * 24,
+      resave: false
+    },
+    store: new MongoStore({
+      url: config.get('mongoUrl'),
+      mongoOptions,
+      ttl: 14 * 24 * 60 * 60 // = 14 days. Default
+    })
   }
   if (app.get('env') === 'production') {
     app.set('trust proxy', 1) // trust first proxy
     sess.cookie.secure = true // serve secure cookies
   }
+  console.log('session config====>', sess)
   app.use(session(sess))
   // view engine setup
   app.set('views', path.join(dirname || __dirname, 'views'))
