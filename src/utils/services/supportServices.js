@@ -44,7 +44,7 @@ const sendEmail = async (model) => {
     from: model.from,
     to: model.to,
     subject: model.emailSubject,
-    text: model.emailBody
+    html: model.emailBody
   }
   try {
     await transporter.sendMail(mailOptions)
