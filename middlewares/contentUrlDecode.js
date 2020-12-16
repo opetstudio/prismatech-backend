@@ -26,12 +26,12 @@ const mw = async (resolve, parent, args, context, info) => {
 }
 const contentUrlDecode = {
   Mutation: {
-    createLmsSubjectUnit: mw,
-    updateLmsSubjectUnit: mw,
-    createSubject: mw,
-    updateSubject: mw,
-    createCourse: mw,
-    updateCourse: mw,
+    // createLmsSubjectUnit: mw,
+    // updateLmsSubjectUnit: mw,
+    // createSubject: mw,
+    // updateSubject: mw,
+    // createCourse: mw,
+    // updateCourse: mw,
     createTokoProduct: mw,
     updateTokoProduct: mw
   }

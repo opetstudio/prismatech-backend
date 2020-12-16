@@ -63,13 +63,14 @@ const fetchDetailUserRoleByMyUserId = async (args, context) => {
   }
 }
 const fetchDetailUserRoleByUserId = async (userId) => {
-  console.log('fetchDetailUserRole invoked')
+  console.log('fetchDetailUserRole invoked userId=>', userId)
   try {
     const result = await UserRole.findOne({ user_id: userId })
       .populate({ path: 'user_id' })
       .populate({ path: 'role_id', populate: { path: 'privilege_id' } })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
+    console.log(' UserRole.findOne===', result)
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
     return { status: 400, error: err.message }
