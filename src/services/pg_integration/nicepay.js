@@ -43,12 +43,12 @@ const registration = async ({ pgBaseUrl, payload: { userId } }) => {
   })
   api.setHeader('hmac', '')
   const resp = await api.post('/registration', bodyHit)
-  console.log('resp.duration====>', resp.duration)
-  console.log('resp.problem====>', resp.problem)
-  console.log('resp.status====>', resp.status)
-  console.log('resp.ok====>', resp.ok)
-  console.log('resp.data====>', resp.data)
-  console.log('bodyHit====>', bodyHit)
+  // console.log('resp.duration====>', resp.duration)
+  // console.log('resp.problem====>', resp.problem)
+  // console.log('resp.status====>', resp.status)
+  // console.log('resp.ok====>', resp.ok)
+  // console.log('resp.data====>', resp.data)
+  // console.log('bodyHit====>', bodyHit)
 }
 
 module.exports = {

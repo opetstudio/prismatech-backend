@@ -14,7 +14,7 @@ const getAllMyEligibleToko = async ({ userId }) => {
   let $or = []
   const myListToko = await TokoTeamModel.find({ user_id: userId })
   if (myListToko) {
-    console.log('myListToko=>', myListToko)
+    // console.log('myListToko=>', myListToko)
     $or = myListToko.map(v => ({ _id: '' + v.toko_id }))
     $or.push({ owner: userId })
   }

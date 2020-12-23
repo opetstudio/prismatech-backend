@@ -4,7 +4,7 @@ const _ = require('lodash')
 const UserRole = require('./Model')
 const User = require('../user/Model')
 const fetchAllUserRoles = async (args, context) => {
-  console.log('fetchAllUserRoles invoked')
+  // console.log('fetchAllUserRoles invoked')
   try {
     const filter = {}
     const { accesstoken } = context.req.headers
@@ -19,7 +19,7 @@ const fetchAllUserRoles = async (args, context) => {
     //     ]
     //   })
     // }
-    console.log('filter======', filter)
+    // console.log('filter======', filter)
     const result = await UserRole.find(filter).sort({ updated_at: 'desc' }).skip(args.page_index * args.page_size).limit(args.page_size)
       .populate({ path: 'user_id' })
       .populate({ path: 'role_id', populate: { path: 'privilege_id' } })
@@ -30,12 +30,12 @@ const fetchAllUserRoles = async (args, context) => {
     const pageCount = await Math.ceil(count / args.page_size)
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
-    console.log('err=> ', err)
+    // console.log('err=> ', err)
     return { status: 400, error: err.message }
   }
 }
 const fetchDetailUserRole = async (args, context) => {
-  console.log('fetchDetailUserRole invoked')
+  // console.log('fetchDetailUserRole invoked')
   try {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
@@ -51,7 +51,7 @@ const fetchDetailUserRole = async (args, context) => {
   }
 }
 const fetchDetailUserRoleByMyUserId = async (args, context) => {
-  console.log('fetchDetailUserRole invoked')
+  // console.log('fetchDetailUserRole invoked')
   try {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
@@ -63,14 +63,14 @@ const fetchDetailUserRoleByMyUserId = async (args, context) => {
   }
 }
 const fetchDetailUserRoleByUserId = async (userId) => {
-  console.log('fetchDetailUserRole invoked userId=>', userId)
+  // console.log('fetchDetailUserRole invoked userId=>', userId)
   try {
     const result = await UserRole.findOne({ user_id: userId })
       .populate({ path: 'user_id' })
       .populate({ path: 'role_id', populate: { path: 'privilege_id' } })
       .populate({ path: 'created_by' })
       .populate({ path: 'updated_by' })
-    console.log(' UserRole.findOne===', result)
+    // console.log(' UserRole.findOne===', result)
     return { status: 200, success: 'Successfully get Data', data_detail: result }
   } catch (err) {
     return { status: 400, error: err.message }
@@ -89,10 +89,10 @@ const doCreateUserRole = async (args, context, { opts }) => {
     data.updated_by = userDetail._id
     data.created_at = now
     data.updated_at = now
-    console.log('create course=> ', data)
+    // console.log('create course=> ', data)
     return { status: 200, success: 'Successfully save Data', detail_data: await (await UserRole.create(data, opts)).populate({ path: 'user_id' }).populate({ path: 'role_id', populate: { path: 'privilege_id' } }).execPopulate() }
   } catch (err) {
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: 400, error: err.message }
   }
 }
@@ -108,10 +108,10 @@ const doUpdateUserRole = async (args, context) => {
     data.updated_by = userDetail._id
     // data.created_at = now
     data.updated_at = now
-    console.log('update=> ', data)
+    // console.log('update=> ', data)
     return { status: 200, success: 'Successfully save Data', detail_data: await (await UserRole.findOneAndUpdate({ _id: args._id, created_by: userId }, data)).populate({ path: 'user_id' }).populate({ path: 'role_id', populate: { path: 'privilege_id' } }).populate({ path: 'created_by' }).populate({ path: 'updated_by' }).execPopulate() }
   } catch (err) {
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: 400, error: err.message }
   }
 }
@@ -120,10 +120,10 @@ const doDeleteUserRole = async (args, context) => {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
-    console.log('delete invoked')
+    // console.log('delete invoked')
     return { status: 200, success: 'Successfully delete Data', detail_data: await UserRole.remove({ _id: args._id, created_by: userId }) }
   } catch (err) {
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: 400, error: err.message }
   }
 }

@@ -7,6 +7,7 @@ const schema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  user_id: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'User' }],
   created_at: {
     type: Number,
     default: new Date().now

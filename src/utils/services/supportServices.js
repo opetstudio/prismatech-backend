@@ -24,7 +24,7 @@ const generateRandomNumber = (length) => {
   })
 }
 const sendEmail = async (model) => {
-  console.log('model===>', model)
+  // console.log('model===>', model)
   var mailOptions
 
   var smtpConfig = {
@@ -36,16 +36,20 @@ const sendEmail = async (model) => {
       pass: config.get('devAuth')
     }
   }
-  console.log('smtpConfig===>', smtpConfig)
+  // console.log('smtpConfig===>', smtpConfig)
   const transporter = nodemailer.createTransport(smtpConfig)
 
-  if (!model.from || !model.to || !model.emailSubject || !model.emailBody) throw new Error('invalid email parameter')
+  if (!model.to || !model.emailSubject || !model.emailBody) throw new Error('invalid email parameter')
   mailOptions = {
-    from: model.from,
     to: model.to,
     subject: model.emailSubject,
     html: model.emailBody
   }
+  if (model.sender) mailOptions.sender = model.sender
+  if (model.from) mailOptions.from = model.from
+  // console.log('mailOptionsmailOptions=>', mailOptions)
+  if (!model.sender && !model.from) throw new Error('invalid email parameter')
+
   try {
     await transporter.sendMail(mailOptions)
   } catch (err) {
@@ -54,7 +58,7 @@ const sendEmail = async (model) => {
 }
 
 const sendMailVerification = async (model) => {
-  console.log('model===>', model)
+  // console.log('model===>', model)
   var mailOptions
 
   var smtpConfig = {
@@ -67,7 +71,7 @@ const sendMailVerification = async (model) => {
     }
   }
 
-  console.log('smtpConfig===>', smtpConfig)
+  // console.log('smtpConfig===>', smtpConfig)
 
   const transporter = nodemailer.createTransport(smtpConfig)
   // const transporter = nodemailer.createTransport({

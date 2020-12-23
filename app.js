@@ -15,7 +15,7 @@ var session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 
 
-function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
+function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { middleware: externalMiddleware, query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
   console.log('run prismatech backend')
 
   // var mainapp = connect()
@@ -81,7 +81,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
 
   // API APPLICATION
   var apiApp = express()
-  const graphqlRouter = require('./routes/graphql')({ io: app.io, externalQuery, externalMutation })
+  const graphqlRouter = require('./routes/graphql')({ io: app.io, externalQuery, externalMutation, externalMiddleware })
   app.use(graphqlRoutePath, graphqlRouter)
   app.use('/core/api', require('./routes/api'))
 
@@ -97,9 +97,9 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   // })
 
   // SDK
-  var sdkApp = express()
-  sdkApp.engine('html', require('ejs').renderFile)
-  sdkApp.set('view engine', 'html')
+  // var sdkApp = express()
+  // sdkApp.engine('html', require('ejs').renderFile)
+  // sdkApp.set('view engine', 'html')
   // app.use('/users', usersRouter)
 
   apiApp.use(function (req, res, next) {
@@ -114,7 +114,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   })
 
   // INDEX APPLICATION
-  var indexApp = express()
+  // var indexApp = express()
   app.engine('html', require('ejs').renderFile)
   app.set('view engine', 'html')
   // app.use('/users', usersRouter)

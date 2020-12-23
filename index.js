@@ -13,6 +13,7 @@ module.exports.model = {
   file: require('./src/collections/file/Model')
 }
 module.exports.services = {
+  tag: require('./src/collections/tag/services'),
   rp_otp: require('./src/collections/rp_otp/services'),
   supportServices: require('./src/utils/services/supportServices')
 }

@@ -5,7 +5,7 @@ const Role = require('./Model')
 const User = require('../user/Model')
 const { CommandCursor } = require('mongodb')
 const fetchAllRoles = async (args, context) => {
-  console.log('fetchAllRoles invoked')
+  // console.log('fetchAllRoles invoked')
   try {
     const filter = {}
     const { accesstoken } = context.req.headers
@@ -19,18 +19,16 @@ const fetchAllRoles = async (args, context) => {
         ]
       })
     }
-    console.log('filter======', filter)
     const result = await Role.find(filter).sort({ updated_at: 'desc' }).skip(args.page_index * args.page_size).limit(args.page_size).populate({ path: 'created_by' }).populate({ path: 'updated_by' })
     const count = await Role.countDocuments(filter)
     const pageCount = await Math.ceil(count / args.page_size)
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
-    console.log('err=> ', err)
+    // console.log('err=> ', err)
     return { status: 400, error: err.message }
   }
 }
 const fetchDetailRole = async (args, context) => {
-  console.log('fetchDetailRole invoked')
   try {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
@@ -53,10 +51,10 @@ const doCreateRole = async (args, context) => {
     data.updated_by = userDetail._id
     data.created_at = now
     data.updated_at = now
-    console.log('create course=> ', data)
+    // console.log('create course=> ', data)
     return { status: 200, success: 'Successfully save Data', detail_data: await Role.create(data) }
   } catch (err) {
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: 400, error: err.message }
   }
 }
@@ -77,7 +75,7 @@ const doUpdateRole = async (args, context) => {
     const updateRoleResp = await Role.findByIdAndUpdate(args._id, dataUpdate)
     return { status: 200, success: 'Successfully save Data', detail_data: updateRoleResp }
   } catch (err) {
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: 400, error: err.message }
   }
 }
@@ -86,11 +84,11 @@ const doDeleteRole = async (args, context) => {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
-    console.log('delete invoked')
+    // console.log('delete invoked')
 
     return { status: 200, success: 'Successfully delete Data', detail_data: await Role.remove({ _id: args._id, created_by: userId }) }
   } catch (err) {
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: 400, error: err.message }
   }
 }

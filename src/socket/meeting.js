@@ -8,7 +8,7 @@ const {
 
 const meeting = (io) => {
   io.of('/participant').on('connection', (socket) => {
-    console.log('Client Connected to Socket...')
+    // console.log('Client Connected to Socket...')
 
     createMeeting(socket)
 

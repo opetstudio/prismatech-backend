@@ -9,11 +9,19 @@ const {
   GraphQLNonNull,
   GraphQLID,
   GraphQLObjectType,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList
 } = graphql
 
 // const EntityType = Type[entity + 'Type']
+
+// const TypeSortBy = new GraphQLInputObjectType({
+//   name: Manifest.collection + 'SortBy',
+//   fields: () => ({
+//     name: { type: GraphQLString }
+//   })
+// })
 
 const getAllData = {
   type: new GraphQLObjectType({
@@ -29,7 +37,8 @@ const getAllData = {
   args: {
     page_size: { type: GraphQLInt },
     page_index: { type: GraphQLInt },
-    string_to_search: { type: GraphQLString }
+    string_to_search: { type: GraphQLString },
+    sort_by: { type: GraphQLString }
   },
   async resolve (parent, args, context) {
     return Services['fetchAll' + Manifest.entity + 's'](args, context)

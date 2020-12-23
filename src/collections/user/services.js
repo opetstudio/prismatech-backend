@@ -18,7 +18,7 @@ const { doCreateUserRole } = require('../user_role/services')
 const UserRole = require('../user_role/Model')
 
 const fetchDetailUser = async (args, context) => {
-  console.log('fetchDetailUser invoked')
+  // console.log('fetchDetailUser invoked')
   try {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
@@ -108,7 +108,7 @@ const userSignupV2 = async (args, context) => {
     })
 
     user = await user.save(opts)
-    console.log('new user=====>', user)
+    // console.log('new user=====>', user)
 
     const accessToken = await jwt.sign({ user_id: user.user_id }, config.get('privateKey'), { expiresIn: '30min' })
 
@@ -123,7 +123,7 @@ const userSignupV2 = async (args, context) => {
       created_by: '' + user._id
     }], opts)
     // const doCreateUserRoleResp = await doCreateUserRole({ user_id: '' + user._id, user_role: ['5f21083b6b896d0a1d0178e4'] }, context, { opts })
-    console.log('doCreateUserRoleResp==>', doCreateUserRoleResp)
+    // console.log('doCreateUserRoleResp==>', doCreateUserRoleResp)
 
     // user.password = localPassword
     // user.type = 'signup'
@@ -137,13 +137,13 @@ const userSignupV2 = async (args, context) => {
   } catch (err) {
     await session.abortTransaction()
     session.endSession()
-    console.log('errorrr====>', err)
+    // console.log('errorrr====>', err)
     return { status: '500', error: err || 'Failed to save to data...' }
   }
 }
 
 const userLogin = async (email, password, token, isLoggedInWithToken) => {
-  console.log('userLogin {}', email)
+  // console.log('userLogin {}', email)
   const checkerToken = await Blacklist.findOne({ token })
   if (checkerToken) return { status: 400, error: 'Token already expired' }
 
@@ -162,12 +162,12 @@ const userLogin = async (email, password, token, isLoggedInWithToken) => {
     await user.comparedPassword(password)
 
     // generate access token
-    const accessToken = await jwt.sign({ user_id: user._id }, config.get('privateKey'), { expiresIn: '30min' })
+    const accessToken = await jwt.sign({ user_id: user._id }, config.get('privateKey'), { expiresIn: '7d' }) // exp 7 hari
 
     // get user privileges
     const userRole = await fetchDetailUserRoleByUserId(user._id)
     const userPrivilegeName = _.uniq(flatten(_.map(userRole.data_detail.role_id, (v, i) => _.map(v.privilege_id, (v, i) => v.name)) || []))
-    // console.log('userRole.data_detail.role_id===>', userRole.data_detail.role_id)
+    // // console.log('userRole.data_detail.role_id===>', userRole.data_detail.role_id)
     // login with username & password
     // await User.updateOne({ _id: '' + user._id }, { last_login: new Date().now, $inc: { total_login: 1 } })
     // await user.save({ last_login: '' + new Date().getTime(), $inc: { total_login: 1 } })
@@ -181,7 +181,7 @@ const userLogin = async (email, password, token, isLoggedInWithToken) => {
       role: (_.map(userRole.data_detail.role_id, (v, i) => v.title) || []).join(', ')
     }
   } catch (err) {
-    console.log('error login=====>', err)
+    // console.log('error login=====>', err)
     return { status: 500, error: err }
   }
 }
@@ -195,7 +195,7 @@ const userLogin = async (email, password, token, isLoggedInWithToken) => {
 //   if (emailChecker) return { status: 400, error: 'Email already used' }
 
 //   await checkerValidUser(userID)
-//   console.log('sampai sini')
+//   // console.log('sampai sini')
 
 //   const { error } = User.validation({ email: newEmail })
 //   if (error) return { status: 400, error: error.details[0].message }
@@ -351,7 +351,7 @@ const changeProfile = async args => {
 // }
 
 // router.post('/sendLinkForgetPassword', async (req, res) => {
-//   console.log('sampe sini')
+//   // console.log('sampe sini')
 //   const { email, name } = req
 //   console.log(email + name)
 //   // if (!req.email) res.status(400).send({ error: 'Invalid email' })
@@ -370,9 +370,9 @@ const changeProfile = async args => {
 //       email: 'michaelleopold2016@gmail.com',
 //       link: `http://localhost:3000/send/${uuid}`
 //     }
-//     console.log('sebelum email')
+//     // console.log('sebelum email')
 //     await sendMailVerification(model)
-//     console.log('sesudah email')
+//     // console.log('sesudah email')
 //     res.status(200).send('Successfully send link')
 //   } catch (err) {
 //     res.status(400).send('Failded to send new password')
@@ -380,8 +380,8 @@ const changeProfile = async args => {
 // })
 
 // router.get('/send/:codeConfirmation', (req, res) => {
-//   // console.log('sampe sini')
-//   console.log('uuid', req.params)
+//   // // console.log('sampe sini')
+//   // console.log('uuid', req.params)
 
 //   res.send('berhasil')
 // })
@@ -443,7 +443,7 @@ const userChangesValidation = async ({ userID, password }) => {
 }
 
 const fetchAllUsers = async (args, context) => {
-  console.log('fetchAllUsers invoked')
+  // console.log('fetchAllUsers invoked')
   try {
     const filter = {}
     const { accesstoken } = context.req.headers
@@ -459,7 +459,7 @@ const fetchAllUsers = async (args, context) => {
         ]
       })
     }
-    console.log('filter======', filter)
+    // console.log('filter======', filter)
     let result = await User.find(filter)
       .sort({ updated_at: 'desc' })
       .skip(args.page_index * args.page_size)
@@ -478,7 +478,7 @@ const fetchAllUsers = async (args, context) => {
     const pageCount = await Math.ceil(count / args.page_size)
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
   } catch (err) {
-    console.log('err=> ', err)
+    // console.log('err=> ', err)
     return { status: 400, error: err }
   }
 }

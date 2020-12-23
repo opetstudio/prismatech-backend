@@ -210,7 +210,7 @@ const purchaseorderCheckStatusSendOtp = async ({ email, otpString, emailBody, em
 
     return { status: 200, success: 'Successfully send otp', otpRefNum: otp.otp_reference_number }
   } catch (err) {
-    // console.log('err====>', err)
+    // // console.log('err====>', err)
     return { status: 400, error: err || 'Failed send new password' }
   }
 }
@@ -218,7 +218,7 @@ const purchaseorderCheckStatusValidateOtp = async (otp, email, otpRefNum) => {
   // if (!otp) return { status: 400, error: 'Invalid otp' }
   try {
     const filter = { new_email: email, otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'CHECK PAYMENT PROCESS' }
-    console.log('filter otp=>', filter)
+    // console.log('filter otp=>', filter)
     const otpChecker = await Otp.findOne(filter)
     if (!otpChecker) {
       return { status: 400, error: 'Invalid otp' }
@@ -232,7 +232,7 @@ const purchaseorderCheckStatusValidateOtp = async (otp, email, otpRefNum) => {
     // await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
     return { status: 200, success: 'Successfully validate otp' }
   } catch (err) {
-    console.log('err====>', err)
+    // console.log('err====>', err)
     return { status: 400, error: 'Failed validate otp' }
   }
 }
@@ -278,7 +278,7 @@ const paymentProcessSendOtpService = async ({ email, otpString, emailBody, email
     return { status: 200, success: 'Successfully send otp', otpRefNum: 'xxx' }
     // return { status: 200, success: 'Successfully send otp', otpRefNum: otp.otp_reference_number }
   } catch (err) {
-    // console.log('err====>', err)
+    // // console.log('err====>', err)
     return { status: 400, error: err || 'Failed send new password' }
   }
 }
@@ -286,7 +286,7 @@ const paymentProcessValidateOtpService = async (otp, email, otpRefNum) => {
   // if (!otp) return { status: 400, error: 'Invalid otp' }
   try {
     const filter = { new_email: email, otp_number: otp, status: 'ACTIVE', otp_reference_number: otpRefNum, type: 'PAYMENT PROCESS' }
-    console.log('filter otp=>', filter)
+    // console.log('filter otp=>', filter)
     const otpChecker = await Otp.findOne(filter)
     if (!otpChecker) {
       return { status: 400, error: 'Invalid otp' }
@@ -300,7 +300,7 @@ const paymentProcessValidateOtpService = async (otp, email, otpRefNum) => {
     // await Otp.findOneAndUpdate({ otp_number: otp }, { status: 'INACTIVE', updated_at: getUnixTime() })
     return { status: 200, success: 'Successfully validate otp' }
   } catch (err) {
-    console.log('err====>', err)
+    // console.log('err====>', err)
     return { status: 400, error: 'Failed validate otp' }
   }
 }

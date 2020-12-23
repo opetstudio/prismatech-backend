@@ -15,14 +15,14 @@ const contentUrlDecode = require('../middlewares/contentUrlDecode')
 
 // const meeting = require('../src/socket/meeting')
 
-module.exports = function ({ io, externalQuery, externalMutation }) {
+module.exports = function ({ io, externalQuery, externalMutation, externalMiddleware }) {
   // meeting(io)
 
   const Router = express.Router()
   const sc = schema({ externalQuery, externalMutation })
 
   const mw = [
-    authorizationMiddlewares, authMiddleware, accessTokenValidateMiddleware, privilegeValidateMiddleware, contentUrlDecode
+    authorizationMiddlewares, authMiddleware, accessTokenValidateMiddleware, privilegeValidateMiddleware, contentUrlDecode, ...externalMiddleware
   ]
 
   applyMiddleware(sc, ...mw)
