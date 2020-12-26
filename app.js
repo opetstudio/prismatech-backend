@@ -63,6 +63,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   }
   console.log('session config====>', sess)
   app.use(session(sess))
+  app.use(compression())
   // view engine setup
   app.set('views', path.join(dirname || __dirname, 'views'))
   app.use(express.static(path.join(dirname || __dirname, 'public')))
