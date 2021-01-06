@@ -1,7 +1,7 @@
 const graphql = require('graphql')
-const { PrivilegeType } = require('./type')
-const { doPrivilegeCheckboxSubmit, doCreatePrivilege, doUpdatePrivilege, doDeletePrivilege } = require('../services')
-
+const Type = require('./type')
+const { doUpsertPrivilege, doPrivilegeCheckboxSubmit, doCreatePrivilege, doUpdatePrivilege, doDeletePrivilege } = require('../services')
+const Manifest = require('../manifest')
 const {
   GraphQLBoolean,
   GraphQLString,
@@ -14,49 +14,49 @@ const {
 
 const createPrivilege = {
   type: new GraphQLObjectType({
-    name: 'createPrivilege' + 'Response',
+    name: 'create' + Manifest.entity + 'Response',
     fields: () => ({
       status: { type: GraphQLInt },
       error: { type: GraphQLString },
-      detail_data: { type: PrivilegeType }
+      detail_data: { type: Type[Manifest.entity + 'Type'] }
     })
   }),
-  args: {
-    entity: { type: GraphQLString },
-    description: { type: GraphQLString },
-    role_id: { type: GraphQLString },
-    title: { type: GraphQLString },
-    name: { type: GraphQLString }
-  },
+  args: Manifest.createArgs,
   async resolve (parent, args, context) {
     return doCreatePrivilege(args, context)
   }
 }
 const updatePrivilege = {
   type: new GraphQLObjectType({
-    name: 'updatePrivilege' + 'Response',
+    name: 'update' + Manifest.entity + 'Response',
     fields: () => ({
       status: { type: GraphQLInt },
       error: { type: GraphQLString },
-      detail_data: { type: PrivilegeType }
+      detail_data: { type: Type[Manifest.entity + 'Type'] }
     })
   }),
-  args: {
-    _id: { type: GraphQLID },
-    title: { type: GraphQLString },
-    role_id: { type: GraphQLString },
-    description: { type: GraphQLString },
-    entity: { type: GraphQLString },
-    name: { type: GraphQLString },
-    status: { type: GraphQLString }
-  },
+  args: Manifest.updateArgs,
   async resolve (parent, args, context) {
     return doUpdatePrivilege(args, context)
   }
 }
+const upsertData = {
+  type: new GraphQLObjectType({
+    name: 'upsert' + Manifest.entity + 'Response',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      detail_data: { type: Type[Manifest.entity + 'Type'] }
+    })
+  }),
+  args: Manifest.updateArgs,
+  async resolve (parent, args, context) {
+    return doUpsertPrivilege(args, context)
+  }
+}
 const deletePrivilege = {
   type: new GraphQLObjectType({
-    name: 'deletePrivilege' + 'Response',
+    name: 'delete' + Manifest.entity + 'Response',
     fields: () => ({
       status: { type: GraphQLInt },
       error: { type: GraphQLString }
@@ -99,5 +99,6 @@ module.exports = {
   privilegeCheckboxSubmit,
   createPrivilege,
   updatePrivilege,
-  deletePrivilege
+  deletePrivilege,
+  ['upsert' + Manifest.entity]: upsertData
 }

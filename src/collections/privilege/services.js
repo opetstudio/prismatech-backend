@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
 const config = require('config')
 const _ = require('lodash')
+const Manifest = require('./manifest')
+const entity = Manifest.entity
 const Privilege = require('./Model')
+const EntityModel = Privilege
 const User = require('../user/Model')
 const Role = require('../role/Model')
 const Roleprivilege = require('../role_privilege/Model')
@@ -23,7 +27,10 @@ const fetchAllPrivileges = async (args, context) => {
       })
     }
     // console.log('filter======', filter)
-    const result = await Privilege.find(filter).sort({ updated_at: 'desc' }).skip(args.page_index * args.page_size).limit(args.page_size).populate({ path: 'created_by' }).populate({ path: 'updated_by' })
+    const result = await Privilege.find(filter).sort({ updated_at: 'desc' }).skip(args.page_index * args.page_size).limit(args.page_size)
+      .populate({ path: 'role_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
     const count = await Privilege.countDocuments(filter)
     const pageCount = await Math.ceil(count / args.page_size)
     return { status: 200, success: 'Successfully get all Data', list_data: result, count, page_count: pageCount }
@@ -38,7 +45,10 @@ const fetchDetailPrivilege = async (args, context) => {
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
-    const result = await Privilege.findOne({ _id: args.id }).populate({ path: 'created_by' }).populate({ path: 'updated_by' })
+    const result = await Privilege.findOne({ _id: args.id })
+      .populate({ path: 'role_id' })
+      .populate({ path: 'created_by' })
+      .populate({ path: 'updated_by' })
     if (args.role_id) {
 
     }
@@ -126,6 +136,7 @@ const doPrivilegeCheckboxSubmit = async (args, context) => {
   }
 }
 const doCreatePrivilege = async (args, context) => {
+  console.log('doCreatePrivilege invoked')
   const session = await Privilege.db.startSession()
   session.startTransaction()
   try {
@@ -135,58 +146,102 @@ const doCreatePrivilege = async (args, context) => {
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
+
     const data = args
     data.created_by = userDetail._id
     data.updated_by = userDetail._id
     data.created_at = now
     data.updated_at = now
-    data.role_id = [args.role_id]
-    const priv = (await Privilege.create([data], opts))[0]
+    const createResponse = (await EntityModel.create([data], opts))[0]
+    if (!createResponse) throw new Error('gagal create data')
+    // data.role_id = [args.role_id]
+    // const priv = (await Privilege.create([data], opts))[0]
     // console.log('priv====>', priv)
-    if (args.role_id && priv) {
+    if (args.role_id && createResponse) {
       // create role privilege
-      const RoleprivilegeCreateResp = await Roleprivilege.create({
-        role_id: args.role_id,
-        privilege_id: priv._id,
+      const rolePrivilegeData = args.role_id.map(v => ({
+        role_id: v,
+        privilege_id: createResponse._id,
         updated_by: userDetail._id,
         created_by: userDetail._id,
         created_at: now,
         updated_at: now
-      })
+      }))
+      await Roleprivilege.create(rolePrivilegeData, opts)
       // console.log('RoleprivilegeCreateResp===>', RoleprivilegeCreateResp)
       // const doCreateRoleprivilegeResp = await doCreateRoleprivilege({ role_id: args.role_id, privilege_id: priv._id }, context, { opts })
       // if (doCreateRoleprivilegeResp.status === 400) throw new Error('failed doCreateRoleprivilege')
       // push to role.privilege_id
-      const updateRoleResp = await Role.updateOne({ _id: args.role_id }, { $addToSet: { privilege_id: { $each: ['' + priv._id] } } }).session(session)
+      await Role.updateMany({ _id: { $in: args.role_id } }, { $addToSet: { privilege_id: { $each: ['' + createResponse._id] } } }).session(session)
       // console.log('update one role push many privilege_ids updateRoleResp===>', updateRoleResp)
     }
     await session.commitTransaction()
     session.endSession()
-    return { status: 200, success: 'Successfully save Data', detail_data: priv }
+    return { status: 200, success: 'Successfully save Data', detail_data: createResponse }
   } catch (err) {
-    // console.log('errorrr====>', err)
+    console.log('errorrr====>', err)
     await session.abortTransaction()
     session.endSession()
     return { status: 400, error: err.message }
   }
 }
 const doUpdatePrivilege = async (args, context) => {
+  const session = await mongoose.startSession()
+  session.startTransaction()
   try {
     const now = Date.now()
     const { accesstoken } = context.req.headers
     const bodyAt = await jwt.verify(accesstoken, config.get('privateKey'))
     const { user_id: userId } = bodyAt
     const userDetail = await User.findById(userId)
+
+    // dataDetail
+    const dataDetail = await EntityModel.findById(args._id).session(session)
+
     const data = args
     // data.created_by = userDetail._id
     data.updated_by = userDetail._id
     // data.created_at = now
     data.updated_at = now
     // console.log('update=> ', data)
-    return { status: 200, success: 'Successfully save Data', detail_data: await Privilege.findOneAndUpdate({ _id: args._id }, data).populate({ path: 'created_by' }).populate({ path: 'updated_by' }) }
+    Object.assign(dataDetail, args)
+    data.updated_by = userDetail._id
+    data.updated_at = now
+
+    const saveResp = await dataDetail.save()
+    if (_.isEmpty(saveResp)) throw new Error('gagal update data')
+
+    if (args.role_id && saveResp) {
+      const currentRoleIds = dataDetail.role_id || []
+      const currentRoleIdsToDelete = currentRoleIds.filter(v => !((args.role_id || []).includes(v)))
+      const currentRoleIdsToCreate = (args.role_id || []).filter(v => !currentRoleIds.includes(v))
+      // const currentRoleIdsToDelete = currentRoleIds.filter(v => !((args.role_id || []).includes(v)))
+      await Role.updateMany({ _id: { $in: currentRoleIdsToDelete } }, { $pull: { privilege_id: dataDetail._id } }).session(session)
+      await Roleprivilege.deleteMany({ _id: { $in: currentRoleIdsToDelete } }).session(session)
+
+      const rolePrivilegeData = currentRoleIdsToCreate.map(v => ({
+        role_id: v,
+        privilege_id: dataDetail._id,
+        updated_by: userDetail._id,
+        created_by: userDetail._id,
+        created_at: now,
+        updated_at: now
+      }))
+      await Roleprivilege.create(rolePrivilegeData, { session: session })
+    }
+
+    // const doUpsertResponse = await customerEmailService.doUpsert({ batchId: dataDetail._id, userId, emailList, session, currentEmailIds: dataDetail.customer_email_ids.map(v => v._id) })
+
+    await session.commitTransaction()
+    session.endSession()
+
+    return { status: 200, success: 'Successfully save Data', detail_data: await dataDetail }
   } catch (err) {
-    // console.log('errorrr====>', err)
-    return { status: 400, error: err.message }
+    console.log('errorrr====>', err)
+    await session.abortTransaction()
+    session.endSession()
+
+    throw new Error(err.message)
   }
 }
 const doDeletePrivilege = async (args, context) => {
@@ -220,6 +275,11 @@ const doDeletePrivilege = async (args, context) => {
     return { status: 400, error: err.message }
   }
 }
+const doUpsertData = async (args, context) => {
+  console.log('doUpsertData invoked args:', args)
+  if (args._id) return doUpdatePrivilege(args, context)
+  else return doCreatePrivilege(args, context)
+}
 
 module.exports = {
   doPrivilegeCheckboxSubmit,
@@ -227,5 +287,6 @@ module.exports = {
   fetchDetailPrivilege,
   doCreatePrivilege,
   doUpdatePrivilege,
-  doDeletePrivilege
+  doDeletePrivilege,
+  ['doUpsert' + entity]: doUpsertData
 }

@@ -27,7 +27,14 @@ module.exports = function ({ io, externalQuery, externalMutation, externalMiddle
 
   applyMiddleware(sc, ...mw)
 
-  return Router.all('/', (req, res) => {
+  return Router.all('/', [(req, res, next) => {
+    console.log('halowwwwxxxx')
+    if (req.method === 'POST') {
+      // do form handling
+      // if(req.body.files)
+    }
+    next()
+  }], (req, res) => {
     return graphqlHTTP({
       schema: sc,
       graphiql: config.get('isGraphiqlActive'),

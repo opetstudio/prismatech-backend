@@ -1,6 +1,6 @@
 const graphql = require('graphql')
 const { RoleType } = require('./type')
-const { doUpdateRole, doDeleteRole, doCreateRole } = require('../services')
+const { doUpsertRole, doUpdateRole, doDeleteRole, doCreateRole } = require('../services')
 
 const {
   GraphQLString,
@@ -48,6 +48,26 @@ const updateRole = {
     return doUpdateRole(args, context)
   }
 }
+const upsertRole = {
+  type: new GraphQLObjectType({
+    name: 'upsertRole' + 'Response',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString },
+      detail_data: { type: RoleType }
+    })
+  }),
+  args: {
+    _id: { type: GraphQLID },
+    title: { type: GraphQLString },
+    description: { type: GraphQLString },
+    privilege_id: { type: GraphQLList(GraphQLString) },
+    status: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return doUpsertRole(args, context)
+  }
+}
 const deleteRole = {
   type: new GraphQLObjectType({
     name: 'deleteRole' + 'Response',
@@ -66,5 +86,6 @@ const deleteRole = {
 module.exports = {
   createRole,
   updateRole,
-  deleteRole
+  deleteRole,
+  upsertRole
 }

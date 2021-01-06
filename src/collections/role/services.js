@@ -3,7 +3,7 @@ const config = require('config')
 const _ = require('lodash')
 const Role = require('./Model')
 const User = require('../user/Model')
-const { CommandCursor } = require('mongodb')
+// const { CommandCursor } = require('mongodb')
 const fetchAllRoles = async (args, context) => {
   // console.log('fetchAllRoles invoked')
   try {
@@ -79,6 +79,11 @@ const doUpdateRole = async (args, context) => {
     return { status: 400, error: err.message }
   }
 }
+const doUpsertRole = async (args, context) => {
+  const isUpdate = !_.isEmpty(args._id)
+  if (isUpdate) return doUpdateRole(args, context)
+  else return doCreateRole(args, context)
+}
 const doDeleteRole = async (args, context) => {
   try {
     const { accesstoken } = context.req.headers
@@ -98,5 +103,6 @@ module.exports = {
   fetchDetailRole,
   doCreateRole,
   doUpdateRole,
-  doDeleteRole
+  doDeleteRole,
+  doUpsertRole
 }

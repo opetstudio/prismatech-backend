@@ -123,22 +123,26 @@ const doDeleteData = async (args, context) => {
 }
 const doUpsertData = async ({ tagIds, userId, session }) => {
   const now = Date.now()
+  let result = tagIds
+  console.log('tagIdstagIdstagIdstagIds===>', tagIds)
   // tagIds = [id, id, id, tag, tag]
   const listNewTag = ((tagIds || []).map(v => {
     if (!mongoose.Types.ObjectId.isValid(v)) return (v || '').toLowerCase()
     else return null
   })).filter(v => v !== null)
   // listNewTag = [tag, tag]
-  // console.log('listNewTaglistNewTaglistNewTaglistNewTag===>', listNewTag)
+  console.log('listNewTaglistNewTaglistNewTaglistNewTag===>', listNewTag)
   if (!_.isEmpty(listNewTag)) {
     // existedListNewTag = [ tag-doc, tag-doc ]
     const existedListNewTag = await EntityModel.find({ name: { $in: listNewTag } })
     // existedListNewTagName = [ tag, tag ]
     const existedListNewTagName = existedListNewTag.map(v => v.name)
     await EntityModel.updateMany({ name: { $in: listNewTag } }, { $addToSet: { user_id: userId } }, { session })
+    console.log('existedListNewTagNameexistedListNewTagName=>', existedListNewTagName)
     // createListNewTag = listNewTag - existedListNewTagName
     // createListNewTag = []
     const createListNewTag = listNewTag.filter(n => !existedListNewTagName.includes(n))
+    console.log('createListNewTag===>', createListNewTag)
     if (!_.isEmpty(createListNewTag)) {
       // dataListNewTag[new-tag-doc, new-tag-doc]
       const dataListNewTag = createListNewTag.map(v => ({
@@ -151,31 +155,32 @@ const doUpsertData = async ({ tagIds, userId, session }) => {
       }))
       // console.log('dataListNewTag===>', dataListNewTag)
       const createNewTagResponse = await EntityModel.create(dataListNewTag, { session })
-      // console.log('createNewTagResponse===>', createNewTagResponse)
+      console.log('createNewTagResponse===>', createNewTagResponse)
       const indexed = {}
       // createNewTagResponse = [new-tag-doc, new-tag-doc]
       createNewTagResponse.forEach((v, i) => {
-        indexed[v.name] = '' + v._id
+        indexed[v.name] = v._id
       })
       // const dTemp = createNewTagResponse.map(v => ({ [v.name]: '' + v._id }))
       // indexed = { tag: id, tag: id }
-      tagIds = (tagIds || []).map(tagId => {
+      console.log('indexedindexed===>', indexed)
+      result = (result || []).map(tagId => {
         if (indexed[tagId]) return indexed[tagId]
         else return tagId
       })
-      // console.log('tagIds => ', tagIds)
+      console.log('tagIds => ', tagIds)
     } else {
       const indexed = {}
       existedListNewTag.forEach((v, i) => {
-        indexed[v.name] = '' + v._id
+        indexed[v.name] = v._id
       })
-      tagIds = (tagIds || []).map(tagId => {
+      result = (result || []).map(tagId => {
         if (indexed[tagId]) return indexed[tagId]
         else return tagId
       })
     }
   }
-  return tagIds
+  return result
 }
 
 module.exports = {

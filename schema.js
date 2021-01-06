@@ -16,7 +16,7 @@ const { signUpV2, signUp, changeUserPassword, changeUserName, changeUserProfile,
 const { getDetailUser, login, getProfile, allUser, getAllUsers } = require('./src/collections/user/graphql/query')
 // role
 const { getAllRoles, getDetailRole } = require('./src/collections/role/graphql/query')
-const { createRole, deleteRole, updateRole } = require('./src/collections/role/graphql/mutation')
+const { createRole, deleteRole, updateRole, upsertRole } = require('./src/collections/role/graphql/mutation')
 
 // role privilege
 const { getAllRoleprivilegesByRoleId, getDetailRoleprivilege } = require('./src/collections/role_privilege/graphql/query')
@@ -24,7 +24,7 @@ const { createRoleprivilege, deleteRoleprivilege, updateRoleprivilege } = requir
 
 // privilege
 const { getAllPrivileges, getDetailPrivilege } = require('./src/collections/privilege/graphql/query')
-const { createPrivilege, deletePrivilege, privilegeCheckboxSubmit, updatePrivilege } = require('./src/collections/privilege/graphql/mutation')
+const { upsertPrivilege, createPrivilege, deletePrivilege, privilegeCheckboxSubmit, updatePrivilege } = require('./src/collections/privilege/graphql/mutation')
 
 // user role
 const { getAllUserRoles, getDetailUserRole, getDetailUserRoleByMyUserId } = require('./src/collections/user_role/graphql/query')
@@ -100,6 +100,7 @@ const Mutation = ({ externalMutation }) => new GraphQLObjectType({
     createRole,
     updateRole,
     deleteRole,
+    upsertRole,
 
     // role privilege
     createRoleprivilege,
@@ -111,6 +112,7 @@ const Mutation = ({ externalMutation }) => new GraphQLObjectType({
     updatePrivilege,
     deletePrivilege,
     privilegeCheckboxSubmit,
+    upsertPrivilege,
 
     // user role
     createUserRole,
