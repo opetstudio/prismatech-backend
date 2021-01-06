@@ -169,11 +169,13 @@ const doUpsertData = async ({ tagIds, userId, session }) => {
         else return tagId
       })
       console.log('tagIds => ', tagIds)
-    } else {
+    }
+    if (!_.isEmpty(existedListNewTag)) {
       const indexed = {}
       existedListNewTag.forEach((v, i) => {
         indexed[v.name] = v._id
       })
+      console.log('indexedindexed1===>', indexed)
       result = (result || []).map(tagId => {
         if (indexed[tagId]) return indexed[tagId]
         else return tagId
