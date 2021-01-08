@@ -123,7 +123,7 @@ const doDeleteData = async (args, context) => {
 }
 const doUpsertData = async ({ tagIds, userId, session }) => {
   const now = Date.now()
-  let result = tagIds
+  let result = (tagIds || []).map(v => v.toLowerCase())
   console.log('tagIdstagIdstagIdstagIds===>', tagIds)
   // tagIds = [id, id, id, tag, tag]
   const listNewTag = ((tagIds || []).map(v => {
