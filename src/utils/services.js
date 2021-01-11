@@ -28,12 +28,12 @@ const sendMail = async model => {
   var mailOptions
 
   var smtpConfig = {
-    host: 'smtp.gmail.com',
-    port: 465,
+    host: config.get('smtpHost'),
+    port: config.get('smtpPort'),
     secure: true, // use SSL
     auth: {
-      user: config.get('devEmail'),
-      pass: config.get('devAuth')
+      user: config.get('smtpEmail'),
+      pass: config.get('smtpPass')
     }
   }
 
@@ -41,7 +41,7 @@ const sendMail = async model => {
 
   if (model.type === 'signup') {
     mailOptions = {
-      from: config.get('devEmail'),
+      from: config.get('smtpEmail'),
       to: model.email,
       subject: 'Tokoonline',
       text: `Thank you for applying to Tokoonline. We are looking forward for your action in changing your name and password.

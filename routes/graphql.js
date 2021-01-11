@@ -28,7 +28,7 @@ module.exports = function ({ io, externalQuery, externalMutation, externalMiddle
   applyMiddleware(sc, ...mw)
 
   return Router.all('/', [(req, res, next) => {
-    console.log('halowwwwxxxx')
+    // console.log('halowwwwxxxx', req.body)
     if (req.method === 'POST') {
       // do form handling
       // if(req.body.files)

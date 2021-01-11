@@ -1,20 +1,19 @@
-var createError = require('http-errors')
+// var createError = require('http-errors')
 var express = require('express')
 var compression = require('compression')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var logger = require('morgan')
-var connect = require('connect')
-var serveStatic = require('serve-static')
-var vhost = require('vhost')
+// var connect = require('connect')
+// var serveStatic = require('serve-static')
+// var vhost = require('vhost')
 
 const mongoose = require('mongoose')
 const cors = require('cors')
-const corsAccess = require('./middlewares/corsAccess')
+// const corsAccess = require('./middlewares/corsAccess')
 // const config = require('config')
 var session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
-
 
 function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { middleware: externalMiddleware, query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
   console.log('run prismatech backend')
@@ -22,7 +21,6 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   // var mainapp = connect()
 
   // create app that will server user content from public/{username}/
-  
 
   console.log('trying to connect to db... ', config.get('mongoUrl'))
   const mongoOptions = { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }
@@ -77,7 +75,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
 
   app.use(logger('dev'))
   app.use(express.json())
-  app.use(express.urlencoded({ extended: false }))
+  app.use(express.urlencoded({ extended: true }))
   app.use(cookieParser())
   app.use(cors({ exposedHeaders: 'Authorization' }))
 

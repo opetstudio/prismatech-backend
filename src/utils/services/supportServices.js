@@ -28,12 +28,12 @@ const sendEmail = async (model) => {
   var mailOptions
 
   var smtpConfig = {
-    host: 'smtp.gmail.com',
-    port: 465,
+    host: config.get('smtpHost'),
+    port: config.get('smtpPort'),
     secure: true, // use SSL
     auth: {
-      user: config.get('devEmail'),
-      pass: config.get('devAuth')
+      user: config.get('smtpEmail'),
+      pass: config.get('smtpPass')
     }
   }
   // console.log('smtpConfig===>', smtpConfig)
@@ -62,12 +62,12 @@ const sendMailVerification = async (model) => {
   var mailOptions
 
   var smtpConfig = {
-    host: 'smtp.gmail.com',
-    port: 465,
+    host: config.get('smtpHost'),
+    port: config.get('smtpPort'),
     secure: true, // use SSL
     auth: {
-      user: config.get('devEmail'),
-      pass: config.get('devAuth')
+      user: config.get('smtpEmail'),
+      pass: config.get('smtpPass')
     }
   }
 
