@@ -93,7 +93,7 @@ const sendMailVerification = async (model) => {
   }
   if (model.type === 'signup') {
     mailOptions = {
-      from: 'prismalinkdev@gmail.com',
+      from: config.get('smtpEmail'),
       to: model.email,
       subject: 'Tokoonline',
       text: `Thank you for applying on Tokoonline. We are looking forward for your action in changing your name and password.
@@ -104,7 +104,7 @@ const sendMailVerification = async (model) => {
 
   if (model.type === 'signupUser') {
     mailOptions = {
-      from: 'prismalinkdev@gmail.com',
+      from: config.get('smtpEmail'),
       to: model.email,
       subject: 'Tokoonline',
       text: `Thank you for applying on Tokoonline. We are looking forward for your action in changing your name and password.
@@ -114,7 +114,7 @@ const sendMailVerification = async (model) => {
 
   if (model.type === 'forgetPasswordSendOtp') {
     mailOptions = {
-      from: 'prismalinkdev@gmail.com',
+      from: config.get('smtpEmail'),
       to: model.email,
       subject: 'Tokoonline',
       text: `Thank you for trusting us. use this otp to change your password
@@ -128,7 +128,7 @@ const sendMailVerification = async (model) => {
     //   emailBody,
     //   emailSubject
     mailOptions = {
-      from: 'prismalinkdev@gmail.com',
+      from: config.get('smtpEmail'),
       to: model.email,
       subject: model.emailSubject || 'Plink Market Validasi Email Untuk Pembayaran',
       text: model.emailBody || `Gunakan Otp berikut, untuk melakukan validasi email.
@@ -142,7 +142,7 @@ const sendMailVerification = async (model) => {
     //   emailBody,
     //   emailSubject
     mailOptions = {
-      from: 'prismalinkdev@gmail.com',
+      from: config.get('smtpEmail'),
       to: model.email,
       subject: model.emailSubject || 'Plink Market Validasi Email',
       text: model.emailBody || `Gunakan Otp berikut, untuk melakukan validasi email.

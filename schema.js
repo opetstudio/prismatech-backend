@@ -12,7 +12,7 @@ const {
 } = require('./src/collections/rp_otp/graphql/mutation')
 
 // User
-const { signUpV2, signUp, changeUserPassword, changeUserName, changeUserProfile, logout } = require('./src/collections/user/graphql/mutation')
+const { forgetpasswordSubmitNewPassword, forgetpasswordValidateToken, forgetpasswordSubmitEmail, signUpV2, signUp, changeUserPassword, changeUserName, changeUserProfile, logout } = require('./src/collections/user/graphql/mutation')
 const { getDetailUser, login, getProfile, allUser, getAllUsers } = require('./src/collections/user/graphql/query')
 // role
 const { getAllRoles, getDetailRole } = require('./src/collections/role/graphql/query')
@@ -95,6 +95,9 @@ const Mutation = ({ externalMutation }) => new GraphQLObjectType({
     changeUserName,
     changeUserProfile,
     logout,
+    forgetpasswordSubmitEmail,
+    forgetpasswordValidateToken,
+    forgetpasswordSubmitNewPassword,
 
     // role
     createRole,

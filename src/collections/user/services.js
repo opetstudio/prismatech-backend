@@ -1,11 +1,14 @@
 const jwt = require('jsonwebtoken')
 const config = require('config')
 const express = require('express')
+const mongoose = require('mongoose')
+const SHA256 = require('crypto-js/sha256')
 const router = express()
 const { v4: uuidv4 } = require('uuid')
 const _ = require('lodash')
 const { fetchDetailUserRoleByUserId } = require('../user_role/services')
 const { flatten } = require('../../utils/services')
+const { sendEmail } = require('../../utils/services/supportServices')
 
 const User = require('./Model')
 const { reusableFindUserByID } = require('../../utils/services/mongoServices')
@@ -483,6 +486,102 @@ const fetchAllUsers = async (args, context) => {
   }
 }
 
+const forgetpasswordSubmitEmail = async (args, context) => {
+  console.log('forgetpasswordSubmitEmail invoked. args > ', args)
+  const session = await mongoose.startSession()
+  session.startTransaction()
+  const now = Date.now()
+  try {
+    const opts = { session }
+    if (!args.email) return { status: 400, error: 'Invalid email' }
+    const { error } = User.validation({ email: args.email })
+    if (error) throw new Error(error.details[0].message)
+
+    const userDetail = await User.findOne({ email: args.email }).session(session)
+    if (!userDetail) throw new Error('Data user tidak ditemukan.')
+
+    const token = SHA256(userDetail.email + generateID(20)).toString()
+    userDetail.change_data_token = token
+    userDetail.updated_at = now
+    console.log('userDetail==>', userDetail)
+    await userDetail.save()
+    // send email
+    const sendEmailMsg = {
+      // from: 'prismalinkdev@gmail.com',
+      from: {
+        name: config.get('application_name'),
+        address: config.get('smtpEmail')
+      },
+      // sender: emailBlastDetail.toko_id.email,
+      to: userDetail.email,
+      emailSubject: 'Konfirmasi untuk mengganti password',
+      emailBody: `
+      <div>
+        <p>Klik Link di bawah untuk mengganti password baru</p>
+        <p>${config.get('backendBaseUrl')}/change-password/${token}</p>
+      </div>
+      `
+    }
+    await sendEmail(sendEmailMsg)
+    await session.commitTransaction()
+    session.endSession()
+    return { status: 200, success: 'Successfully save Data' }
+  } catch (err) {
+    await session.abortTransaction()
+    session.endSession()
+    console.log('errorrr====>', err)
+    return { status: 400, error: err.message }
+  }
+}
+const forgetpasswordValidateToken = async (args, context) => {
+  console.log('forgetpasswordValidateToken invoked. args > ', args)
+  const session = await mongoose.startSession()
+  session.startTransaction()
+  const now = Date.now()
+  try {
+    const opts = { session }
+    const userDetail = await User.findOne({ change_data_token: args.token }).session(session)
+    if (!userDetail) throw new Error('Token tidak valid')
+    await session.commitTransaction()
+    session.endSession()
+    return { status: 200, success: 'Successfully save Data' }
+  } catch (err) {
+    await session.abortTransaction()
+    session.endSession()
+    console.log('errorrr====>', err)
+    return { status: 400, error: err.message }
+  }
+}
+const forgetpasswordSubmitNewPassword = async (args, context) => {
+  console.log('forgetpasswordSubmitNewPassword invoked. args > ', args)
+  const session = await mongoose.startSession()
+  session.startTransaction()
+  const now = Date.now()
+  try {
+    // const opts = { session }
+    const { error } = User.validation({ password: args.newpassword })
+    if (error) return { status: 400, error: error.details[0].message }
+    if (!args.token || !args.newpassword) throw new Error('Data yang dikirim tidak valid')
+    const userDetail = await User.findOne({ change_data_token: args.token }).session(session)
+    if (!userDetail) throw new Error('Token tidak valid')
+    // 5 menit
+    if (now - userDetail.updated_at >= 5 * 60 * 1000) throw new Error('Token expired')
+    userDetail.password = args.newpassword
+    userDetail.change_data_token = ''
+    userDetail.updated_at = now
+    console.log('userDetailuserDetail=>', userDetail)
+    await userDetail.save()
+    await session.commitTransaction()
+    session.endSession()
+    return { status: 200, success: 'Successfully save Data' }
+  } catch (err) {
+    await session.abortTransaction()
+    session.endSession()
+    console.log('errorrr====>', err)
+    return { status: 400, error: err.message }
+  }
+}
+
 module.exports.fetchDetailUser = fetchDetailUser
 module.exports.fetchAllUsers = fetchAllUsers
 module.exports.userSignupV2 = userSignupV2
@@ -497,4 +596,7 @@ module.exports.serviceLogout = serviceLogout
 module.exports.checkerValidUser = checkerValidUser
 module.exports.userChangesValidation = userChangesValidation
 module.exports.checkValidUserUsingEmail = checkValidUserUsingEmail
+module.exports.forgetpasswordSubmitEmail = forgetpasswordSubmitEmail
+module.exports.forgetpasswordValidateToken = forgetpasswordValidateToken
+module.exports.forgetpasswordSubmitNewPassword = forgetpasswordSubmitNewPassword
 // module.exports.router = router

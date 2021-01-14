@@ -55,6 +55,9 @@ const userSchema = new mongoose.Schema({
     min: 6,
     max: 50
   },
+  change_data_token: {
+    type: String
+  },
   profile_picture: {
     type: String
   },

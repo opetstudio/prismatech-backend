@@ -1,12 +1,14 @@
 const graphql = require('graphql')
 
-const { userSignupV2, userSignup, changeEmail, changePassword, changeName, changeProfile, serviceLogout } = require('../services')
+const { forgetpasswordSubmitNewPassword, forgetpasswordValidateToken, userSignupV2, userSignup, changeEmail, changePassword, changeName, changeProfile, serviceLogout, forgetpasswordSubmitEmail } = require('../services')
 const { AuthType, ChangeType } = require('./type')
 
 const {
   GraphQLString,
   GraphQLNonNull,
-  GraphQLID
+  GraphQLID,
+  GraphQLObjectType,
+  GraphQLInt
 } = graphql
 
 const signUp = {
@@ -104,3 +106,49 @@ module.exports.changeUserPassword = changeUserPassword
 module.exports.changeUserName = changeUserName
 module.exports.changeUserProfile = changeUserProfile
 module.exports.logout = logout
+module.exports.forgetpasswordSubmitEmail = {
+  type: new GraphQLObjectType({
+    name: 'forgetpasswordSubmitEmailResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString }
+    })
+  }),
+  args: {
+    email: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return forgetpasswordSubmitEmail(args, context)
+  }
+}
+module.exports.forgetpasswordValidateToken = {
+  type: new GraphQLObjectType({
+    name: 'forgetpasswordValidateTokenResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString }
+    })
+  }),
+  args: {
+    token: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return forgetpasswordValidateToken(args, context)
+  }
+}
+module.exports.forgetpasswordSubmitNewPassword = {
+  type: new GraphQLObjectType({
+    name: 'forgetpasswordSubmitNewPasswordResponse',
+    fields: () => ({
+      status: { type: GraphQLInt },
+      error: { type: GraphQLString }
+    })
+  }),
+  args: {
+    token: { type: GraphQLString },
+    newpassword: { type: GraphQLString }
+  },
+  async resolve (parent, args, context) {
+    return forgetpasswordSubmitNewPassword(args, context)
+  }
+}
