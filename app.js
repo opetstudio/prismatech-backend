@@ -15,7 +15,7 @@ const cors = require('cors')
 var session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 
-function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { middleware: externalMiddleware, query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) {
+const run = async ({ cb, middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname, routes, graphql: { middleware: externalMiddleware, query: externalQuery, mutation: externalMutation, routePath: graphqlRoutePath }, config, port: applicationPort, hostname }) => {
   console.log('run prismatech backend')
 
   // var mainapp = connect()
@@ -190,7 +190,7 @@ function run ({ middleware, sdkSubdomain, adminSubdomain, apiSubdomain, dirname,
   // app.use(vhost('user.tokoinstandev.com', userapp))
   // app.use(vhost('api.tokoinstandev.com', userapp))
   // app.use(vhost('*.tokoinstandev.com', userapp))
-
+  cb()
   return app
 }
 
