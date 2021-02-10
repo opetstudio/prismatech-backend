@@ -8,11 +8,15 @@ module.exports.graphqlModule = require('graphql')
 module.exports.GraphQLLong = require('graphql-type-long')
 module.exports.mongoose = require('mongoose')
 module.exports.model = {
+  province: require('./src/collections/province/Model'),
+  city: require('./src/collections/city/Model'),
+  subcity: require('./src/collections/subcity/Model'),
   user: require('./src/collections/user/Model'),
   tag: require('./src/collections/tag/Model'),
   file: require('./src/collections/file/Model')
 }
 module.exports.services = {
+  province: require('./src/collections/province/services'),
   tag: require('./src/collections/tag/services'),
   rp_otp: require('./src/collections/rp_otp/services'),
   supportServices: require('./src/utils/services/supportServices')
