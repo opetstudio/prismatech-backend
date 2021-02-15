@@ -15,7 +15,11 @@ module.exports.model = {
   tag: require('./src/collections/tag/Model'),
   file: require('./src/collections/file/Model')
 }
+module.exports.utils = {
+  services: require('./src/utils/services')
+}
 module.exports.services = {
+  user_role: require('./src/collections/user_role/services'),
   province: require('./src/collections/province/services'),
   tag: require('./src/collections/tag/services'),
   rp_otp: require('./src/collections/rp_otp/services'),
