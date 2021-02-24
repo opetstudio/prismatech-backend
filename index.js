@@ -19,6 +19,7 @@ module.exports.utils = {
   services: require('./src/utils/services')
 }
 module.exports.services = {
+  user: require('./src/collections/user/services'),
   user_role: require('./src/collections/user_role/services'),
   province: require('./src/collections/province/services'),
   tag: require('./src/collections/tag/services'),

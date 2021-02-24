@@ -82,6 +82,9 @@ const userSignupV2 = async (args, context) => {
 
   const emailCheck = await User.findOne({ email: args.email })
   if (emailCheck) return { status: 400, error: 'Email already used' }
+  if (args.phone_number !== undefined && args.phone_number) {
+    if (!args.phone_number.startsWith('+')) return { status: 400, error: 'invalid phone number' }
+  }
 
   // if (!emailSent) return { status: 400, error: 'Failed sent email' }
 
@@ -100,6 +103,7 @@ const userSignupV2 = async (args, context) => {
     }
 
     let user = new User({
+      phone_number: args.phone_number,
       user_id: generateID(RANDOM_STRING_FOR_CONCAT),
       email: args.email,
       full_name: args.full_name,
