@@ -4,6 +4,8 @@ var compression = require('compression')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var logger = require('morgan')
+var helmet = require('helmet')
+
 // var connect = require('connect')
 // var serveStatic = require('serve-static')
 // var vhost = require('vhost')
@@ -73,6 +75,7 @@ const run = async ({ cb, middleware, sdkSubdomain, adminSubdomain, apiSubdomain,
   // app.set('view engine', 'jade')
   // app.set('view engine', 'pug')
 
+  app.use(helmet())
   app.use(logger('dev'))
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))

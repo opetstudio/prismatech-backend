@@ -9,7 +9,7 @@ const schema = new mongoose.Schema({
     unique: true
   },
   entity: {
-    type: String
+    type: String // page, field, sectioncontent, main menu
   },
   description: {
     type: String

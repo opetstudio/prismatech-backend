@@ -12,6 +12,7 @@ module.exports.model = {
   city: require('./src/collections/city/Model'),
   subcity: require('./src/collections/subcity/Model'),
   user: require('./src/collections/user/Model'),
+  user_role: require('./src/collections/user_role/Model'),
   tag: require('./src/collections/tag/Model'),
   file: require('./src/collections/file/Model')
 }
