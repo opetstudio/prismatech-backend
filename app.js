@@ -75,7 +75,9 @@ const run = async ({ cb, middleware, sdkSubdomain, adminSubdomain, apiSubdomain,
   // app.set('view engine', 'jade')
   // app.set('view engine', 'pug')
 
-  app.use(helmet())
+  // enable all security
+  // app.use(helmet())
+  
   app.use(logger('dev'))
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
